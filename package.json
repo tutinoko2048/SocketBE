@@ -1,0 +1,13 @@
+{
+  "name": "SocketBE",
+  "version": "0.1.0",
+  "scripts": {
+    "main": "node index.js"
+  },
+  "dependencies": {
+    "ip": "^1.1.8",
+    "moment-timezone": "^0.5.37",
+    "uuid": "^8.3.2",
+    "ws": "^8.8.1"
+  }
+}
