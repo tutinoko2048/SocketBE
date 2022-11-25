@@ -1,5 +1,5 @@
 {
-  "name": "SocketBE",
+  "name": "socket-be",
   "version": "0.1.0",
   "scripts": {
     "main": "node index.js"
