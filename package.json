@@ -1,9 +1,5 @@
 {
-<<<<<<< Updated upstream
-  "name": "socket-be",
-=======
   "name": "socket-bedrock",
->>>>>>> Stashed changes
   "version": "0.1.0",
   "scripts": {
     "main": "node index.js",
