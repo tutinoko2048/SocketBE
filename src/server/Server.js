@@ -1,31 +1,62 @@
 const WebSocket = require('ws');
-const { Util, World, ServerEvent, PluginManager, Logger } = require('../');
+const Logger = require('../util/Logger');
+const ServerEvent = require('../server/ServerEvent');
+const World = require('../world/World');
+const Util = require('../util/Util');
 const { v4: uuidv4 } = require('uuid');
 const ip = require('ip');
-const { version } = require('../constants');
+const { version } = require('../util/constants');
+
+/**
+ * @typedef {Object} ServerOptions
+ * @property {number} [port]
+ * @property {boolean} [debug]
+ */
 
 class Server extends WebSocket.Server {
-  constructor(config) {
+  /**
+   * 
+   * @param {ServerOptions} [options]
+   */
+  constructor(options = {}) {
     console.log(`${'='.repeat(30)}\nStarting SocketBE Server\n${'='.repeat(30)}`);
-    super(config);
+    super(options);
+
+    /** @type {ServerOptions} */
+    this.options = options;
+
+    /** @type {number} */
     this.startTime = Date.now();
+
+    /** @type {Logger} */
     this.logger = new Logger('Server');
+
+    /** @type {ServerEvent} */
     this.events = new ServerEvent(this);
+
+    /** @type {Map<string, World>} */
     this.worlds = new Map();
+
+    /** @type {Set<string>} */
     this.subscribedEvents = new Set();
-    this.number = 0;
+
+    /** @type {number} */
+    this.worldNumber = 0;
+
     this.getLogger().info(`This server is running SocketBE version ${version}`);
-    this.plugin = new PluginManager(this);
     
-    this.on('connection', async ws => {
+    this.on('connection', ws => {
       ws.id = uuidv4();
+
       const world = new World(this, ws);
-      world.number = this.number++;
       this.addWorld(world);
       
       ws.on('message', packet => {
         const res = JSON.parse(packet);
-        this.getWorld(ws.id).emit('packet', res);
+        const world = this.getWorld(ws.id);
+        res.world = world;
+        this.emit('packetReceive', res);
+        world.emit('packetReceive', res);
       });
       
       ws.on('close', () => {
@@ -33,52 +64,79 @@ class Server extends WebSocket.Server {
       });
     });
     
-    this.plugin.enablePlugins();
+    this.getLogger().info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
+    this.getLogger().info(`Done (${(Date.now() - this.startTime) / 1000}s)!`); 
     
-    this.getLogger().info(`WebSocket Server is runnning on ${ip.address()}:${config.port || config}`);
-    this.getLogger().info(`Done (${(Date.now()-this.startTime) / 1000}s)!`); 
-    
+    this.emit('serverOpen');
   }
   
+  /**
+   * 
+   * @param {World} world 
+   */
   addWorld(world) {
+    world.setNumber(this.worldNumber++);
+
     this.worlds.set(world.id, world);
-    this.events.emit('open', { world });
+    this.events.emit('worldAdd', { world });
     
-    world.ws.send(JSON.stringify(Util.eventBuilder('commandResponse')));
+    world.sendPacket(Util.eventBuilder('commandResponse'));
 
     this.subscribedEvents.forEach(eventName => {
-      if (eventName == 'PlayerJoin' || eventName == 'PlayerLeave') { // start interval
+      if (eventName == 'playerJoin' || eventName == 'playerLeave') { // start interval
         world.startInterval();
       } else {
-        world.ws.send(JSON.stringify(Util.eventBuilder(eventName))); // send packet
+        world.sendPacket(Util.eventBuilder(eventName)); // send packet
       }
     });
   }
   
+  /**
+   * 
+   * @param {World} world 
+   */
   removeWorld(world) {
     world.stopInterval();
-    this.events.emit('close', { world });
+    this.events.emit('worldRemove', { world });
     this.worlds.delete(world.id);
   }
   
-  getWorld(id) {
-    return id ? this.worlds.get(id) : this.getWorlds()[0];
+  /**
+   * 
+   * @param {string} worldId 
+   * @returns {World|undefined}
+   */
+  getWorld(worldId) {
+    return this.worlds.get(worldId);
   }
   
+  /**
+   * 
+   * @returns {World[]}
+   */
   getWorlds() {
     return [...this.worlds.values()];
   }
-  
+
+  /**
+   * 
+   * @returns {Logger}
+   */
   getLogger() {
     return this.logger;
   }
   
-  async runCommand(command) {
+  /**
+   * 
+   * @param {string} command 
+   * @returns {Promise<Object[]>}
+   */
+  runCommand(command) {
     const res = this.getWorlds().map(w => w.runCommand(command));
     return Promise.all(res);
   }
   
-  async sendMessage(...args) {
+  sendMessage(...args) {
     const res = this.getWorlds().map(w => w.sendMessage(...args));
     return Promise.all(res);
   }

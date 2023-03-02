@@ -1,6 +1,7 @@
 const { Util } = require('../');
 
 class Logger {
+  /** @param {string} name */
   constructor(name) {
     this.name = name;
   }

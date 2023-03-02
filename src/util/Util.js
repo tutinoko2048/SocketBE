@@ -1,8 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
-
 const moment = require('moment-timezone');
 moment.tz.setDefault('Asia/Tokyo');
-
 
 class Util {
   static isEmpty(v) {

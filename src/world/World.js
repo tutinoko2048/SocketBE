@@ -2,29 +2,51 @@ const { EventEmitter } = require('events');
 const { Util } = require('../');
 const WebSocket = require('ws');
 
-const { DEBUG } = require('../../config.json');
+/**
+ * @typedef {Object} ServerPacket
+ * @property {Object} header
+ * @property {number} header.requestId
+ * @property {string} header.messagePurpose
+ * @property {number} header.version
+ * @property {string} header.messageType
+ * @property {Object} body
+ * @property {string} body.eventName
+ */
 
 class World extends EventEmitter {
+  /**
+   * 
+   * @param {import('../server/Server')} server 
+   * @param {WebSocket.WebSocket} ws 
+   */
   constructor(server, ws) {
     super();
+
+    /** @type {WebSocket.WebSocket} */
     this.ws = ws;
+
+    /** @type {import('../server/Server')} */
     this.server = server;
+
     this.countInterval;
+
+    /** @type {string[]} */
     this.lastPlayers = [];
+
+    /** @type {Map<string, Function>} */
     this.awaitingResponses = new Map();
+
+    /** @type {number[]} */
     this.responseTimes = [];
     
     this.on('packet', packet => {
-      this.server.events.emit('packet', { world: this, packet });
-      this.server.events.emit(packet.header.eventName, { ...packet.body, world: this });
+      this.server.events.emit(packet.header.eventName, { ...packet.body, world: this }); // minecraft ws events
       if (packet.header.messagePurpose === 'commandResponse') {
-        if (packet.body.recipient === undefined)
-          this.handlePacket(packet);
+        if (packet.body.recipient === undefined) this.handlePacket(packet);
       }
       
       if (packet.header.messagePurpose === 'error') {
-        if (packet.body.recipient === undefined)
-          this.handlePacket(packet);
+        if (packet.body.recipient === undefined) this.handlePacket(packet);
       }
     });
   }
@@ -49,15 +71,28 @@ class World extends EventEmitter {
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
     return await this.getResponse(packet.header.requestId).catch(e => {
-      if (DEBUG) console.error(`runCommand Error: ${e.message}`);
+      if (this.server.options.debug) console.error(`runCommand Error: ${e.message}`);
       return { error: true, statusMessage: e.message }
     });
   }
   
+  /**
+   * 
+   * @param {ServerPacket} packet 
+   * @returns {void}
+   */
   handlePacket(packet) {
     if (!this.awaitingResponses.has(packet.header.requestId)) return;
     this.awaitingResponses.get(packet.header.requestId)(packet.body);
     this.awaitingResponses.delete(packet.header.requestId);
+  }
+
+  /**
+   * 
+   * @param {ServerPacket} packet 
+   */
+  sendPacket(packet) {
+    this.ws.send(JSON.stringify(packet));
   }
   
   getResponse(id) {

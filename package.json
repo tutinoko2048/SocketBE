@@ -1,13 +1,21 @@
 {
+<<<<<<< Updated upstream
   "name": "socket-be",
+=======
+  "name": "socket-bedrock",
+>>>>>>> Stashed changes
   "version": "0.1.0",
   "scripts": {
-    "main": "node index.js"
+    "main": "node index.js",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "ip": "^1.1.8",
     "moment-timezone": "^0.5.37",
     "uuid": "^8.3.2",
     "ws": "^8.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0"
   }
 }

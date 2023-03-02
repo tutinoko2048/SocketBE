@@ -24,6 +24,6 @@ server.events.subscribe('PlayerLeave', ev => {
 });
 
 server.events.subscribe('PlayerMessage', async ev => {
-  const { sender, message, world } = ev;
+  const { sender, message } = ev;
   server.getLogger().info(`<${sender}> ${message}`);
 });
