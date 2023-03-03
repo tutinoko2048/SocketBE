@@ -99,7 +99,7 @@ class World extends EventEmitter {
   async sendMessage(message, target = '@a') {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
-    const rawtext = (typeof message === string)
+    const rawtext = (typeof message === 'string')
       ? { rawtext: [{ text: String(message) }] }
       : message
     

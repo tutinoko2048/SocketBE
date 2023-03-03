@@ -1,5 +1,4 @@
 const { EventEmitter } = require('events');
-const Events = require('../util/Events');
 
 class ServerEvent {
   /**
@@ -34,6 +33,10 @@ class ServerEvent {
   off(eventName) {
     this._subscribed.remove(eventName);
     this._events.off(eventName);
+  }
+  
+  emit(...args) {
+    this._events.emit(...args);
   }
 }
 
