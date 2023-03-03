@@ -1,13 +1,18 @@
 const { EventEmitter } = require('events');
+const Events = require('../util/Events');
 
-class ServerEvent extends EventEmitter {
+class ServerEvent {
   /**
    * 
    * @param {import('./Server')} server 
    */
   constructor(server) {
-    super();
     this.server = server;
+    
+    /** @private */
+    this._events = new EventEmitter();
+    
+    this._subscribed = new Set();
   }
   
   /**
@@ -17,8 +22,8 @@ class ServerEvent extends EventEmitter {
    * @returns 
    */
   on(eventName, fn) {
-    this.server.subscribedEvents.add(eventName);
-    super.on(eventName, fn);
+    this._subscribed.add(eventName);
+    this._events.on(eventName, fn);
     return fn;
   }
 
@@ -27,8 +32,8 @@ class ServerEvent extends EventEmitter {
    * @param {string} eventName 
    */
   off(eventName) {
-    this.server.subscribedEvents.remove(eventName);
-    super.off(eventName);
+    this._subscribed.remove(eventName);
+    this._events.off(eventName);
   }
 }
 

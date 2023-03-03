@@ -1,29 +1,33 @@
-const { Server } = require('./src');
-const { PORT } = require('./config.json');
+const { Server } = require("./src");
+const { PORT } = require("./config.json");
 
 const server = new Server({ port: PORT });
 
-server.events.subscribe('open', ev => {
+server.events.on("serverOpen", () => {
+  console.log("open");
+});
+
+server.events.on("worldAdd", (ev) => {
   const { world } = ev;
-  server.getLogger().info('connection opened: '+ world.id);
+  server.logger.info("connection opened: " + world.id);
 });
 
-server.events.subscribe('close', ev => {
+server.events.on("worldRemove", (ev) => {
   const { world } = ev;
-  server.getLogger().info('connection closed: '+ world.id);
+  server.logger.info("connection closed: " + world.id);
 });
 
-server.events.subscribe('PlayerJoin', ev => {
-  const { join } = ev;
-  server.getLogger().info(`Joined: ${join}`);
+server.events.on("playerJoin", (ev) => {
+  const { players } = ev;
+  server.logger.info(`Joined: ${players}`);
 });
 
-server.events.subscribe('PlayerLeave', ev => {
-  const { leave } = ev;
-  server.getLogger().info(`Left: ${leave}`);
+server.events.on("playerLeave", (ev) => {
+  const { players } = ev;
+  server.logger.info(`Left: ${players}`);
 });
 
-server.events.subscribe('PlayerMessage', async ev => {
+server.events.on("playerChat", async (ev) => {
   const { sender, message } = ev;
-  server.getLogger().info(`<${sender}> ${message}`);
+  server.logger.info(`<${sender}> ${message}`);
 });

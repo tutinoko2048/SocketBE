@@ -23,16 +23,20 @@ class Util {
     }
   }
   
-  static eventBuilder(name) {
+  /**
+   * Creates event packet
+   * @param {'subscribe'|'unsubscribe'} eventPurpose
+   */
+  static eventBuilder(eventName, eventPurpose = 'subscribe') {
     return {
       "header": {
         "requestId": uuidv4(),
-        "messagePurpose": "subscribe",
+        "messagePurpose": eventPurpose,
         "version": 1,
         "messageType": "commandRequest"
       },
       "body": {
-        "eventName": name
+        "eventName": eventName
       }
     };
   }
