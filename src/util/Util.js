@@ -1,12 +1,26 @@
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
+const jsonc = require('jsonc');
+
 const moment = require('moment-timezone');
-moment.tz.setDefault('Asia/Tokyo');
+moment.tz.setDefault(getConfig().timezone);
+
+function getConfig() {
+  const file = fs.readFileSync(path.join(__dirname, '../../config.json'), { encoding: 'utf-8' });
+  return jsonc.parse(file);
+}
 
 class Util {
   static isEmpty(v) {
     return v === undefined || v === null || v === ''
   }
   
+  /**
+   *
+   * @param {string} [mode]
+   * @param {string} [format]
+   */
   static getTime(mode, format) {
     let now = moment();
     switch (mode) {
@@ -25,7 +39,9 @@ class Util {
   
   /**
    * Creates event packet
+   * @param {string} eventName
    * @param {'subscribe'|'unsubscribe'} eventPurpose
+   * @returns {Object}
    */
   static eventBuilder(eventName, eventPurpose = 'subscribe') {
     return {
@@ -41,7 +57,13 @@ class Util {
     };
   }
   
-  static commandBuilder(cmd, id = uuidv4()) {
+  /**
+   * Creates command packet
+   * @param {string} cmd
+   * @param {string} [id]
+   * @returns {Object}
+   */
+   static commandBuilder(cmd, id = uuidv4()) {
     return {
       header: {
         requestId: id,
@@ -59,19 +81,42 @@ class Util {
     };
   }
   
+  /**
+   * splits string nicely (ignore ' and ")
+   * @param {string} str
+   * @returns {string}
+   */
   static splitNicely(str) {
     let split = str.split(/(?<!['"]\w+) +(?!\w+['"])/);
     return split.map(x => x.replace(/^"(.*)"$/g, '$1'));
   }
   
+  /**
+   * 
+   * @param {number[]} numbers
+   * @returns {number}
+   */
   static median(numbers) {
     const half = (numbers.length / 2) | 0;
     const arr = numbers.slice().sort((a,b) =>  a - b);
     return (arr.length % 2 ? arr[half] : (arr[half-1] + arr[half]) / 2) || 0;
   }
   
+  /**
+   * 
+   * @param {number[]} numbers
+   * @returns {number}
+   */
   static average(numbers) {
     return (numbers.reduce((a,b) => a + b, 0) / numbers.length) || 0;
+  }
+  
+  static getConfig() {
+    return getConfig();
+  }
+  
+  static commandString(str) {
+    return str ? `"${str}"` : '';
   }
 }
 

@@ -3,7 +3,7 @@ const { EventEmitter } = require('events');
 class ServerEvent {
   /**
    * 
-   * @param {import('./Server')} server 
+   * @param {import('../Server')} server 
    */
   constructor(server) {
     this.server = server;
@@ -11,7 +11,10 @@ class ServerEvent {
     /** @private */
     this._events = new EventEmitter();
     
+    /** @type {Set<string>} */
     this._subscribed = new Set();
+    
+    this.server.logger.debug('ServerEvent: Initialized');
   }
   
   /**

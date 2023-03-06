@@ -1,10 +1,13 @@
 const { Server } = require("./src");
-const { PORT } = require("./config.json");
 
-const server = new Server({ port: PORT });
+const server = new Server({ port: 8000 });
 
 server.events.on("serverOpen", () => {
-  console.log("open");
+  server.logger.log("open");
+  server.logger.info("open");
+  server.logger.warn("open");
+  server.logger.error("open");
+  server.logger.debug("open");
 });
 
 server.events.on("worldAdd", (ev) => {
@@ -31,3 +34,7 @@ server.events.on("playerChat", async (ev) => {
   const { sender, message } = ev;
   server.logger.info(`<${sender}> ${message}`);
 });
+
+server.events.on('error', e => {
+  server.logger.error(e);
+})

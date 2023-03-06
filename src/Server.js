@@ -20,9 +20,8 @@ class Server extends WebSocket.Server {
    * @param {ServerOptions} [options]
    */
   constructor(options = {}) {
-    console.log(`${'='.repeat(30)}\nStarting SocketBE Server\n${'='.repeat(30)}`);
     super(options);
-
+    
     /** @type {ServerOptions} */
     this.options = options;
 
@@ -44,7 +43,10 @@ class Server extends WebSocket.Server {
     this.logger.info(`This server is running SocketBE version ${version}`);
     
     this.on('connection', ws => {
-      ws.id = uuidv4();
+      Object.defineProperty(ws, 'id', {
+        value: uuidv4(),
+        writable: false
+      });
 
       const world = new World(this, ws, this.worldNumber++);
       this.addWorld(world);
@@ -52,9 +54,8 @@ class Server extends WebSocket.Server {
       ws.on('message', packet => {
         const res = JSON.parse(packet);
         const world = this.getWorld(ws.id);
-        res.world = world;
-        this.emit(Events.PacketReceive, res);
-        world.emit(Events.PacketReceive, res);
+        this.emit(Events.PacketReceive, { ...res, world });
+        world._handlePacket(res);
       });
       
       ws.on('close', () => {
@@ -67,7 +68,7 @@ class Server extends WebSocket.Server {
     this.on('error', e => this.events.emit(Events.Error, e));
     
     this.logger.info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
-    this.logger.info(`Done (${(Date.now() - this.startTime) / 1000}s)!`); 
+    this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} ms)`);
   }
   
   /**
@@ -104,7 +105,7 @@ class Server extends WebSocket.Server {
   /**
    * 
    * @param {string} worldId 
-   * @returns {?World}
+   * @returns {World|undefined}
    */
   getWorld(worldId) {
     return this.worlds.get(worldId);
@@ -128,7 +129,11 @@ class Server extends WebSocket.Server {
     return Promise.all(res);
   }
   
-  
+  /**
+   *
+   * @param {string|Object} message
+   * @param {string} [target]
+   */
   sendMessage(message, target) {
     const res = this.getWorlds().map(w => w.sendMessage(message, target));
     return Promise.all(res);

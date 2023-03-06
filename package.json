@@ -1,17 +1,20 @@
 {
-  "name": "socket-bedrock",
-  "version": "0.1.0",
+  "name": "socket-be",
+  "version": "1.0.0",
   "scripts": {
     "main": "node index.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "ip": "^1.1.8",
-    "moment-timezone": "^0.5.37",
+    "jsonc": "^2.0.0",
+    "moment-timezone": "^0.5.41",
     "uuid": "^8.3.2",
-    "ws": "^8.8.1"
+    "ws": "^8.12.1"
   },
   "devDependencies": {
-    "eslint": "^8.35.0"
-  }
+    "eslint": "^8.35.0",
+    "typescript": "^4.9.5"
+  },
+  "types": "./dist/main.js"
 }

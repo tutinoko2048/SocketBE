@@ -2,6 +2,8 @@ const { EventEmitter } = require('events');
 const WebSocket = require('ws');
 const Util = require('../util/Util');
 const Events = require('../util/Events');
+const Logger = require('../util/Logger');
+const ScoreboardManager = require('../managers/ScoreboardManager');
 
   /**
    * @typedef {Object} ServerPacket
@@ -24,7 +26,7 @@ const Events = require('../util/Events');
 class World extends EventEmitter {
   /**
    * 
-   * @param {import('../server/Server')} server 
+   * @param {import('../Server')} server 
    * @param {WebSocket.WebSocket} ws 
    * @param {number} number
    */
@@ -34,13 +36,19 @@ class World extends EventEmitter {
     /** @type {WebSocket.WebSocket} */
     this.ws = ws;
 
-    /** @type {import('../server/Server')} */
+    /** @type {import('../Server')} */
     this.server = server;
     
     /** @type {number} */
     this.number = number;
+    
+    /** @type {Logger} */
+    this.logger = new Logger(`World #${this.number}`);
 
-    /** @private */
+    /**
+     * @type {?number}
+     * @private 
+     */
     this.countInterval;
 
     /** @type {string[]} */
@@ -50,7 +58,7 @@ class World extends EventEmitter {
     this.maxPlayers = 0;
 
     /**
-     * @type {Map<string, (string, ServerPacket) => void}
+     * @type {Map<string, (string, ServerPacket) => void>}
      * @private
      */
     this._awaitingResponses = new Map();
@@ -61,16 +69,7 @@ class World extends EventEmitter {
      */
     this._responseTimes = [];
     
-    this.on(Events.PacketReceive, packet => {
-      this.server.events.emit(packet.header.eventName, { ...packet.body, world: this }); // minecraft ws events
-      if (packet.header.messagePurpose === 'commandResponse') {
-        if (packet.body.recipient === undefined) this.handlePacket(packet);
-      }
-      
-      if (packet.header.messagePurpose === 'error') {
-        if (packet.body.recipient === undefined) this.handlePacket(packet);
-      }
-    });
+    this.scoreboards = new ScoreboardManager(this);
   }
   
   /** @type {string} */
@@ -88,7 +87,7 @@ class World extends EventEmitter {
     const packet = Util.commandBuilder(command);
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
-    return await this.getResponse(packet.header.requestId);
+    return await this._getResponse(packet.header.requestId);
   }
   
   /**
@@ -112,7 +111,7 @@ class World extends EventEmitter {
    */
   async getPlayers() {
     let data = await this.runCommand('list');
-    let status = (data.statusCode == 0 && !data.error);
+    let status = data.statusCode == 0;
     return {
       current: status ? data.currentPlayerCount : 0,
       max: status ? data.maxPlayerCount : 0,
@@ -197,12 +196,24 @@ class World extends EventEmitter {
    * 
    * @param {ServerPacket} packet 
    * @returns {void}
-   * @private
    */
-  handlePacket(packet) {
-    if (!this._awaitingResponses.has(packet.header.requestId)) return;
-    this._awaitingResponses.get(packet.header.requestId)(packet.body);
-    this._awaitingResponses.delete(packet.header.requestId);
+  _handlePacket(packet) {
+    const { header, body } = packet;
+    this.server.events.emit(header.eventName, { ...body, world: this }); // minecraft ws events
+    
+    if (header.eventName === 'PlayerMessage') {
+      if (body.type === 'title') {
+        this.server.events.emit(Events.PlayerTitle, { ...body, world: this });
+      } else {
+        this.server.events.emit(Events.PlayerChat, { ...body, world: this });
+      }
+    }
+    
+    if (['commandResponse','error'].includes(header.messagePurpose)) {
+      if (!this._awaitingResponses.has(packet.header.requestId)) return;
+      this._awaitingResponses.get(packet.header.requestId)(packet.body);
+      this._awaitingResponses.delete(packet.header.requestId);
+    }
   }
   
   /**
@@ -211,14 +222,14 @@ class World extends EventEmitter {
    * @returns {Promise<Object>}
    * @private
    */
-  getResponse(id) {
+  _getResponse(id) {
     const sendTime = Date.now();
     return new Promise((res, rej) => {
       if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error('client is offline'));
         
       const timeout = setTimeout(() => {
         rej(new Error('response timeout'));
-      }, 10*1000);
+      }, this.server.options.packetTimeout);
       
       this._awaitingResponses.set(id, packet => {
         clearTimeout(timeout);

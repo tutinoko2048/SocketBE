@@ -1,4 +1,5 @@
 {
-  "PORT": 19132,
-  "DEBUG": true
+  "debug": true,
+  "timezone": "Asia/Tokyo",
+  "packetTimeout": 200000
 }
