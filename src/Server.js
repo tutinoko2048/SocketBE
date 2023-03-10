@@ -1,18 +1,12 @@
 const WebSocket = require('ws');
 const Logger = require('./util/Logger');
-const ServerEvent = require('./structures/ServerEvent');
+const Events = require('./structures/Events');
 const World = require('./structures/World');
 const Util = require('./util/Util');
 const { v4: uuidv4 } = require('uuid');
 const ip = require('ip');
 const { version } = require('./util/constants');
-const Events = require('./util/Events');
-
-  /**
-   * @typedef {Object} ServerOptions
-   * @property {number} [port]
-   * @property {boolean} [debug]
-   */
+const ServerEvents = require('./util/Events');
 
 class Server extends WebSocket.Server {
   /**
@@ -31,8 +25,8 @@ class Server extends WebSocket.Server {
     /** @type {Logger} */
     this.logger = new Logger('Server');
 
-    /** @type {ServerEvent} */
-    this.events = new ServerEvent(this);
+    /** @type {Events} */
+    this.events = new Events(this);
 
     /** @type {Map<string, World>} */
     this.worlds = new Map();
@@ -54,7 +48,7 @@ class Server extends WebSocket.Server {
       ws.on('message', packet => {
         const res = JSON.parse(packet);
         const world = this.getWorld(ws.id);
-        this.emit(Events.PacketReceive, { ...res, world });
+        this.emit(ServerEvents.PacketReceive, { ...res, world });
         world._handlePacket(res);
       });
       
@@ -63,9 +57,9 @@ class Server extends WebSocket.Server {
       });
     });
     
-    this.on('listening', () => this.events.emit(Events.ServerOpen));
-    this.on('close', () => this.events.emit(Events.ServerClose));
-    this.on('error', e => this.events.emit(Events.Error, e));
+    this.on('listening', () => this.events.emit(ServerEvents.ServerOpen));
+    this.on('close', () => this.events.emit(ServerEvents.ServerClose));
+    this.on('error', e => this.events.emit(ServerEvents.Error, e));
     
     this.logger.info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
     this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
@@ -77,18 +71,18 @@ class Server extends WebSocket.Server {
    */
   #addWorld(world) {
     this.worlds.set(world.id, world);
-    this.events.emit(Events.WorldAdd, { world });
+    this.events.emit(ServerEvents.WorldAdd, { world });
     
     world.sendPacket(Util.eventBuilder('commandResponse'));
     
     if (
-      this.events._subscribed.has(Events.PlayerJoin) ||
-      this.events._subscribed.has(Events.PlayerLeave)
+      this.events._subscribed.has(ServerEvents.PlayerJoin) ||
+      this.events._subscribed.has(ServerEvents.PlayerLeave)
     ) world._startInterval();
     
     if (
-      this.events._subscribed.has(Events.PlayerChat) ||
-      this.events._subscribed.has(Events.PlayerTitle)
+      this.events._subscribed.has(ServerEvents.PlayerChat) ||
+      this.events._subscribed.has(ServerEvents.PlayerTitle)
     ) world.subscribeEvent('PlayerMessage');
   }
   
@@ -98,7 +92,7 @@ class Server extends WebSocket.Server {
    */
   #removeWorld(world) {
     world._stopInterval();
-    this.events.emit(Events.WorldRemove, { world });
+    this.events.emit(ServerEvents.WorldRemove, { world });
     this.worlds.delete(world.id);
   }
   

@@ -1,21 +1,11 @@
 const { EventEmitter } = require('events');
 const WebSocket = require('ws');
 const Util = require('../util/Util');
-const Events = require('../util/Events');
+const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
 
-  /**
-   * @typedef {Object} ServerPacket
-   * @property {Object} header
-   * @property {number} header.requestId
-   * @property {string} header.messagePurpose
-   * @property {number} header.version
-   * @property {string} header.messageType
-   * @property {Object} body
-   * @property {string} body.eventName
-   */
-   
+  /** @typedef {import('../../typings/index').ServerPacket} ServerPacket */
   /**
    * @typedef {Object} PlayerList
    * @property {number} current
@@ -58,7 +48,7 @@ class World extends EventEmitter {
     this.maxPlayers = 0;
 
     /**
-     * @type {Map<string, (string, ServerPacket) => void>}
+     * @type {Map<string, (arg0: ServerPacket.body) => void>}
      * @private
      */
     this._awaitingResponses = new Map();
@@ -131,8 +121,8 @@ class World extends EventEmitter {
     this.lastPlayers = players;
     this.maxPlayers = max;
     
-    if (join.length > 0) this.server.events.emit(Events.PlayerJoin, { world: this, players: join });
-    if (leave.length > 0) this.server.events.emit(Events.PlayerLeave, { world: this, players: leave });
+    if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
+    if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
   }
   
   /**
@@ -203,9 +193,9 @@ class World extends EventEmitter {
     
     if (header.eventName === 'PlayerMessage') {
       if (body.type === 'title') {
-        this.server.events.emit(Events.PlayerTitle, { ...body, world: this });
+        this.server.events.emit(ServerEvents.PlayerTitle, { ...body, world: this });
       } else {
-        this.server.events.emit(Events.PlayerChat, { ...body, world: this });
+        this.server.events.emit(ServerEvents.PlayerChat, { ...body, world: this });
       }
     }
     
@@ -229,7 +219,7 @@ class World extends EventEmitter {
         
       const timeout = setTimeout(() => {
         rej(new Error('response timeout'));
-      }, this.server.options.packetTimeout);
+      }, Util.getConfig().packetTimeout);
       
       this._awaitingResponses.set(id, packet => {
         clearTimeout(timeout);

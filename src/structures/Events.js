@@ -1,14 +1,13 @@
 const { EventEmitter } = require('events');
 
-class ServerEvent {
+/** @type {import('../../typings/index').Events} */
+class Events {
   /**
    * 
    * @param {import('../Server')} server 
    */
   constructor(server) {
     this.server = server;
-    
-    /** @private */
     this._events = new EventEmitter();
     
     /** @type {Set<string>} */
@@ -43,4 +42,4 @@ class ServerEvent {
   }
 }
 
-module.exports = ServerEvent;
+module.exports = Events;
