@@ -16,5 +16,5 @@
     "eslint": "^8.35.0",
     "typescript": "^4.9.5"
   },
-  "types": "./dist/main.js"
+  "types": "./typings/index.d.ts"
 }

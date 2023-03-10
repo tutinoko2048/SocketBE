@@ -4,7 +4,7 @@
     "allowJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist",
+    "outDir": "typings",
     "lib": [ "es2019" ],
     "target": "es2021",
     "removeComments": true

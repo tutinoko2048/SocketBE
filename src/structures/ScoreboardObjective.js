@@ -2,6 +2,11 @@
 
 class ScoreboardObjective {
   /**
+   * @property {import('./World')}
+   */
+  #world;
+
+  /**
    * @property {string} #id
    */
   #id;
@@ -13,10 +18,12 @@ class ScoreboardObjective {
   
   /**
    *
+   * @param {import('./World')} world
    * @param {string} objectiveId
    * @param {string} [displayName='']
    */
-  constructor(objectiveId, displayName = '') {
+  constructor(world, objectiveId, displayName = '') {
+    this.#world = world;
     this.#id = objectiveId;
     this.#displayName = displayName;
   }
@@ -37,15 +44,53 @@ class ScoreboardObjective {
     return this.#displayName;
   }
   
-  getScore(player) {}
+  /**
+   * 
+   * @param {string} player 
+   * @returns {Promise<?number>}
+   */
+  async getScore(player) {
+    return await this.#world.scoreboards.getScore(player, this.id)
+  }
   
-  setScore(player, value) {}
+  /**
+   * 
+   * @param {string} player 
+   * @param {number} score
+   * @returns {Promise<?number>}
+   */
+  async setScore(player, score) {
+    return await this.#world.scoreboards.setScore(player, this.id, score);
+  }
+
+  /**
+   * 
+   * @param {string} player 
+   * @param {number} score
+   * @returns {Promise<?number>}
+   */
+  async addScore(player, score) {
+    return await this.#world.scoreboards.addScore(player, this.id, score);
+  }
   
-  addScore(player, value) {}
+  /**
+   * 
+   * @param {string} player 
+   * @param {number} score
+   * @returns {Promise<?number>}
+   */
+  async removeScore(player, score) {
+    return await this.#world.scoreboards.removeScore(player, this.id, score);
+  }
   
-  removeScore(player, value) {}
-  
-  resetScore(player) {}
+  /**
+   * 
+   * @param {string} player 
+   * @returns {Promise<boolean>}
+   */
+  async resetScore(player) {
+    return await this.#world.scoreboards.resetScore(player, this.id);
+  }
 }
 
 module.exports = ScoreboardObjective;

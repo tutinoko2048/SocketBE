@@ -49,7 +49,7 @@ class Server extends WebSocket.Server {
       });
 
       const world = new World(this, ws, this.worldNumber++);
-      this.addWorld(world);
+      this.#addWorld(world);
       
       ws.on('message', packet => {
         const res = JSON.parse(packet);
@@ -59,7 +59,7 @@ class Server extends WebSocket.Server {
       });
       
       ws.on('close', () => {
-        this.removeWorld(world);
+        this.#removeWorld(world);
       });
     });
     
@@ -68,14 +68,14 @@ class Server extends WebSocket.Server {
     this.on('error', e => this.events.emit(Events.Error, e));
     
     this.logger.info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
-    this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} ms)`);
+    this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
   
   /**
    * 
    * @param {World} world 
    */
-  addWorld(world) {
+  #addWorld(world) {
     this.worlds.set(world.id, world);
     this.events.emit(Events.WorldAdd, { world });
     
@@ -96,9 +96,9 @@ class Server extends WebSocket.Server {
    * 
    * @param {World} world 
    */
-  removeWorld(world) {
+  #removeWorld(world) {
     world._stopInterval();
-    this.events.emit('worldRemove', { world });
+    this.events.emit(Events.WorldRemove, { world });
     this.worlds.delete(world.id);
   }
   
