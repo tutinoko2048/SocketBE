@@ -26,15 +26,15 @@ class Logger {
   }
   
   info(...args) {
-    console.log(`${color.blue}${Util.getTime()}${color.reset} ${color.cyan}Info${color.reset} [${this.name}]`, ...args);
+    console.log(`${color.blue}${Util.getTime()} ${color.cyan}Info${color.reset} [${this.name}]`, ...args);
   }
   
   warn(...args) {
-    console.log(`${color.blue}${Util.getTime()}${color.yellow} Warn [${this.name}]`, ...args, color.reset);
+    console.log(`${color.blue}${Util.getTime()} ${color.yellow}Warn${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
   error(...args) {
-    console.log(`${color.blue}${Util.getTime()}${color.red} Error [${this.name}]`, ...args, color.reset);
+    console.log(`${color.blue}${Util.getTime()} ${color.red}Error${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
   debug(...args) {

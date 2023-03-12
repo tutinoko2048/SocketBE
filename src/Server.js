@@ -1,18 +1,12 @@
 const WebSocket = require('ws');
 const Logger = require('./util/Logger');
-const ServerEvent = require('./structures/ServerEvent');
+const Events = require('./structures/Events');
 const World = require('./structures/World');
 const Util = require('./util/Util');
 const { v4: uuidv4 } = require('uuid');
 const ip = require('ip');
 const { version } = require('./util/constants');
-const Events = require('./util/Events');
-
-  /**
-   * @typedef {Object} ServerOptions
-   * @property {number} [port]
-   * @property {boolean} [debug]
-   */
+const ServerEvents = require('./util/Events');
 
 class Server extends WebSocket.Server {
   /** @type {number} */
@@ -37,13 +31,11 @@ class Server extends WebSocket.Server {
     /** @type {Logger} */
     this.logger = new Logger('Server');
 
-    /** @type {ServerEvent} */
-    this.events = new ServerEvent(this);
-
-    /** @type {Map<string, World>} */
+    /** @type {Events} */
+    this.events = new Events(this);
+    
     this.#worlds = new Map();
 
-    /** @type {number} */
     this.#worldNumber = 0;
 
     this.logger.info(`This server is running SocketBE version ${version}`);
@@ -60,7 +52,7 @@ class Server extends WebSocket.Server {
       ws.on('message', packet => {
         const res = JSON.parse(packet);
         const world = this.getWorld(ws.id);
-        this.emit(Events.PacketReceive, { ...res, world });
+        this.emit(ServerEvents.PacketReceive, { ...res, world });
         world._handlePacket(res);
       });
       
@@ -69,12 +61,14 @@ class Server extends WebSocket.Server {
       });
     });
     
-    this.on('listening', () => this.events.emit(Events.ServerOpen));
-    this.on('close', () => this.events.emit(Events.ServerClose));
-    this.on('error', e => this.events.emit(Events.Error, e));
+    this.on('listening', () => this.events.emit(ServerEvents.ServerOpen));
+    this.on('close', () => this.events.emit(ServerEvents.ServerClose));
+    this.on('error', e => this.events.emit(ServerEvents.Error, e));
+    
+    setInterval(() => this.events.emit(ServerEvents.Tick), 1000 / 20);
     
     this.logger.info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
-    this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} ms)`);
+    this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
   
   /**
@@ -82,19 +76,19 @@ class Server extends WebSocket.Server {
    * @param {World} world 
    */
   #addWorld(world) {
-    this.worlds.set(world.id, world);
-    this.events.emit(Events.WorldAdd, { world });
+    this.#worlds.set(world.id, world);
+    this.events.emit(ServerEvents.WorldAdd, { world });
     
     world.sendPacket(Util.eventBuilder('commandResponse'));
     
     if (
-      this.events._subscribed.has(Events.PlayerJoin) ||
-      this.events._subscribed.has(Events.PlayerLeave)
+      this.events._subscribed.has(ServerEvents.PlayerJoin) ||
+      this.events._subscribed.has(ServerEvents.PlayerLeave)
     ) world._startInterval();
     
     if (
-      this.events._subscribed.has(Events.PlayerChat) ||
-      this.events._subscribed.has(Events.PlayerTitle)
+      this.events._subscribed.has(ServerEvents.PlayerChat) ||
+      this.events._subscribed.has(ServerEvents.PlayerTitle)
     ) world.subscribeEvent('PlayerMessage');
   }
   
@@ -104,29 +98,29 @@ class Server extends WebSocket.Server {
    */
   #removeWorld(world) {
     world._stopInterval();
-    this.events.emit('worldRemove', { world });
-    this.worlds.delete(world.id);
+    this.events.emit(ServerEvents.WorldRemove, { world });
+    this.#worlds.delete(world.id);
   }
   
   /**
-   * 
-   * @param {string} worldId 
+   * Returns a world based on the provided id.
+   * @param {string} worldId An identifier of the world.
    * @returns {World|undefined}
    */
   getWorld(worldId) {
-    return this.worlds.get(worldId);
+    return this.#worlds.get(worldId);
   }
   
   /**
-   * 
+   * Returns an array of all the connected worlds.
    * @returns {World[]}
    */
   getWorlds() {
-    return [...this.worlds.values()];
+    return [...this.#worlds.values()];
   }
   
   /**
-   * 
+   * Sends a command to all the worlds.
    * @param {string} command 
    * @returns {Promise<Object[]>}
    */
@@ -136,9 +130,10 @@ class Server extends WebSocket.Server {
   }
   
   /**
-   *
-   * @param {string|Object} message
-   * @param {string} [target]
+   * Sends a message to all the worlds.
+   * @param {string|Object} message The message to be displayed.
+   * @param {string} [target] Player name or target selector
+   * @returns {Promise<void[]>}
    */
   sendMessage(message, target) {
     const res = this.getWorlds().map(w => w.sendMessage(message, target));

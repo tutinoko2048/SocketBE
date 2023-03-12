@@ -7,7 +7,7 @@ module.exports = {
   PlayerLeave: 'playerLeave',
   PacketReceive: 'packetReceive',
   Error: 'error',
-  
   PlayerChat: 'playerChat',
-  PlayerTitle: 'playerTitle'
+  PlayerTitle: 'playerTitle',
+  Tick: 'tick'
 }

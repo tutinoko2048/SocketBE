@@ -6,9 +6,15 @@ const jsonc = require('jsonc');
 const moment = require('moment-timezone');
 moment.tz.setDefault(getConfig().timezone);
 
+/**
+ * 
+ * @returns {import('../../typings/index').ServerOptions}
+ */
 function getConfig() {
-  const file = fs.readFileSync(path.join(__dirname, '../../config.json'), { encoding: 'utf-8' });
-  return jsonc.parse(file);
+  const file = fs.readFileSync(path.join(__dirname, '../../config.jsonc'), { encoding: 'utf-8' });
+  /** @type {import('../../typings/index').ServerOptions} */
+  const data = jsonc.parse(file);
+  return data;
 }
 
 class Util {

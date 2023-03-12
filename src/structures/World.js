@@ -1,20 +1,10 @@
 const WebSocket = require('ws');
 const Util = require('../util/Util');
-const Events = require('../util/Events');
+const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
 
-  /**
-   * @typedef {Object} ServerPacket
-   * @property {Object} header
-   * @property {number} header.requestId
-   * @property {string} header.messagePurpose
-   * @property {number} header.version
-   * @property {string} header.messageType
-   * @property {Object} body
-   * @property {string} body.eventName
-   */
-   
+  /** @typedef {import('../../typings/index').ServerPacket} ServerPacket */
   /**
    * @typedef {Object} PlayerList
    * @property {number} current
@@ -66,16 +56,19 @@ class World {
     this.#responseTimes = [];
   }
   
-  /** @type {string} */
+  /**
+   * An identifier of the world.
+   * @type {string}
+   */
   get id() { return this.ws.id }
   
   /** @type {number} */
   get ping() { return Util.median(this.#responseTimes) }
   
   /**
-   *
-   * @param {string} command
-   * @returns {Promise<Object>}
+   * Runs a particular command from the world.
+   * @param {string} command Command to run.
+   * @returns {Promise<Object>} A JSON structure with command response values.
    */
   async runCommand(command) {
     const packet = Util.commandBuilder(command);
@@ -85,9 +78,9 @@ class World {
   }
   
   /**
-   *
-   * @param {string|Object} message
-   * @param {string} [target]
+   * Sends a messsage to the player.
+   * @param {string|Object} message The message to be displayed.
+   * @param {string} [target] Player name or target selector.
    */
   async sendMessage(message, target = '@a') {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
@@ -99,13 +92,14 @@ class World {
     await this.runCommand(`tellraw ${target} ${JSON.stringify(rawtext)}`);
   }
   
+  
   /**
-   *
+   * Returns an information about players in the world.
    * @returns {Promise<PlayerList>}
    */
-  async getPlayers() {
-    let data = await this.runCommand('list');
-    let status = data.statusCode == 0;
+  async getPlayerList() {
+    const data = await this.runCommand('list');
+    const status = data.statusCode == 0;
     return {
       current: status ? data.currentPlayerCount : 0,
       max: status ? data.maxPlayerCount : 0,
@@ -114,23 +108,28 @@ class World {
   }
   
   /**
-   *
-   * @private
+   * Returns an array of player names in the world.
+   * @returns {Promise<string[]>}
    */
+  async getPlayers() {
+    const { players } = await this.getPlayerList();
+    return players;
+  }
+  
   async #playerCounter() {
-    const { players, max } = await this.getPlayers();
+    const { players, max } = await this.getPlayerList();
     const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
     const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
     
     this.lastPlayers = players;
     this.maxPlayers = max;
     
-    if (join.length > 0) this.server.events.emit(Events.PlayerJoin, { world: this, players: join });
-    if (leave.length > 0) this.server.events.emit(Events.PlayerLeave, { world: this, players: leave });
+    if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
+    if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
   }
   
   /**
-   *
+   * Returns all tags that a player has.
    * @param {string} player
    * @returns {Promise<string[]>}
    */
@@ -140,7 +139,7 @@ class World {
   }
   
   /**
-   *
+   * Tests whether an player has a particular tag.
    * @param {string} player
    * @param {string} tag
    * @returns {Promise<boolean>}
@@ -151,7 +150,7 @@ class World {
   }
 
   /**
-   * 
+   * Sends a packet to the world.
    * @param {ServerPacket} packet 
    */
   sendPacket(packet) {
@@ -162,6 +161,7 @@ class World {
    * 
    * @param {ServerPacket} packet 
    * @returns {void}
+   * @ignore
    */
   _handlePacket(packet) {
     const { header, body } = packet;
@@ -169,9 +169,9 @@ class World {
     
     if (header.eventName === 'PlayerMessage') {
       if (body.type === 'title') {
-        this.server.events.emit(Events.PlayerTitle, { ...body, world: this });
+        this.server.events.emit(ServerEvents.PlayerTitle, { ...body, world: this });
       } else {
-        this.server.events.emit(Events.PlayerChat, { ...body, world: this });
+        this.server.events.emit(ServerEvents.PlayerChat, { ...body, world: this });
       }
     }
     
@@ -194,7 +194,7 @@ class World {
         
       const timeout = setTimeout(() => {
         rej(new Error('response timeout'));
-      }, this.server.options.packetTimeout);
+      }, Util.getConfig().packetTimeout);
       
       this.#awaitingResponses.set(id, packet => {
         clearTimeout(timeout);
@@ -219,21 +219,24 @@ class World {
   }
   
   /**
-   *
-   * @param {string} eventName
+   * Sends an event subscribe packet.
+   * @param {string} eventName A name of the event.
    */
   subscribeEvent(eventName) {
     this.sendPacket(Util.eventBuilder(eventName, 'subscribe'));
   }
   
   /**
-   *
-   * @param {string} eventName
+   * Sends an event unsubscribe packet.
+   * @param {string} eventName A name of the event.
    */
   unsubscribeEvent(eventName) {
     this.sendPacket(Util.eventBuilder(eventName, 'unsubscribe'));
   }
   
+  /**
+   * Closes a connection.
+   */
   close() {
     this.ws.close();
   }

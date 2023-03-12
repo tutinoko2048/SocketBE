@@ -2,14 +2,17 @@
 const ScoreboardObjective = require('../structures/ScoreboardObjective');
 
 class ScoreboardManager {
+  /** @property {import('../structures/World')} */
+  #world;
+
   /**
    *
    * @param {import('../structures/World')} world
    */
   constructor(world) {
-    this.world = world;
+    this.#world = world;
     
-    this.world.logger.debug('ScoreboardManager: Initialized');
+    this.#world.logger.debug('ScoreboardManager: Initialized');
   }
   
   /**
@@ -17,7 +20,7 @@ class ScoreboardManager {
    * @returns {Promise<ScoreboardObjective[]>}
    */
   async getObjectives() {
-    const res = await this.world.runCommand('scoreboard objectives list');
+    const res = await this.#world.runCommand('scoreboard objectives list');
     const objectives = res;
     // process something
     return objectives;
@@ -41,9 +44,9 @@ class ScoreboardManager {
    */
   async addObjective(objectiveId, displayName = '') {
     if (await this.getObjective(objectiveId)) return null;
-    const res = await this.world.runCommand(`scoreboard objectives add "${objectiveId}" dummy "${displayName}"`);
+    const res = await this.#world.runCommand(`scoreboard objectives add "${objectiveId}" dummy "${displayName}"`);
     if (res.statusCode !== 0) return null;
-    return new ScoreboardObjective(objectiveId, displayName);
+    return new ScoreboardObjective(this.#world, objectiveId, displayName);
   }
   
   /**
@@ -54,7 +57,7 @@ class ScoreboardManager {
   async removeObjective(objectiveId) {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
     if (!(await this.getObjective(objective))) return false;
-    const res = await this.world.runCommand(`scoreboard objectives remove ${objective}`);
+    const res = await this.#world.runCommand(`scoreboard objectives remove ${objective}`);
     return res.statusCode === 0;
   }
 
@@ -64,7 +67,7 @@ class ScoreboardManager {
    * @returns {Promise<Object<string, ?number>>}
    */
   async getScores(player) {
-    const res = await this.world.runCommand(`scoreboard players list "${player}"`);
+    const res = await this.#world.runCommand(`scoreboard players list "${player}"`);
     try {
       return Object.fromEntries(
         [...res.statusMessage.matchAll(/: (\d*) \((.*?)\)/g)]
@@ -91,41 +94,41 @@ class ScoreboardManager {
    *
    * @param {string} player
    * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} value
+   * @param {number} score
    * @returns {Promise<?number>}
    */
-  async setScore(player, objectiveId, value) {
+  async setScore(player, objectiveId, score) {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
-    const res = await this.world.runCommand(`scoreboard players set "${player}" "${objective}" ${value}`);
-    return res.statusCode === 0 ? value : null;
+    const res = await this.#world.runCommand(`scoreboard players set "${player}" "${objective}" ${score}`);
+    return res.statusCode === 0 ? score : null;
   }
   
   /**
    *
    * @param {string} player
    * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} value
+   * @param {number} score
    * @returns {Promise<?number>}
    */
-  async addScore(player, objectiveId, value) {
+  async addScore(player, objectiveId, score) {
     let res = await this.getScore(player, objectiveId);
     if (isNaN(res)) return null;
-    const score = res += value;
-    return await this.setScore(player, objectiveId, score);
+    const value = res += score;
+    return await this.setScore(player, objectiveId, value);
   }
   
   /**
    *
    * @param {string} player
    * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} value
+   * @param {number} score
    * @returns {Promise<?number>}
    */
-  async removeScore(player, objectiveId, value) {
+  async removeScore(player, objectiveId, score) {
     let res = await this.getScore(player, objectiveId);
     if (isNaN(res)) return null;
-    const score = res -= value;
-    return await this.setScore(player, objectiveId, score);
+    const value = res -= score;
+    return await this.setScore(player, objectiveId, value);
   }
   
   /**
@@ -136,7 +139,7 @@ class ScoreboardManager {
    */
   async resetScore(player, objectiveId = '') {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
-    const res = await this.world.runCommand(`scoreboard players reset "${player}" "${objective}"`);
+    const res = await this.#world.runCommand(`scoreboard players reset "${player}" "${objective}"`);
     return res.statusCode === 0;
   }
   

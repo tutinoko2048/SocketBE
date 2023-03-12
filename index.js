@@ -4,12 +4,7 @@ const server = new Server({ port: 8000 });
 
 server.events.on("serverOpen", () => {
   server.logger.log("open");
-  server.logger.info("open");
-  server.logger.warn("open");
-  server.logger.error("open");
-  server.logger.debug("open");
   
-  server.
 });
 
 server.events.on("worldAdd", (ev) => {
