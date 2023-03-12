@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "main": "node index.js",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "compile": "npx tsc -d"
   },
   "dependencies": {
     "ip": "^1.1.8",
@@ -16,5 +17,5 @@
     "eslint": "^8.35.0",
     "typescript": "^4.9.5"
   },
-  "types": "./dist/main.js"
+  "types": "./dist/index.js"
 }

@@ -1,4 +1,3 @@
-const { EventEmitter } = require('events');
 const WebSocket = require('ws');
 const Util = require('../util/Util');
 const Events = require('../util/Events');
@@ -23,7 +22,16 @@ const ScoreboardManager = require('../managers/ScoreboardManager');
    * @property {string[]} players
    */
 
-class World extends EventEmitter {
+class World {
+  /** @type {number[]} */
+  #responseTimes;
+  
+  /** @type {?number} */
+  #countInterval;
+  
+  /** @type {Map<string, (string, ServerPacket) => void>} */
+  #awaitingResponses;
+  
   /**
    * 
    * @param {import('../Server')} server 
@@ -31,7 +39,6 @@ class World extends EventEmitter {
    * @param {number} number
    */
   constructor(server, ws, number) {
-    super();
 
     /** @type {WebSocket.WebSocket} */
     this.ws = ws;
@@ -45,38 +52,25 @@ class World extends EventEmitter {
     /** @type {Logger} */
     this.logger = new Logger(`World #${this.number}`);
 
-    /**
-     * @type {?number}
-     * @private 
-     */
-    this.countInterval;
-
     /** @type {string[]} */
     this.lastPlayers = [];
     
     /** @type {number} */
     this.maxPlayers = 0;
 
-    /**
-     * @type {Map<string, (string, ServerPacket) => void>}
-     * @private
-     */
-    this._awaitingResponses = new Map();
-
-    /**
-     * @type {number[]}
-     * @private
-     */
-    this._responseTimes = [];
-    
+    /** @type {ScoreboardManager} */
     this.scoreboards = new ScoreboardManager(this);
+    
+    this.#countInterval;
+    this.#awaitingResponses = new Map();
+    this.#responseTimes = [];
   }
   
   /** @type {string} */
   get id() { return this.ws.id }
   
   /** @type {number} */
-  get ping() { return Util.median(this._responseTimes) }
+  get ping() { return Util.median(this.#responseTimes) }
   
   /**
    *
@@ -87,7 +81,7 @@ class World extends EventEmitter {
     const packet = Util.commandBuilder(command);
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
-    return await this._getResponse(packet.header.requestId);
+    return await this.#getResponse(packet.header.requestId);
   }
   
   /**
@@ -123,7 +117,7 @@ class World extends EventEmitter {
    *
    * @private
    */
-  async playerCounter() {
+  async #playerCounter() {
     const { players, max } = await this.getPlayers();
     const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
     const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
@@ -155,35 +149,7 @@ class World extends EventEmitter {
     const tags = await this.getTags(player);
     return tags.includes(tag);
   }
-   
-  /**
-   *
-   * @param {string} player
-   * @returns {Promise<Object<string, ?number>>}
-   */
-  async getScores(player) {
-    const res = await this.runCommand(`scoreboard players list "${player}"`);
-    try {
-      return Object.fromEntries(
-        [...res.statusMessage.matchAll(/: (\d*) \((.*?)\)/g)]
-          .map(data => [data[2], Number(data[1])])
-      )
-    } catch {
-      return {};
-    }
-  }
-  
-  /**
-   *
-   * @param {string} player
-   * @param {string} objective
-   * @returns {Promise<?number>}
-   */
-  async getScore(player, objective) {
-    const res = await this.getScores(player);
-    return res[objective];
-  }
-  
+
   /**
    * 
    * @param {ServerPacket} packet 
@@ -210,9 +176,9 @@ class World extends EventEmitter {
     }
     
     if (['commandResponse','error'].includes(header.messagePurpose)) {
-      if (!this._awaitingResponses.has(packet.header.requestId)) return;
-      this._awaitingResponses.get(packet.header.requestId)(packet.body);
-      this._awaitingResponses.delete(packet.header.requestId);
+      if (!this.#awaitingResponses.has(packet.header.requestId)) return;
+      this.#awaitingResponses.get(packet.header.requestId)(packet.body);
+      this.#awaitingResponses.delete(packet.header.requestId);
     }
   }
   
@@ -220,9 +186,8 @@ class World extends EventEmitter {
    *
    * @param {string} id
    * @returns {Promise<Object>}
-   * @private
    */
-  _getResponse(id) {
+  #getResponse(id) {
     const sendTime = Date.now();
     return new Promise((res, rej) => {
       if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error('client is offline'));
@@ -231,23 +196,25 @@ class World extends EventEmitter {
         rej(new Error('response timeout'));
       }, this.server.options.packetTimeout);
       
-      this._awaitingResponses.set(id, packet => {
+      this.#awaitingResponses.set(id, packet => {
         clearTimeout(timeout);
-        if (this._responseTimes.length > 20) this._responseTimes.shift();
-        this._responseTimes.push(Date.now() - sendTime);
+        if (this.#responseTimes.length > 20) this.#responseTimes.shift();
+        this.#responseTimes.push(Date.now() - sendTime);
         res(packet);
       });
     });
   }
   
+  /** @ignore */
   _startInterval() {
-    if (!this.countInterval) this.countInterval = setInterval(this.playerCounter.bind(this), 1000);
+    if (!this.#countInterval) this.#countInterval = setInterval(this.#playerCounter.bind(this), 1000);
   }
   
+  /** @ignore */
   _stopInterval() {
-    if (this.countInterval) {
-      clearInterval(this.countInterval);
-      this.countInterval = null;
+    if (this.#countInterval) {
+      clearInterval(this.#countInterval);
+      this.#countInterval = null;
     }
   }
   

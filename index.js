@@ -8,6 +8,8 @@ server.events.on("serverOpen", () => {
   server.logger.warn("open");
   server.logger.error("open");
   server.logger.debug("open");
+  
+  server.
 });
 
 server.events.on("worldAdd", (ev) => {

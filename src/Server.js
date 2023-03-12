@@ -15,6 +15,12 @@ const Events = require('./util/Events');
    */
 
 class Server extends WebSocket.Server {
+  /** @type {number} */
+  #worldNumber
+  
+  /** @type {Map<string, World>} */
+  #worlds
+  
   /**
    * 
    * @param {ServerOptions} [options]
@@ -35,10 +41,10 @@ class Server extends WebSocket.Server {
     this.events = new ServerEvent(this);
 
     /** @type {Map<string, World>} */
-    this.worlds = new Map();
+    this.#worlds = new Map();
 
     /** @type {number} */
-    this.worldNumber = 0;
+    this.#worldNumber = 0;
 
     this.logger.info(`This server is running SocketBE version ${version}`);
     
@@ -48,8 +54,8 @@ class Server extends WebSocket.Server {
         writable: false
       });
 
-      const world = new World(this, ws, this.worldNumber++);
-      this.addWorld(world);
+      const world = new World(this, ws, this.#worldNumber++);
+      this.#addWorld(world);
       
       ws.on('message', packet => {
         const res = JSON.parse(packet);
@@ -59,7 +65,7 @@ class Server extends WebSocket.Server {
       });
       
       ws.on('close', () => {
-        this.removeWorld(world);
+        this.#removeWorld(world);
       });
     });
     
@@ -75,7 +81,7 @@ class Server extends WebSocket.Server {
    * 
    * @param {World} world 
    */
-  addWorld(world) {
+  #addWorld(world) {
     this.worlds.set(world.id, world);
     this.events.emit(Events.WorldAdd, { world });
     
@@ -96,7 +102,7 @@ class Server extends WebSocket.Server {
    * 
    * @param {World} world 
    */
-  removeWorld(world) {
+  #removeWorld(world) {
     world._stopInterval();
     this.events.emit('worldRemove', { world });
     this.worlds.delete(world.id);
