@@ -1,25 +1,20 @@
+// @ts-check
+
 const WebSocket = require('ws');
 const Util = require('../util/Util');
 const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
 
-  /** @typedef {import('../../typings/index').ServerPacket} ServerPacket */
-  /**
-   * @typedef {Object} PlayerList
-   * @property {number} current
-   * @property {number} max
-   * @property {string[]} players
-   */
 
 class World {
   /** @type {number[]} */
   #responseTimes;
   
-  /** @type {?number} */
+  /** @type {?NodeJS.Timer} */
   #countInterval;
   
-  /** @type {Map<string, (string, ServerPacket) => void>} */
+  /** @type {Map<string, (arg0: ServerPacket) => void>} */
   #awaitingResponses;
   
   /**

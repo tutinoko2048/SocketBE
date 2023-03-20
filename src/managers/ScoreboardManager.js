@@ -2,7 +2,7 @@
 const ScoreboardObjective = require('../structures/ScoreboardObjective');
 
 class ScoreboardManager {
-  /** @property {import('../structures/World')} */
+  /** @type {import('../structures/World')} */
   #world;
 
   /**
@@ -16,7 +16,15 @@ class ScoreboardManager {
   }
   
   /**
-   *
+   * World instance that this manager belongs to.
+   * @type {import('../structures/World')}
+   */
+  get world() {
+    return this.#world;
+  }
+  
+  /**
+   * Returns all defined objectives.
    * @returns {Promise<ScoreboardObjective[]>}
    */
   async getObjectives() {
@@ -27,7 +35,7 @@ class ScoreboardManager {
   }
   
   /**
-   *
+   * Returns a specific objective (by id).
    * @param {string} objectiveId
    * @returns {Promise<ScoreboardObjective|undefined>}
    */
@@ -37,7 +45,7 @@ class ScoreboardManager {
   }
   
   /**
-   *
+   * Adds a new objective to the scoreboard.
    * @param {string} objectiveId
    * @param {string} [displayName]
    * @returns {Promise<?ScoreboardObjective>}
@@ -50,9 +58,9 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string|ScoreboardObjective} objectiveId
-   * @returns {Promise<boolean>}
+   * Removes an objective from the scoreboard.
+   * @param {string|ScoreboardObjective} objectiveId Objective to remove from scoreboard.
+   * @returns {Promise<boolean>} Whether successful to remove objective.
    */
   async removeObjective(objectiveId) {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
@@ -62,9 +70,9 @@ class ScoreboardManager {
   }
 
   /**
-   *
-   * @param {string} player
-   * @returns {Promise<Object<string, ?number>>}
+   * Returns all of scores that player has.
+   * @param {string} player Player to retrieve the score for.
+   * @returns {Promise<Object<string, ?number>>} Score values.
    */
   async getScores(player) {
     const res = await this.#world.runCommand(`scoreboard players list "${player}"`);
@@ -79,10 +87,10 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string} player
-   * @param {string|ScoreboardObjective} objectiveId
-   * @returns {Promise<?number>}
+   * Returns a score given a player and objective.
+   * @param {string} player Name of the player to retrieve the score for.
+   * @param {string|ScoreboardObjective} objectiveId Objective to retrieve the score for.
+   * @returns {Promise<?number>} Score value.
    */
   async getScore(player, objectiveId) {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
@@ -91,11 +99,11 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string} player
-   * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} score
-   * @returns {Promise<?number>}
+   * Sets the score given a player and objective.
+   * @param {string} player Name of the player.
+   * @param {string|ScoreboardObjective} objectiveId Objective to apply the score to.
+   * @param {number} score New value of the score.
+   * @returns {Promise<?number>} New value of the score, returns null if failed to set the score.
    */
   async setScore(player, objectiveId, score) {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
@@ -104,11 +112,11 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string} player
-   * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} score
-   * @returns {Promise<?number>}
+   * Adds the score given a player and objective.
+   * @param {string} player Name of the player.
+   * @param {string|ScoreboardObjective} objectiveId Objective to apply the score to.
+   * @param {number} score The amount of score to add.
+   * @returns {Promise<?number>} New value of the score, returns null if failed to add the score.
    */
   async addScore(player, objectiveId, score) {
     let res = await this.getScore(player, objectiveId);
@@ -118,11 +126,11 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string} player
-   * @param {string|ScoreboardObjective} objectiveId
-   * @param {number} score
-   * @returns {Promise<?number>}
+   * Removes the score given a player and objective.
+   * @param {string} player Name of the player.
+   * @param {string|ScoreboardObjective} objectiveId Objective to apply the score to.
+   * @param {number} score The amount of score to remove.
+   * @returns {Promise<?number>} New value of the score, returns null if failed to remove the score.
    */
   async removeScore(player, objectiveId, score) {
     let res = await this.getScore(player, objectiveId);
@@ -132,10 +140,10 @@ class ScoreboardManager {
   }
   
   /**
-   *
-   * @param {string} player
-   * @param {string|ScoreboardObjective} [objectiveId]
-   * @returns {Promise<boolean>}
+   * Removes a player from an objective.
+   * @param {string} player Name of the player.
+   * @param {string|ScoreboardObjective} [objectiveId] Objective that player is removed from.
+   * @returns {Promise<boolean>} Whether successful to reset score of player.
    */
   async resetScore(player, objectiveId = '') {
     const objective = ScoreboardManager.resolveObjective(objectiveId);
@@ -144,9 +152,9 @@ class ScoreboardManager {
   }
   
   /**
-   * 
-   * @param {string|ScoreboardObjective} objective
-   * @returns {string} objectiveId
+   * Returns an objective id.
+   * @param {string|ScoreboardObjective} objective Objective or its id to resolve.
+   * @returns {string} objectiveId The id of the objective.
    */
   static resolveObjective(objective) {
     return typeof objective === 'string' ? objective : objective.id;

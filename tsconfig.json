@@ -3,10 +3,12 @@
   "compilerOptions": {
     "allowJs": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
+    //"emitDeclarationOnly": true,
     "outDir": "dist",
     "lib": [ "es2019" ],
     "target": "es2021",
-    "removeComments": true
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true
   }
 }

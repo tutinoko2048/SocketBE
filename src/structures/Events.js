@@ -1,6 +1,5 @@
 const { EventEmitter } = require('events');
 
-/** @type {import('../../typings/index').Events} */
 class Events {
   /**
    * 
@@ -16,12 +15,6 @@ class Events {
     this.server.logger.debug('ServerEvent: Initialized');
   }
   
-  /**
-   * 
-   * @param {string} eventName 
-   * @param {(...any) => void} fn 
-   * @returns 
-   */
   on(eventName, fn) {
     this._subscribed.add(eventName);
     this._events.on(eventName, fn);

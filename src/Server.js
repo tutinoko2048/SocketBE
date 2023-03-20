@@ -8,6 +8,8 @@ const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
 
+
+/** @type {import('../typings/index').Server} */
 class Server extends WebSocket.Server {
   /** @type {number} */
   #worldNumber
@@ -15,14 +17,10 @@ class Server extends WebSocket.Server {
   /** @type {Map<string, World>} */
   #worlds
   
-  /**
-   * 
-   * @param {ServerOptions} [options]
-   */
   constructor(options = {}) {
     super(options);
     
-    /** @type {ServerOptions} */
+    
     this.options = options;
 
     /** @type {number} */
@@ -31,7 +29,6 @@ class Server extends WebSocket.Server {
     /** @type {Logger} */
     this.logger = new Logger('Server');
 
-    /** @type {Events} */
     this.events = new Events(this);
     
     this.#worlds = new Map();
@@ -52,7 +49,7 @@ class Server extends WebSocket.Server {
       ws.on('message', packet => {
         const res = JSON.parse(packet);
         const world = this.getWorld(ws.id);
-        this.emit(ServerEvents.PacketReceive, { ...res, world });
+        this.events.emit(ServerEvents.PacketReceive, { ...res, world });
         world._handlePacket(res);
       });
       

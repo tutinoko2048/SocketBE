@@ -19,12 +19,12 @@ server.events.on("worldRemove", (ev) => {
 
 server.events.on("playerJoin", (ev) => {
   const { players } = ev;
-  server.logger.info(`Joined: ${players}`);
+  server.logger.info(`Joined: ${players.join(', ')}`);
 });
 
 server.events.on("playerLeave", (ev) => {
   const { players } = ev;
-  server.logger.info(`Left: ${players}`);
+  server.logger.info(`Left: ${players.join(', ')}`);
 });
 
 server.events.on("playerChat", async (ev) => {
@@ -34,4 +34,4 @@ server.events.on("playerChat", async (ev) => {
 
 server.events.on('error', e => {
   server.logger.error(e);
-})
+});
