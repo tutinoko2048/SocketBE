@@ -1,4 +1,5 @@
 import type World from '../src/structures/World';
+//import type { WebSocket } from 'ws';
 
 declare global {
   interface ServerPacket {
@@ -28,7 +29,7 @@ declare global {
   }
 }
 
-declare module 'websocket' {
+declare module 'ws' {
   interface WebSocket {
     id: string;
   }
@@ -54,7 +55,7 @@ export interface ServerEvents {
   serverClose: void,
   worldAdd: { world: World },
   worldRemove: { world: World },
-  packetReceive: { packet: ServerPacket, world: World },
+  packetReceive: { packet: any, world: World },
   error: Error,
   playerChat: {
     'type': string,

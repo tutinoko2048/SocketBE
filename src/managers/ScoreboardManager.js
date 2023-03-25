@@ -152,6 +152,21 @@ class ScoreboardManager {
   }
   
   /**
+   * Sets an objective into a display slot with specified additional display settings.
+   * @param {string} displaySlotId
+   * @param {string|ScoreboardObjective|undefined} objectiveId
+   * @param {'ascending'|'descending'|undefined} sortOrder
+   * @returns {Promise<boolean>}
+   */
+  async setDisplay(displaySlotId, objectiveId, sortOrder) {
+    let commandString = `scoreboard objectives setdisplay ${displaySlotId}`;
+    if (objectiveId) commandString += ` "${ScoreboardManager.resolveObjective(objectiveId)}"`;
+    if (sortOrder) commandString += ` ${sortOrder}`;
+    const res = await this.#world.runCommand(commandString);
+    return res.statusCode === 0;
+  }
+  
+  /**
    * Returns an objective id.
    * @param {string|ScoreboardObjective} objective Objective or its id to resolve.
    * @returns {string} objectiveId The id of the objective.

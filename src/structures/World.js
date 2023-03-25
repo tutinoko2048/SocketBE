@@ -46,6 +46,9 @@ class World {
     /** @type {ScoreboardManager} */
     this.scoreboards = new ScoreboardManager(this);
     
+    /** @type {number} */
+    this.connectedAt = Date.now();
+    
     this.#countInterval;
     this.#awaitingResponses = new Map();
     this.#responseTimes = [];
@@ -121,6 +124,20 @@ class World {
     
     if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
     if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
+  }
+  
+  /**
+   * Returns the name of local player (client)
+   * @returns {Promise<string>}
+   */
+  async getLocalPlayer() {
+    const res = await this.runCommand('getlocalplayername');
+    return res.localplayername;
+    /*
+    sendCmd('getlocalplayername').then((data) => {
+    console.log(getTime(), lang.discord.connectionOpen.replace('$1', data.localplayername));
+    sendD(lang.discord.connectionOpen.replace('$1', data.localplayername));
+  });*/
   }
   
   /**
