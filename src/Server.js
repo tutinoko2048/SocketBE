@@ -20,8 +20,7 @@ class Server extends WebSocket.Server {
   constructor(options = {}) {
     super(options);
     
-    
-    this.options = options;
+    this._options = options;
 
     /** @type {number} */
     this.startTime = Date.now();
@@ -56,6 +55,8 @@ class Server extends WebSocket.Server {
       ws.on('close', () => {
         this.#removeWorld(world);
       });
+      
+      ws.on('error', e => this.events.emit(ServerEvents.Error, e))
     });
     
     this.on('listening', () => this.events.emit(ServerEvents.ServerOpen));

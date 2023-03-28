@@ -72,7 +72,7 @@ class World {
     const packet = Util.commandBuilder(command);
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
-    return await this.#getResponse(packet.header.requestId);
+    return await this.#getResponse(packet);
   }
   
   /**
@@ -115,15 +115,17 @@ class World {
   }
   
   async #playerCounter() {
-    const { players, max } = await this.getPlayerList();
-    const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
-    const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
-    
-    this.lastPlayers = players;
-    this.maxPlayers = max;
-    
-    if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
-    if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
+    try {
+      const { players, max } = await this.getPlayerList();
+      const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
+      const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
+      
+      this.lastPlayers = players;
+      this.maxPlayers = max;
+      
+      if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
+      if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
+    } catch (e) {}
   }
   
   /**
@@ -196,30 +198,32 @@ class World {
   
   /**
    *
-   * @param {string} id
+   * @param {ServerPacket} packet
    * @returns {Promise<Object>}
    */
-  #getResponse(id) {
+  #getResponse(packet) {
+    const packetId = packet.header.requestId;
     const sendTime = Date.now();
+    
     return new Promise((res, rej) => {
-      if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error('client is offline'));
+      if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error('client is offline' + JSON.stringify(packet, null, 2)));
         
       const timeout = setTimeout(() => {
-        rej(new Error('response timeout'));
+        rej(new Error('response timeout' + JSON.stringify(packet, null, 2)));
       }, Util.getConfig().packetTimeout);
       
-      this.#awaitingResponses.set(id, packet => {
+      this.#awaitingResponses.set(packetId, (response) => {
         clearTimeout(timeout);
         if (this.#responseTimes.length > 20) this.#responseTimes.shift();
         this.#responseTimes.push(Date.now() - sendTime);
-        res(packet);
+        res(response);
       });
     });
   }
   
   /** @ignore */
   _startInterval() {
-    if (!this.#countInterval) this.#countInterval = setInterval(this.#playerCounter.bind(this), 1000);
+    if (!this.#countInterval) this.#countInterval = setInterval(this.#playerCounter.bind(this), 2000);
   }
   
   /** @ignore */

@@ -11,12 +11,12 @@
     "jsonc": "^2.0.0",
     "moment-timezone": "^0.5.41",
     "uuid": "^8.3.2",
-    "ws": "^8.12.1"
+    "ws": "^8.13.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.5.4",
     "eslint": "^8.35.0",
-    "typescript": "^4.9.5",
-    "@types/ws": "^8.5.4"
+    "typescript": "^4.9.5"
   },
   "types": "./typings/index.d.ts"
 }

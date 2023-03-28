@@ -1,4 +1,3 @@
-// @ts-check
 const ScoreboardObjective = require('../structures/ScoreboardObjective');
 
 class ScoreboardManager {
@@ -29,8 +28,11 @@ class ScoreboardManager {
    */
   async getObjectives() {
     const res = await this.#world.runCommand('scoreboard objectives list');
-    const objectives = res;
-    // process something
+    const objectives = res.statusMessage.split('\n').slice(1).map(entry => {
+      const [ id, displayName ] = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0].slice(1,3);
+      return new ScoreboardObjective(this.#world, id, displayName);
+    });
+    
     return objectives;
   }
   
@@ -72,7 +74,7 @@ class ScoreboardManager {
   /**
    * Returns all of scores that player has.
    * @param {string} player Player to retrieve the score for.
-   * @returns {Promise<Object<string, ?number>>} Score values.
+   * @returns {Promise<{[objective: string]: ?number}>} Score values.
    */
   async getScores(player) {
     const res = await this.#world.runCommand(`scoreboard players list "${player}"`);

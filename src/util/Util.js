@@ -124,6 +124,10 @@ class Util {
   static commandString(str) {
     return str ? `"${str}"` : '';
   }
+  
+  static sleep(ms) {
+   return new Promise(res => setTimeout(res, ms));
+ }
 }
 
 module.exports = Util;
