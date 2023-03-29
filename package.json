@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "ip": "^1.1.8",
-    "jsonc": "^2.0.0",
     "moment-timezone": "^0.5.41",
     "uuid": "^8.3.2",
     "ws": "^8.13.0",
