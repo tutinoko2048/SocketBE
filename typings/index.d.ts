@@ -1,5 +1,5 @@
 import type World from '../src/structures/World';
-//import type { WebSocket } from 'ws';
+import type WebSocket from 'ws';
 
 declare global {
   interface ServerPacket {
@@ -21,11 +21,27 @@ declare global {
     players: string[]
   }
   
-  interface ServerOptions {
+  interface PlayerDetail extends PlayerList {
+    details: PlayerInfo[]
+  }
+  
+  interface PlayerInfo {
+    activeSessionId: string,
+    clientId: string,
+    color: string,
+    deviceSessionId: string,
+    globalMultiplayerCorrelationId: string,
+    id: number,
+    name: string,
+    randomId: number,
+    uuid: string
+  }
+  
+  interface ServerOption extends WebSocket.ServerOptions {
     debug?: boolean,
     timezone?: string,
     packetTimeout?: number,
-    port?: number
+    listUpdateInterval?: number
   }
 }
 
@@ -36,7 +52,7 @@ declare module 'ws' {
 }
 
 export class Server {
-  constructor(options?: ServerOptions);
+  constructor(option?: ServerOption);
   public events: Events;
 }
 
@@ -58,14 +74,14 @@ export interface ServerEvents {
   packetReceive: { packet: any, world: World },
   error: Error,
   playerChat: {
-    'type': string,
+    'type': 'chat' | 'say' | 'me' | 'tell',
     message: string,
     sender: string,
     receiver: string,
     world: World
   },
   playerTitle: {
-    'type': string,
+    'type': 'title',
     message: string,
     sender: string,
     receiver: string,

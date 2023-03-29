@@ -1,21 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
-const jsonc = require('jsonc');
-
 const moment = require('moment-timezone');
-moment.tz.setDefault(getConfig().timezone);
-
-/**
- * 
- * @returns {import('../../typings/index').ServerOptions}
- */
-function getConfig() {
-  const file = fs.readFileSync(path.join(__dirname, '../../config.jsonc'), { encoding: 'utf-8' });
-  /** @type {import('../../typings/index').ServerOptions} */
-  const data = jsonc.parse(file);
-  return data;
-}
 
 class Util {
   static isEmpty(v) {
@@ -23,12 +7,12 @@ class Util {
   }
   
   /**
-   *
+   * Returns current time with nice format.
+   * @param {string} timezone
    * @param {string} [mode]
-   * @param {string} [format]
    */
-  static getTime(mode, format) {
-    let now = moment();
+  static getTime(timezone, mode) {
+    const now = moment().tz(timezone);
     switch (mode) {
       case 'date':
         return now.format('MM/DD HH:mm:ss');
@@ -36,10 +20,10 @@ class Util {
         return now.format('YYYY MM/DD HH:mm:ss');
       case 'timestamp':
         return now.format();
-      case 'custom':
-        return now.format(format);
-      default:
+      case undefined:
         return now.format('HH:mm:ss');
+      default:
+        return now.format(mode);
     }
   }
   
@@ -115,10 +99,6 @@ class Util {
    */
   static average(numbers) {
     return (numbers.reduce((a,b) => a + b, 0) / numbers.length) || 0;
-  }
-  
-  static getConfig() {
-    return getConfig();
   }
   
   static commandString(str) {

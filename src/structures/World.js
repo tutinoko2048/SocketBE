@@ -35,7 +35,7 @@ class World {
     this.number = number;
     
     /** @type {Logger} */
-    this.logger = new Logger(`World #${this.number}`);
+    this.logger = new Logger(this.server, `World #${this.number}`);
 
     /** @type {string[]} */
     this.lastPlayers = [];
@@ -57,11 +57,20 @@ class World {
   /**
    * An identifier of the world.
    * @type {string}
+   * @readonly
    */
-  get id() { return this.ws.id }
+  get id() {
+    return this.ws.id;
+  }
   
-  /** @type {number} */
-  get ping() { return Util.median(this.#responseTimes) }
+  /**
+   * The latency between server and minecraft
+   * @type {number}
+   * @readonly
+   */
+  get ping() {
+    return Util.median(this.#responseTimes);
+  }
   
   /**
    * Runs a particular command from the world.
@@ -83,16 +92,16 @@ class World {
   async sendMessage(message, target = '@a') {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
-    const rawtext = (typeof message === 'string')
-      ? { rawtext: [{ text: String(message) }] }
-      : message
+    const rawtext = (typeof message === 'object')
+      ? message
+      : { rawtext: [{ text: String(message) }] }
     
     await this.runCommand(`tellraw ${target} ${JSON.stringify(rawtext)}`);
   }
   
   
   /**
-   * Returns an information about players in the world.
+   * Returns information about players in the world.
    * @returns {Promise<PlayerList>}
    */
   async getPlayerList() {
@@ -114,20 +123,6 @@ class World {
     return players;
   }
   
-  async #playerCounter() {
-    try {
-      const { players, max } = await this.getPlayerList();
-      const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
-      const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
-      
-      this.lastPlayers = players;
-      this.maxPlayers = max;
-      
-      if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
-      if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
-    } catch (e) {}
-  }
-  
   /**
    * Returns the name of local player (client)
    * @returns {Promise<string>}
@@ -135,11 +130,6 @@ class World {
   async getLocalPlayer() {
     const res = await this.runCommand('getlocalplayername');
     return res.localplayername;
-    /*
-    sendCmd('getlocalplayername').then((data) => {
-    console.log(getTime(), lang.discord.connectionOpen.replace('$1', data.localplayername));
-    sendD(lang.discord.connectionOpen.replace('$1', data.localplayername));
-  });*/
   }
   
   /**
@@ -149,7 +139,7 @@ class World {
    */
   async getTags(player) {
     const res = await this.runCommand(`tag "${player}" list`);
-    return res.statusMessage.match(/§a.*?§r/g).map(str => str.replace(/§a|§r/g, ''));
+    return res.statusMessage.match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
   
   /**
@@ -162,6 +152,24 @@ class World {
     const tags = await this.getTags(player);
     return tags.includes(tag);
   }
+  
+  /**
+   * Returns information about players with more details in the world.
+   * @returns {Promise<PlayerDetail>}
+   */
+  async getPlayerDetail() {
+    const res = await this.runCommand('listd');
+    const status = res.statusCode === 0;
+    /** @type {PlayerInfo[]} */
+    const details = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
+    
+    return {
+      details,
+      current: status ? res.currentPlayerCount : 0,
+      max: status ? res.maxPlayerCount : 0,
+      players: status ? res.players.split(', ') : []
+    }
+  }
 
   /**
    * Sends a packet to the world.
@@ -172,7 +180,7 @@ class World {
   }
   
   /**
-   * 
+   * Handles incoming packets
    * @param {ServerPacket} packet 
    * @returns {void}
    * @ignore
@@ -206,11 +214,11 @@ class World {
     const sendTime = Date.now();
     
     return new Promise((res, rej) => {
-      if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error('client is offline' + JSON.stringify(packet, null, 2)));
+      if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error(`client is offline\npacket: ${JSON.stringify(packet, null, 2)}`));
         
       const timeout = setTimeout(() => {
-        rej(new Error('response timeout' + JSON.stringify(packet, null, 2)));
-      }, Util.getConfig().packetTimeout);
+        rej(new Error(`response timeout\npacket: ${JSON.stringify(packet, null, 2)}`));
+      }, this.server.option.packetTimeout);
       
       this.#awaitingResponses.set(packetId, (response) => {
         clearTimeout(timeout);
@@ -221,9 +229,26 @@ class World {
     });
   }
   
+  async #updatePlayers() {
+    try {
+      const { players, max } = await this.getPlayerList();
+      const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
+      const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
+      
+      this.lastPlayers = players;
+      this.maxPlayers = max;
+      
+      if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
+      if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
+    } catch (e) {}
+  }
+  
   /** @ignore */
   _startInterval() {
-    if (!this.#countInterval) this.#countInterval = setInterval(this.#playerCounter.bind(this), 2000);
+    if (!this.#countInterval) {
+      this.#updatePlayers();
+      this.#countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
+    }
   }
   
   /** @ignore */

@@ -8,6 +8,13 @@ const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
 
+/** @type {ServerOption} */
+const defaultOption = {
+  timezone: 'UTC',
+  listUpdateInterval: 1000,
+  packetTimeout: 200000,
+  debug: false
+}
 
 /** @type {import('../typings/index').Server} */
 class Server extends WebSocket.Server {
@@ -17,21 +24,23 @@ class Server extends WebSocket.Server {
   /** @type {Map<string, World>} */
   #worlds
   
-  constructor(options = {}) {
-    super(options);
+  constructor(option = {}) {
+    super({ ...defaultOption, ...option });
     
-    this._options = options;
+    /** @type {ServerOption} */
+    this.option = { ...defaultOption, ...option };
 
     /** @type {number} */
     this.startTime = Date.now();
 
     /** @type {Logger} */
-    this.logger = new Logger('Server');
+    this.logger = new Logger(this, 'Server');
+    
+    /** @type {string} */
+    this.ip = ip.address();
 
     this.events = new Events(this);
-    
     this.#worlds = new Map();
-
     this.#worldNumber = 0;
 
     this.logger.info(`This server is running SocketBE version ${version}`);
@@ -59,13 +68,14 @@ class Server extends WebSocket.Server {
       ws.on('error', e => this.events.emit(ServerEvents.Error, e))
     });
     
+    this.logger.info(`WebSocket Server is runnning on ${this.ip}:${this.option.port}`);
+    
     this.on('listening', () => this.events.emit(ServerEvents.ServerOpen));
     this.on('close', () => this.events.emit(ServerEvents.ServerClose));
     this.on('error', e => this.events.emit(ServerEvents.Error, e));
     
     setInterval(() => this.events.emit(ServerEvents.Tick), 1000 / 20);
     
-    this.logger.info(`WebSocket Server is runnning on ${ip.address()}:${options.port}`);
     this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
   
