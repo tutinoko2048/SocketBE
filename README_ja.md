@@ -1,24 +1,43 @@
 # SocketBE
 MinecraftBEで使えるWebSocketのライブラリです。
 
+## 特徴
+- 複数クライアントの接続
+- コマンドの実行+レスポンスの受け取り
+- イベントの登録
+- プレイヤーの参加/退出イベント
+- プレイヤーのスコア/タグの管理
+
 ## Discord
+サポートサーバー: https://discord.gg/XGR8FcCeFc  
+機能の提案、バグの報告などもお待ちしています！  
 
-
-## 使い方:
+## インストール:
 NodeJS v16以上が必要なのでインストールしてください。  
   
-- cloneして使う場合
-このリポジトリをCloneした後
+- cloneして使う場合  
+このリポジトリをCloneした後  
 `npm i`  
 で依存パッケージをインストールしてください。  
 `node test.js`  
-で動かすことができます。  
+でサンプルを動かすことができます。  
 
-- npmのライブラリとして使う場合
-`npm i socket-be`
+- npmのライブラリとして使う場合  
+`npm i socket-be`  
 でインストールしてください  
   
-使用例: (送られたメッセージをコンソールに出力、そのまま送り返す)
+## 繋いでみよう
+同じPC内で接続する場合はループバック接続を許可してください
+`CheckNetIsolation.exe LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"`  
+  
+マイクラの設定で暗号化したWebSocket接続をオフにしてください  
+  
+マイクラとの接続には `/wsserver` または `/connect` コマンドを使用します  
+EX: `/wsserver <IPアドレス>:<ポート>`  
+繋がらない時はファイアウォールの設定も確認してみてください。  
+  
+## 使用例
+- 送られたメッセージをコンソールに出力、そのまま送り返す  
 ```js
 const { Server } = require('socket-be');
 const server = new Server({
@@ -41,15 +60,8 @@ server.events.on('playerChat', async (event) => {
 });
 ```
   
-使用例2: ("apple"とチャットしたプレイヤーが10以上のスコアを持っていたらりんごを与える)
-```js
-server.events.on('playerChat', async (event) => {
-  const { sender, message, world } = event;
-  if (sender === '外部') return;
-  
-  if (message === 'apple') {
-    const score = await world.scoreboards.getScore(sender, 'objective');
-    if (score >= 10) await world.runCommand(`give "${sender}" apple`);
-  }
-});
-```
+## SocketBE Wiki
+https://github.com/tutinoko2048/SocketBE/wiki
+
+## License
+MITライセンスです。
