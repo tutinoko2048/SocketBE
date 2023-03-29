@@ -6,7 +6,6 @@ const reader = require("readline").createInterface({
 
 const server = new Server({
   port: 8000,
-  debug: true,
   timezone: 'Asia/Tokyo',
 });
 
