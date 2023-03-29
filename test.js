@@ -1,4 +1,8 @@
-const { Server } = require("./src");
+const { Server } = require('./src');
+process.stdin.setEncoding("utf8");
+const reader = require("readline").createInterface({
+  input: process.stdin,
+});
 
 const server = new Server({
   port: 8000,
@@ -37,17 +41,11 @@ server.events.on("playerChat", async (ev) => {
   
   server.logger.info(`<${sender}> ${message}`);
   
-  world.sendMessage(Date.now())
+  world.sendMessage(message);
 });
 
 server.events.on('error', e => {
   server.logger.error(e);
-});
-
-process.stdin.setEncoding("utf8");
-
-var reader = require("readline").createInterface({
-  input: process.stdin,
 });
 
 reader.on("line", (line) => {

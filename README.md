@@ -1,5 +1,4 @@
 # SocketBE
-MCBE Websocket Library
-
-![img1](docs/server.png)  
-![img2](docs/minecraft.png)
+MCBE Websocket Library  
+  
+日本語版はこちら: [README_ja.md](./README_ja.md)  
