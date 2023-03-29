@@ -3,7 +3,7 @@ This is a tool to connect with MinecraftBE via websocket easier.
   
 日本語版はこちら: [README_ja.md](./README_ja.md)  
 
-## 特徴
+## Features
 - Multiple client connection
 - Command execution + Handling responses
 - Simple event subscribing
@@ -52,7 +52,7 @@ server.events.on('serverOpen', () => {
 });
 
 server.events.on('playerChat', async (event) => {
-  if (event.sender === '外部') return;
+  if (event.sender === 'External') return; // prevents spam loop
   
   server.logger.info(`<${event.sender}> ${event.message}`);
   

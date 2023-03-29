@@ -50,7 +50,7 @@ server.events.on('serverOpen', () => {
 });
 
 server.events.on('playerChat', async (event) => {
-  if (event.sender === '外部') return;
+  if (event.sender === '外部') return; // スパムの無限ループを防ぐ
   
   server.logger.info(`<${event.sender}> ${event.message}`);
   
