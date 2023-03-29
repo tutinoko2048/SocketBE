@@ -12,13 +12,13 @@ server.events.on("serverOpen", () => {
 
 server.events.on("worldAdd", (ev) => {
   const { world } = ev;
-  server.logger.info("connection opened: " + world.id);
+  server.logger.info(`connection opened: ${world.name}`);
   world.sendMessage('connected')
 });
 
 server.events.on("worldRemove", (ev) => {
   const { world } = ev;
-  server.logger.info("connection closed: " + world.id);
+  server.logger.info(`connection closed: ${world.name}`);
 });
 
 server.events.on("playerJoin", (ev) => {
@@ -32,26 +32,17 @@ server.events.on("playerLeave", (ev) => {
 });
 
 server.events.on("playerChat", async (ev) => {
-  const { sender, message, type, world } = ev;
-  server.logger.info(`${type} <${sender}> ${message}`);
+  const { sender, message, world } = ev;
+  if (sender === '外部') return;
   
-  if (!message.startsWith('!')) return;
-  const [ command, ...args ] = message.slice(1).split(' ');
-  if (command == 'get') {
-    const obj = await world.scoreboards.getObjectives();
-    world.sendMessage(JSON.stringify(obj))
-  }
+  server.logger.info(`<${sender}> ${message}`);
+  
+  world.sendMessage(Date.now())
 });
 
-server.events.on("playerTitle", ev => {
-  const { sender, message } = ev;
-  server.logger.info(`${sender}: title ${message}`)
-})
 server.events.on('error', e => {
   server.logger.error(e);
 });
-
-server.on('error', console.error);
 
 process.stdin.setEncoding("utf8");
 

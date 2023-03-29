@@ -51,8 +51,7 @@ class Server extends WebSocket.Server {
         writable: false
       });
 
-      const world = new World(this, ws, this.#worldNumber++);
-      this.#addWorld(world);
+      const world = this.#createWorld(ws);
       
       ws.on('message', packet => {
         const res = JSON.parse(packet);
@@ -83,9 +82,8 @@ class Server extends WebSocket.Server {
    * 
    * @param {World} world 
    */
-  #addWorld(world) {
-    this.#worlds.set(world.id, world);
-    this.events.emit(ServerEvents.WorldAdd, { world });
+  #createWorld(ws) {
+    const world = new World(this, ws, `World #${this.#worldNumber++}`);
     
     world.sendPacket(Util.eventBuilder('commandResponse'));
     
@@ -98,6 +96,11 @@ class Server extends WebSocket.Server {
       this.events._subscribed.has(ServerEvents.PlayerChat) ||
       this.events._subscribed.has(ServerEvents.PlayerTitle)
     ) world.subscribeEvent('PlayerMessage');
+    
+    this.#worlds.set(world.id, world);
+    this.events.emit(ServerEvents.WorldAdd, { world });
+    
+    return world;
   }
   
   /**

@@ -21,9 +21,9 @@ class World {
    * 
    * @param {import('../Server')} server 
    * @param {WebSocket.WebSocket} ws 
-   * @param {number} number
+   * @param {string} name
    */
-  constructor(server, ws, number) {
+  constructor(server, ws, name) {
 
     /** @type {WebSocket.WebSocket} */
     this.ws = ws;
@@ -31,11 +31,11 @@ class World {
     /** @type {import('../Server')} */
     this.server = server;
     
-    /** @type {number} */
-    this.number = number;
+    /** @type {string} */
+    this.name = name;
     
     /** @type {Logger} */
-    this.logger = new Logger(this.server, `World #${this.number}`);
+    this.logger = new Logger(this.server, this.name);
 
     /** @type {string[]} */
     this.lastPlayers = [];
