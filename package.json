@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node test.js",
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
-    "compile": "npx tsc -d"
+    "tsc": "npx tsc"
   },
   "dependencies": {
     "ip": "^1.1.8",
