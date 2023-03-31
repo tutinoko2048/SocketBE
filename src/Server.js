@@ -16,7 +16,6 @@ const defaultOption = {
   debug: false
 }
 
-/** @type {import('../typings/index').Server} */
 class Server extends WebSocket.Server {
   /** @type {number} */
   #worldNumber
@@ -39,6 +38,7 @@ class Server extends WebSocket.Server {
     /** @type {string} */
     this.ip = ip.address();
 
+    /** @type {import('../typings/index').Events} */
     this.events = new Events(this);
     this.#worlds = new Map();
     this.#worldNumber = 0;

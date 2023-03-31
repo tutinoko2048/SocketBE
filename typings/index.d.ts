@@ -51,17 +51,14 @@ declare module 'ws' {
   }
 }
 
-export class Server {
-  constructor(option?: ServerOption);
-  public events: Events;
-}
 
-export interface Events {
-  constructor(server: import('../src/Server')): Events;
+export class Events {
+  constructor(server: import('../src/Server'));
   _subscribed: Set<string>;
+  _events: import('node:events').EventEmitter;
   
   on<K extends keyof ServerEvents>(eventName: K, fn: (arg: ServerEvents[K]) => void): (arg: ServerEvents[K]) => void;
-  off(eventName: string): void;
+  off<K extends keyof ServerEvents>(eventName: K, fn: (arg: ServerEvents[K]) => void): void;
   emit(eventName:string, ...args: any[]): any;
 }
 
