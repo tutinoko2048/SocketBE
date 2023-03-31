@@ -3,6 +3,7 @@
   "version": "1.0.2",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
   "main": "src/index.js",
+  "types": "./typings/index.d.ts",
   "scripts": {
     "test": "node test.js",
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
@@ -19,7 +20,6 @@
     "eslint": "^8.35.0",
     "typescript": "^4.9.5"
   },
-  "types": "./typings/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tutinoko2048/SocketBE.git"
@@ -34,5 +34,10 @@
   "bugs": {
     "url": "https://github.com/tutinoko2048/SocketBE/issues"
   },
-  "homepage": "https://github.com/tutinoko2048/SocketBE#readme"
+  "homepage": "https://github.com/tutinoko2048/SocketBE#readme",
+  "files": [
+    "src",
+    "typings",
+    "docs"
+  ]
 }
