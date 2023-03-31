@@ -58,10 +58,11 @@ export class Server {
 
 export interface Events {
   constructor(server: import('../src/Server')): Events;
+  _subscribed: Set<string>;
   
   on<K extends keyof ServerEvents>(eventName: K, fn: (arg: ServerEvents[K]) => void): (arg: ServerEvents[K]) => void;
   off(eventName: string): void;
-  emit(...args: any[]): any;
+  emit(eventName:string, ...args: any[]): any;
 }
 
 export interface ServerEvents {

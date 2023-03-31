@@ -2,6 +2,7 @@
   "include": ["src/*"],
   "compilerOptions": {
     "allowJs": true,
+    "checkJs": true,
     "declaration": true,
     //"emitDeclarationOnly": true,
     "outDir": "dist",
@@ -9,6 +10,7 @@
     "target": "es2021",
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true
+    "noEmit": true,
+    "moduleResolution": "node"
   }
 }
