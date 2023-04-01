@@ -1,7 +1,7 @@
 # SocketBE
 MinecraftBEで使えるWebSocketのライブラリです。  
   
-<img src="./docs/image.jpeg" alt="image" width="80%"/>  
+<img src="https://raw.githubusercontent.com/tutinoko2048/SocketBE/main/docs/image.jpeg" alt="image" width="80%"/>  
 
 ## 特徴
 - 複数クライアントの接続

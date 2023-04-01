@@ -3,7 +3,7 @@ This is a tool to connect with MinecraftBE via websocket easier.
   
 日本語版はこちら: [README_ja.md](./README_ja.md)  
   
-<img src="./docs/image.jpeg" alt="image" width="80%"/>  
+<img src="https://raw.githubusercontent.com/tutinoko2048/SocketBE/main/docs/image.jpeg" alt="image" width="80%"/>  
 
 ## Features
 - Multiple client connection

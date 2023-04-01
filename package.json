@@ -37,7 +37,6 @@
   "homepage": "https://github.com/tutinoko2048/SocketBE#readme",
   "files": [
     "src",
-    "typings",
-    "docs"
+    "typings"
   ]
 }
