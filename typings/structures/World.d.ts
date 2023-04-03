@@ -1,0 +1,33 @@
+export = World;
+declare class World {
+    constructor(server: import('../Server'), ws: WebSocket.WebSocket, name: string);
+    ws: WebSocket.WebSocket;
+    server: import('../Server');
+    name: string;
+    logger: Logger;
+    lastPlayers: string[];
+    maxPlayers: number;
+    scoreboards: ScoreboardManager;
+    connectedAt: number;
+    readonly get id(): string;
+    readonly get ping(): number;
+    runCommand(command: string): Promise<any>;
+    sendMessage(message: string | any, target?: string): Promise<void>;
+    getPlayerList(): Promise<PlayerList>;
+    getPlayers(): Promise<string[]>;
+    getLocalPlayer(): Promise<string>;
+    getTags(player: string): Promise<string[]>;
+    hasTag(player: string, tag: string): Promise<boolean>;
+    getPlayerDetail(): Promise<PlayerDetail>;
+    sendPacket(packet: ServerPacket): void;
+    _handlePacket(packet: ServerPacket): void;
+    _startInterval(): void;
+    _stopInterval(): void;
+    subscribeEvent(eventName: string): void;
+    unsubscribeEvent(eventName: string): void;
+    close(): void;
+    #private;
+}
+import WebSocket = require("ws");
+import Logger = require("../util/Logger");
+import ScoreboardManager = require("../managers/ScoreboardManager");

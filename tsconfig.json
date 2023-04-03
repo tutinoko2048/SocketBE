@@ -2,13 +2,15 @@
   "include": ["src/*"],
   "compilerOptions": {
     "allowJs": true,
+    "checkJs": true,
     "declaration": true,
     //"emitDeclarationOnly": true,
-    "outDir": "dist",
+    "noEmit": true,
     "lib": [ "es2019" ],
     "target": "es2021",
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true
+    "moduleResolution": "node",
+    "outDir": "typings"
   }
 }

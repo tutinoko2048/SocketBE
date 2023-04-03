@@ -21,17 +21,13 @@ class Events {
     return fn;
   }
 
-  /**
-   * 
-   * @param {string} eventName 
-   */
-  off(eventName) {
-    this._subscribed.remove(eventName);
-    this._events.off(eventName);
+  off(eventName, fn) {
+    this._subscribed.delete(eventName);
+    this._events.off(eventName, fn);
   }
   
-  emit(...args) {
-    this._events.emit(...args);
+  emit(eventName, ...args) {
+    this._events.emit(eventName, ...args);
   }
 }
 

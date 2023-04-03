@@ -17,7 +17,7 @@ class Logger {
   /** @type {import('../Server')} */
   #server;
   /**
-   * @param {import('../Server')}
+   * @param {import('../Server')} server
    * @param {string} name
    */
   constructor(server, name) {

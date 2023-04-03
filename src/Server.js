@@ -16,7 +16,6 @@ const defaultOption = {
   debug: false
 }
 
-/** @type {import('../typings/index').Server} */
 class Server extends WebSocket.Server {
   /** @type {number} */
   #worldNumber
@@ -39,6 +38,7 @@ class Server extends WebSocket.Server {
     /** @type {string} */
     this.ip = ip.address();
 
+    /** @type {import('../typings/index').Events} */
     this.events = new Events(this);
     this.#worlds = new Map();
     this.#worldNumber = 0;
@@ -54,6 +54,7 @@ class Server extends WebSocket.Server {
       const world = this.#createWorld(ws);
       
       ws.on('message', packet => {
+        // @ts-ignore
         const res = JSON.parse(packet);
         const world = this.getWorld(ws.id);
         this.events.emit(ServerEvents.PacketReceive, { ...res, world });
@@ -80,7 +81,7 @@ class Server extends WebSocket.Server {
   
   /**
    * 
-   * @param {World} world 
+   * @param {WebSocket.WebSocket} ws
    */
   #createWorld(ws) {
     const world = new World(this, ws, `World #${this.#worldNumber++}`);

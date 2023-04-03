@@ -1,5 +1,4 @@
-module.exports = {
-  ServerOpen: 'serverOpen',
+module.exports = {  ServerOpen: 'serverOpen',
   ServerClose: 'serverClose',
   WorldAdd: 'worldAdd',
   WorldRemove: 'worldRemove',
