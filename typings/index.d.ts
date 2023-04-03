@@ -1,5 +1,3 @@
-import "./types";
-
 export const Util: typeof import("./util/Util");
 export const Logger: typeof import("./util/Logger");
 export const World: typeof import("./structures/World");
@@ -19,3 +17,9 @@ export const Events: {
 };
 export const ScoreboardManager: typeof import("./managers/ScoreboardManager");
 export const ScoreboardObjective: typeof import("./structures/ScoreboardObjective");
+
+declare module 'ws' {
+  interface WebSocket {
+    id: string;
+  }
+}

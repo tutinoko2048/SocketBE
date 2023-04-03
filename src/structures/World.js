@@ -6,6 +6,10 @@ const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
 
+/** @typedef {import('../../typings/types').ServerPacket} ServerPacket */
+/** @typedef {import('../../typings/types').PlayerList} PlayerList */
+/** @typedef {import('../../typings/types').PlayerDetail} PlayerDetail */
+/** @typedef {import('../../typings/types').PlayerInfo} PlayerInfo */
 
 class World {
   /** @type {number[]} */

@@ -8,6 +8,8 @@ const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
 
+/** @typedef {import('../typings/types').ServerOption} ServerOption */
+
 /** @type {ServerOption} */
 const defaultOption = {
   timezone: 'UTC',

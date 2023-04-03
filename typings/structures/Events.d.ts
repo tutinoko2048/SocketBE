@@ -9,3 +9,4 @@ declare class Events {
     emit(eventName:string, ...args: any[]): any;
 }
 import { EventEmitter } from "events";
+import { ServerEvents } from '../types';

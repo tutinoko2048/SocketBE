@@ -13,14 +13,14 @@ declare class World {
     get ping(): number;
     runCommand(command: string): Promise<any>;
     sendMessage(message: string | any, target?: string): Promise<void>;
-    getPlayerList(): Promise<PlayerList>;
+    getPlayerList(): Promise<import("../types").PlayerList>;
     getPlayers(): Promise<string[]>;
     getLocalPlayer(): Promise<string>;
     getTags(player: string): Promise<string[]>;
     hasTag(player: string, tag: string): Promise<boolean>;
-    getPlayerDetail(): Promise<PlayerDetail>;
-    sendPacket(packet: ServerPacket): void;
-    _handlePacket(packet: ServerPacket): void;
+    getPlayerDetail(): Promise<import("../types").PlayerDetail>;
+    sendPacket(packet: import("../types").ServerPacket): void;
+    _handlePacket(packet: import("../types").ServerPacket): void;
     _startInterval(): void;
     _stopInterval(): void;
     subscribeEvent(eventName: string): void;
