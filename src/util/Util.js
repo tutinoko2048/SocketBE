@@ -74,7 +74,7 @@ class Util {
   /**
    * splits string nicely (ignore ' and ")
    * @param {string} str
-   * @returns {string}
+   * @returns {string[]}
    */
   static splitNicely(str) {
     let split = str.split(/(?<!['"]\w+) +(?!\w+['"])/);
