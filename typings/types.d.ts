@@ -1,6 +1,3 @@
-import World from './structures/World';
-import * as WebSocket from 'ws';
-
 export interface ServerPacket {
   header: {
     requestId: string,
@@ -68,3 +65,6 @@ export interface ServerEvents {
   },
   tick: void
 }
+
+import World = require("./structures/World");
+import WebSocket from 'ws';
