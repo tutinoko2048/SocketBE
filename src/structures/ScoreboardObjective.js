@@ -31,7 +31,6 @@ class ScoreboardObjective {
   /**
    * World instance that this objective belongs to.
    * @type {import('./World')}
-   * @readonly
    */
   get world() {
     return this.#world;
@@ -40,7 +39,6 @@ class ScoreboardObjective {
   /**
    * Identifier of the scoreboard objective.
    * @type {string}
-   * @readonly
    */
   get id() {
     return this.#id;
@@ -49,7 +47,6 @@ class ScoreboardObjective {
   /**
    * Returns the player-visible name of this scoreboard objective.
    * @type {string|undefined}
-   * @readonly
    */
   get displayName() {
     return this.#displayName;

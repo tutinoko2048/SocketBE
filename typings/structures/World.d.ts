@@ -9,8 +9,8 @@ declare class World {
     maxPlayers: number;
     scoreboards: ScoreboardManager;
     connectedAt: number;
-    readonly get id(): string;
-    readonly get ping(): number;
+    get id(): string;
+    get ping(): number;
     runCommand(command: string): Promise<any>;
     sendMessage(message: string | any, target?: string): Promise<void>;
     getPlayerList(): Promise<PlayerList>;

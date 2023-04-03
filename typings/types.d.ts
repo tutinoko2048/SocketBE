@@ -1,5 +1,5 @@
-import type World from '../src/structures/World';
-import type WebSocket from 'ws';
+import World from './structures/World';
+import WebSocket from 'ws';
 
 declare global {
   interface ServerPacket {
@@ -44,7 +44,7 @@ declare global {
     listUpdateInterval?: number
   }
   
-  export interface ServerEvents {
+  interface ServerEvents {
     playerJoin:  { players: string[], world: World },
     playerLeave: { players: string[], world: World }
     serverOpen: void,

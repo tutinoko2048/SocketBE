@@ -57,7 +57,6 @@ class World {
   /**
    * An identifier of the world.
    * @type {string}
-   * @readonly
    */
   get id() {
     return this.ws.id;
@@ -66,7 +65,6 @@ class World {
   /**
    * The latency between server and minecraft
    * @type {number}
-   * @readonly
    */
   get ping() {
     return Util.median(this.#responseTimes);

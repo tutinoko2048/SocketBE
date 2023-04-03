@@ -38,7 +38,7 @@ class Server extends WebSocket.Server {
     /** @type {string} */
     this.ip = ip.address();
 
-    /** @type {import('../typings/index').Events} */
+    /** @type {import('./structures/Events')} */
     this.events = new Events(this);
     this.#worlds = new Map();
     this.#worldNumber = 0;

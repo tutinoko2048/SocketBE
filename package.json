@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
   "main": "src/index.js",
-  "types": "./typings/index.d.ts",
+  "types": "typings/index.d.ts",
   "scripts": {
     "test": "node test.js",
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx",
