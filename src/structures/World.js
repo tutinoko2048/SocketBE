@@ -6,6 +6,10 @@ const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
 
+/** @typedef {import('../../typings/types').ServerPacket} ServerPacket */
+/** @typedef {import('../../typings/types').PlayerList} PlayerList */
+/** @typedef {import('../../typings/types').PlayerDetail} PlayerDetail */
+/** @typedef {import('../../typings/types').PlayerInfo} PlayerInfo */
 
 class World {
   /** @type {number[]} */
@@ -57,7 +61,6 @@ class World {
   /**
    * An identifier of the world.
    * @type {string}
-   * @readonly
    */
   get id() {
     return this.ws.id;
@@ -66,7 +69,6 @@ class World {
   /**
    * The latency between server and minecraft
    * @type {number}
-   * @readonly
    */
   get ping() {
     return Util.median(this.#responseTimes);

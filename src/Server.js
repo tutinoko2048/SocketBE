@@ -8,6 +8,8 @@ const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
 
+/** @typedef {import('../typings/types').ServerOption} ServerOption */
+
 /** @type {ServerOption} */
 const defaultOption = {
   timezone: 'UTC',
@@ -38,7 +40,7 @@ class Server extends WebSocket.Server {
     /** @type {string} */
     this.ip = ip.address();
 
-    /** @type {import('../typings/index').Events} */
+    /** @type {import('./structures/Events')} */
     this.events = new Events(this);
     this.#worlds = new Map();
     this.#worldNumber = 0;
