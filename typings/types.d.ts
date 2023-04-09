@@ -41,27 +41,27 @@ export interface ServerOption extends WebSocket.ServerOptions {
 }
 
 export interface ServerEvents {
-  playerJoin:  { players: string[], world: typeof World },
-  playerLeave: { players: string[], world: typeof World }
+  playerJoin:  { players: string[], world: World },
+  playerLeave: { players: string[], world: World }
   serverOpen: void,
   serverClose: void,
-  worldAdd: { world: typeof World },
-  worldRemove: { world: typeof World },
-  packetReceive: { packet: any, world:typeof World },
+  worldAdd: { world: World },
+  worldRemove: { world: World },
+  packetReceive: { packet: any, world: World },
   error: Error,
   playerChat: {
     'type': 'chat' | 'say' | 'me' | 'tell',
     message: string,
     sender: string,
     receiver: string,
-    world: typeof World
+    world: World
   },
   playerTitle: {
     'type': 'title',
     message: string,
     sender: string,
     receiver: string,
-    world: typeof World
+    world: World
   },
   tick: void
 }
