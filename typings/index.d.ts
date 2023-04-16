@@ -17,9 +17,3 @@ export const Events: {
 };
 export const ScoreboardManager: typeof import("./managers/ScoreboardManager");
 export const ScoreboardObjective: typeof import("./structures/ScoreboardObjective");
-
-declare module 'ws' {
-  interface WebSocket {
-    id: string;
-  }
-}

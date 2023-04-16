@@ -40,6 +40,11 @@ export interface ServerOption extends WebSocket.ServerOptions {
   listUpdateInterval?: number
 }
 
+export interface LoggerOption {
+  debug?: boolean;
+  timezone?: string;
+}
+
 export interface ServerEvents {
   playerJoin:  { players: string[], world: World },
   playerLeave: { players: string[], world: World }

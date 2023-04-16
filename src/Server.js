@@ -3,7 +3,6 @@ const Logger = require('./util/Logger');
 const Events = require('./structures/Events');
 const World = require('./structures/World');
 const Util = require('./util/Util');
-const { v4: uuidv4 } = require('uuid');
 const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
@@ -35,7 +34,7 @@ class Server extends WebSocket.Server {
     this.startTime = Date.now();
 
     /** @type {Logger} */
-    this.logger = new Logger(this, 'Server');
+    this.logger = new Logger('Server', this.option);
     
     /** @type {string} */
     this.ip = ip.address();
@@ -48,17 +47,11 @@ class Server extends WebSocket.Server {
     this.logger.info(`This server is running SocketBE version ${version}`);
     
     this.on('connection', ws => {
-      Object.defineProperty(ws, 'id', {
-        value: uuidv4(),
-        writable: false
-      });
-
       const world = this.#createWorld(ws);
       
       ws.on('message', packet => {
         // @ts-ignore
         const res = JSON.parse(packet);
-        const world = this.getWorld(ws.id);
         this.events.emit(ServerEvents.PacketReceive, { ...res, world });
         world._handlePacket(res);
       });

@@ -13,16 +13,17 @@ const color = {
   reset: '\u001b[0m',
 }
 
+/** @typedef {import('../../typings/types').LoggerOption} LoggerOption */
+/** @typedef {import('../../typings/types').ServerOption} ServerOption */
+
 class Logger {
-  /** @type {import('../Server')} */
-  #server;
   /**
-   * @param {import('../Server')} server
    * @param {string} name
+   * @param {LoggerOption|ServerOption} option
    */
-  constructor(server, name) {
-    this.#server = server;
+  constructor(name, option) {
     this.name = name;
+    this.option = option;
     
     this.debug('Logger: Initialized');
   }
@@ -44,11 +45,11 @@ class Logger {
   }
   
   debug(...args) {
-    if (this.#server.option.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
+    if (this.option.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
   }
   
   getTime() {
-    return Util.getTime(this.#server.option.timezone);
+    return Util.getTime(this.option.timezone);
   }
 }
 

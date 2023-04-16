@@ -1,5 +1,6 @@
 {
   "include": ["src/*"],
+  "files": ["typings/index"],
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,

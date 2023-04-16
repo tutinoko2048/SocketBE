@@ -1,6 +1,7 @@
 // @ts-check
 
 const WebSocket = require('ws');
+const { v4: uuidv4 } = require('uuid');
 const Util = require('../util/Util');
 const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
@@ -40,7 +41,7 @@ class World {
     this.name = name;
     
     /** @type {Logger} */
-    this.logger = new Logger(this.server, this.name);
+    this.logger = new Logger(this.name, this.server.option);
 
     /** @type {string[]} */
     this.lastPlayers = [];
@@ -54,6 +55,9 @@ class World {
     /** @type {number} */
     this.connectedAt = Date.now();
     
+    /** @type {string} */
+    this.id = uuidv4();
+    
     this.#countInterval;
     this.#awaitingResponses = new Map();
     this.#responseTimes = [];
@@ -64,14 +68,6 @@ class World {
    */
   get ws() {
     return this.#ws;
-  }
-  
-  /**
-   * An identifier of the world.
-   * @type {string}
-   */
-  get id() {
-    return this.#ws.id;
   }
   
   /**
