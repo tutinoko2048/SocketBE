@@ -21,6 +21,9 @@ class World {
   /** @type {Map<string, (arg0: ServerPacket) => void>} */
   #awaitingResponses;
   
+  /** @type {WebSocket.WebSocket} */
+  #ws;
+  
   /**
    * 
    * @param {import('../Server')} server 
@@ -28,9 +31,7 @@ class World {
    * @param {string} name
    */
   constructor(server, ws, name) {
-
-    /** @type {WebSocket.WebSocket} */
-    this.ws = ws;
+    this.#ws = ws;
 
     /** @type {import('../Server')} */
     this.server = server;
@@ -59,11 +60,18 @@ class World {
   }
   
   /**
+   * A websocket instance of the world.
+   */
+  get ws() {
+    return this.#ws;
+  }
+  
+  /**
    * An identifier of the world.
    * @type {string}
    */
   get id() {
-    return this.ws.id;
+    return this.#ws.id;
   }
   
   /**

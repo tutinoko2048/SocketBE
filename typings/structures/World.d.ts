@@ -1,7 +1,6 @@
 export = World;
 declare class World {
     constructor(server: import('../Server'), ws: WebSocket.WebSocket, name: string);
-    ws: WebSocket.WebSocket;
     server: import('../Server');
     name: string;
     logger: Logger;
@@ -11,6 +10,7 @@ declare class World {
     connectedAt: number;
     get id(): string;
     get ping(): number;
+    get ws(): WebSocket.WebSocket;
     runCommand(command: string): Promise<any>;
     sendMessage(message: string | any, target?: string): Promise<void>;
     getPlayerList(): Promise<import("../types").PlayerList>;
