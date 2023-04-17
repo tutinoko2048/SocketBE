@@ -6,7 +6,7 @@ const reader = require("readline").createInterface({
 
 const server = new Server({
   port: 8000,
-  timezone: 'Asia/Tokyo',
+  timezone: 'Asia/Tokyo'
 });
 
 server.events.on("serverOpen", () => {
@@ -38,7 +38,7 @@ server.events.on("playerChat", async (ev) => {
   const { sender, message, world } = ev;
   if (sender === '外部') return;
   
-  server.logger.info(`<${sender}> ${message}`);
+  world.logger.info(`<${sender}> ${message}`);
   
   world.sendMessage(message);
 });
@@ -59,3 +59,7 @@ reader.on("line", (line) => {
     }
   }
 });
+
+process.on('unhandledRejection', err => {
+  server.logger.error(err);
+})

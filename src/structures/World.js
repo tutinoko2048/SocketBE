@@ -145,7 +145,7 @@ class World {
    */
   async getTags(player) {
     const res = await this.runCommand(`tag "${player}" list`);
-    return res.statusMessage.match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
+    return /** @type {string} */(res.statusMessage).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
   
   /**

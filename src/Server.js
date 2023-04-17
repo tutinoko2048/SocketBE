@@ -24,6 +24,7 @@ class Server extends WebSocket.Server {
   /** @type {Map<string, World>} */
   #worlds
   
+  /** @param {ServerOption} option */
   constructor(option = {}) {
     super({ ...defaultOption, ...option });
     
