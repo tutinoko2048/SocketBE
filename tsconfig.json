@@ -1,6 +1,6 @@
 {
   "include": ["src/*"],
-  "files": ["typings/index"],
+  "files": ["typings/index.d.ts"],
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
