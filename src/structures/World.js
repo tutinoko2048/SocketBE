@@ -1,6 +1,7 @@
 // @ts-check
 
 const WebSocket = require('ws');
+const { v4: uuidv4 } = require('uuid');
 const Util = require('../util/Util');
 const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
@@ -40,7 +41,7 @@ class World {
     this.name = name;
     
     /** @type {Logger} */
-    this.logger = new Logger(this.server, this.name);
+    this.logger = new Logger(this.name, this.server.option);
 
     /** @type {string[]} */
     this.lastPlayers = [];
@@ -54,6 +55,12 @@ class World {
     /** @type {number} */
     this.connectedAt = Date.now();
     
+    /** @type {string} */
+    this.id = uuidv4();
+    
+    /** @type {string|null} */
+    this.localPlayer = null;
+    
     this.#countInterval;
     this.#awaitingResponses = new Map();
     this.#responseTimes = [];
@@ -64,14 +71,6 @@ class World {
    */
   get ws() {
     return this.#ws;
-  }
-  
-  /**
-   * An identifier of the world.
-   * @type {string}
-   */
-  get id() {
-    return this.#ws.id;
   }
   
   /**
@@ -88,7 +87,7 @@ class World {
    * @returns {Promise<Object>} A JSON structure with command response values.
    */
   async runCommand(command) {
-    const packet = Util.commandBuilder(command);
+    const packet = Util.commandBuilder(command, this.server.option.commandVersion);
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
     return await this.#getResponse(packet);
@@ -139,6 +138,7 @@ class World {
    */
   async getLocalPlayer() {
     const res = await this.runCommand('getlocalplayername');
+    this.localPlayer = res.localplayername;
     return res.localplayername;
   }
   
@@ -149,7 +149,7 @@ class World {
    */
   async getTags(player) {
     const res = await this.runCommand(`tag "${player}" list`);
-    return res.statusMessage.match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
+    return /** @type {string} */(res.statusMessage).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
   
   /**

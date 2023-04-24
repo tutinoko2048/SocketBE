@@ -3,7 +3,6 @@ const Logger = require('./util/Logger');
 const Events = require('./structures/Events');
 const World = require('./structures/World');
 const Util = require('./util/Util');
-const { v4: uuidv4 } = require('uuid');
 const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
@@ -15,7 +14,8 @@ const defaultOption = {
   timezone: 'UTC',
   listUpdateInterval: 1000,
   packetTimeout: 200000,
-  debug: false
+  debug: false,
+  commandVersion: 31
 }
 
 class Server extends WebSocket.Server {
@@ -25,6 +25,7 @@ class Server extends WebSocket.Server {
   /** @type {Map<string, World>} */
   #worlds
   
+  /** @param {ServerOption} option */
   constructor(option = {}) {
     super({ ...defaultOption, ...option });
     
@@ -35,30 +36,25 @@ class Server extends WebSocket.Server {
     this.startTime = Date.now();
 
     /** @type {Logger} */
-    this.logger = new Logger(this, 'Server');
+    this.logger = new Logger('Server', this.option);
     
     /** @type {string} */
     this.ip = ip.address();
 
     /** @type {import('./structures/Events')} */
     this.events = new Events(this);
+    
     this.#worlds = new Map();
     this.#worldNumber = 0;
 
     this.logger.info(`This server is running SocketBE version ${version}`);
     
     this.on('connection', ws => {
-      Object.defineProperty(ws, 'id', {
-        value: uuidv4(),
-        writable: false
-      });
-
       const world = this.#createWorld(ws);
       
       ws.on('message', packet => {
         // @ts-ignore
         const res = JSON.parse(packet);
-        const world = this.getWorld(ws.id);
         this.events.emit(ServerEvents.PacketReceive, { ...res, world });
         world._handlePacket(res);
       });

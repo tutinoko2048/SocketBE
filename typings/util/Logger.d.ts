@@ -1,6 +1,8 @@
+import { LoggerOption, ServerOption } from '../types';
+
 export = Logger;
 declare class Logger {
-    constructor(server: import('../Server'), name: string);
+    constructor(name: string, option: LoggerOption | ServerOption);
     name: string;
     log(...args: any[]): void;
     info(...args: any[]): void;

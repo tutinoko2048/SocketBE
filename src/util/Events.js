@@ -1,4 +1,5 @@
-module.exports = {  ServerOpen: 'serverOpen',
+const Events = /** @type {const} */({
+  ServerOpen: 'serverOpen',
   ServerClose: 'serverClose',
   WorldAdd: 'worldAdd',
   WorldRemove: 'worldRemove',
@@ -9,4 +10,6 @@ module.exports = {  ServerOpen: 'serverOpen',
   PlayerChat: 'playerChat',
   PlayerTitle: 'playerTitle',
   Tick: 'tick'
-}
+});
+
+module.exports = Events
