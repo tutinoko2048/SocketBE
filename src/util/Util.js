@@ -50,7 +50,7 @@ class Util {
   /**
    * Creates command packet
    * @param {string} cmd
-   * @param {number} [commandVersion]
+   * @param {import('../../typings/types').VersionResolvable} [commandVersion]
    * @returns {Object}
    */
    static commandBuilder(cmd, commandVersion = 1) {

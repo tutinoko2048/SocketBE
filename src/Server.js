@@ -43,6 +43,7 @@ class Server extends WebSocket.Server {
 
     /** @type {import('./structures/Events')} */
     this.events = new Events(this);
+    
     this.#worlds = new Map();
     this.#worldNumber = 0;
 
