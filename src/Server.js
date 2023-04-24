@@ -14,7 +14,8 @@ const defaultOption = {
   timezone: 'UTC',
   listUpdateInterval: 1000,
   packetTimeout: 200000,
-  debug: false
+  debug: false,
+  commandVersion: 31
 }
 
 class Server extends WebSocket.Server {

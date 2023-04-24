@@ -50,13 +50,13 @@ class Util {
   /**
    * Creates command packet
    * @param {string} cmd
-   * @param {string} [id]
+   * @param {number} [commandVersion]
    * @returns {Object}
    */
-   static commandBuilder(cmd, id = uuidv4()) {
+   static commandBuilder(cmd, commandVersion = 1) {
     return {
       header: {
-        requestId: id,
+        requestId: uuidv4(),
         messagePurpose: "commandRequest",
         version: 1,
         messageType: "commandRequest"
@@ -66,7 +66,7 @@ class Util {
           type: "player"
         },
         commandLine: cmd,
-        version: 1
+        version: commandVersion
       }
     };
   }

@@ -87,7 +87,7 @@ class World {
    * @returns {Promise<Object>} A JSON structure with command response values.
    */
   async runCommand(command) {
-    const packet = Util.commandBuilder(command);
+    const packet = Util.commandBuilder(command, this.server.option.commandVersion);
     this.ws.send(JSON.stringify(packet));
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
     return await this.#getResponse(packet);

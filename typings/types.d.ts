@@ -33,11 +33,18 @@ export interface PlayerInfo {
   uuid: string
 }
 
+
 export interface ServerOption extends WebSocket.ServerOptions {
-  debug?: boolean,
-  timezone?: string,
-  packetTimeout?: number,
-  listUpdateInterval?: number
+  debug?: boolean;
+  timezone?: string;
+  packetTimeout?: number;
+  listUpdateInterval?: number;
+  /**
+   * The version used for requesting commands. More info in Bedrock OSS(link)
+   * @example "1.19.70" or [ 1, 19, 70 ] or 31 (internal value)
+   * @link https://discord.com/channels/494194063730278411/1075339534797119548/1076028491616768062
+   */
+  commandVersion?: string | number | number[];
 }
 
 export interface LoggerOption {
