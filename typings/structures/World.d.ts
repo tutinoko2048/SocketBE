@@ -9,6 +9,7 @@ declare class World {
     scoreboards: ScoreboardManager;
     connectedAt: number;
     id: string;
+    localPlayer: string | null;
     get ping(): number;
     get ws(): WebSocket.WebSocket;
     runCommand(command: string): Promise<any>;

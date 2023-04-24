@@ -58,6 +58,9 @@ class World {
     /** @type {string} */
     this.id = uuidv4();
     
+    /** @type {string|null} */
+    this.localPlayer = null;
+    
     this.#countInterval;
     this.#awaitingResponses = new Map();
     this.#responseTimes = [];
@@ -135,6 +138,7 @@ class World {
    */
   async getLocalPlayer() {
     const res = await this.runCommand('getlocalplayername');
+    this.localPlayer = res.localplayername;
     return res.localplayername;
   }
   

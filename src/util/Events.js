@@ -10,6 +10,6 @@ const Events = /** @type {const} */({
   PlayerChat: 'playerChat',
   PlayerTitle: 'playerTitle',
   Tick: 'tick'
-})
+});
 
 module.exports = Events
