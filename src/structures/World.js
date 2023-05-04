@@ -88,7 +88,7 @@ class World {
    */
   async runCommand(command) {
     const packet = Util.commandBuilder(command, this.server.option.commandVersion);
-    this.ws.send(JSON.stringify(packet));
+    this.sendPacket(packet);
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
     return await this.#getResponse(packet);
   }
@@ -187,6 +187,7 @@ class World {
    */
   sendPacket(packet) {
     this.ws.send(JSON.stringify(packet));
+    this.server.events.emit(ServerEvents.PacketSend, { packet, world: this });
   }
   
   /**
