@@ -4,6 +4,7 @@ export const WorldAdd: "worldAdd";
 export const WorldRemove: "worldRemove";
 export const PlayerJoin: "playerJoin";
 export const PlayerLeave: "playerLeave";
+export const PacketSend: "packetSend";
 export const PacketReceive: "packetReceive";
 export const Error: "error";
 export const PlayerChat: "playerChat";

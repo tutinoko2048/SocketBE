@@ -1,4 +1,4 @@
-import { LoggerOption, ServerOption } from '../types';
+import { LoggerOption, ServerOption } from "../types";
 
 export = Logger;
 declare class Logger {
