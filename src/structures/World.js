@@ -19,7 +19,7 @@ class World {
   /** @type {?NodeJS.Timer} */
   #countInterval;
   
-  /** @type {Map<string, (arg0: ServerPacket) => void>} */
+  /** @type {Map<string, (arg: ServerPacket) => void>} */
   #awaitingResponses;
   
   /** @type {WebSocket.WebSocket} */
@@ -198,6 +198,7 @@ class World {
    */
   _handlePacket(packet) {
     const { header, body } = packet;
+    // @ts-ignore
     this.server.events.emit(header.eventName, { ...body, world: this }); // minecraft ws events
     
     if (header.eventName === 'PlayerMessage') {

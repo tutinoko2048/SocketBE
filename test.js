@@ -62,4 +62,4 @@ reader.on("line", (line) => {
 
 process.on('unhandledRejection', err => {
   server.logger.error(err);
-})
+});
