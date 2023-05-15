@@ -54,31 +54,55 @@ export interface LoggerOption {
 }
 
 export interface ServerEvents {
-  [Events.PlayerJoin]:  { players: string[], world: World },
-  [Events.PlayerLeave]: { players: string[], world: World }
+  [Events.PlayerJoin]:  PlayerJoinEvent;
+  [Events.PlayerLeave]: PlayerLeaveEvent;
   [Events.ServerOpen]: void,
   [Events.ServerClose]: void,
-  [Events.WorldAdd]: { world: World },
-  [Events.WorldRemove]: { world: World },
-  [Events.PacketReceive]: { packet: any, world: World },
-  [Events.Error]: Error,
-  [Events.PlayerChat]: {
-    'type': 'chat' | 'say' | 'me' | 'tell',
-    message: string,
-    sender: string,
-    receiver: string,
-    world: World
-  },
-  [Events.PlayerTitle]: {
-    'type': 'title',
-    message: string,
-    sender: string,
-    receiver: string,
-    world: World
-  },
+  [Events.WorldAdd]: WorldAddEvent;
+  [Events.WorldRemove]: WorldRemoveEvent;
+  [Events.PacketSend]: PacketSendEvent;
+  [Events.PacketReceive]: PacketReceiveEvent;
+  [Events.Error]: Error;
+  [Events.PlayerChat]: PlayerChatEvent;
+  [Events.PlayerTitle]: PlayerTitleEvent;
   [Events.Tick]: void
 }
 
-import World = require("./structures/World");
-import Events = require("./util/Events");
+export interface WorldEvent {
+  world: World;
+}
+
+export interface PlayerJoinEvent extends WorldEvent {
+  players: string[];
+}
+
+export interface PlayerLeaveEvent extends WorldEvent {
+  players: string[];
+}
+
+export interface WorldAddEvent extends WorldEvent {}
+
+export interface WorldRemoveEvent extends WorldEvent {}
+
+export interface PacketSendEvent extends WorldEvent {
+  packet: any;
+}
+
+export interface PacketReceiveEvent extends WorldEvent {
+  packet: any;
+}
+
+export interface PlayerChatEvent extends WorldEvent {
+  'type': 'chat' | 'say' | 'me' | 'tell';
+  message: string;
+  sender: string;
+  receiver: string;
+}
+
+export interface PlayerTitleEvent extends Omit<PlayerChatEvent, 'type'> {
+  'type': 'title';
+}
+
+import World = require('./structures/World');
+import Events = require('./util/Events');
 import WebSocket from 'ws';

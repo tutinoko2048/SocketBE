@@ -2,6 +2,7 @@ const { Server } = require('./src');
 process.stdin.setEncoding("utf8");
 const reader = require("readline").createInterface({
   input: process.stdin,
+  output: process.stdout
 });
 
 const server = new Server({
@@ -62,4 +63,4 @@ reader.on("line", (line) => {
 
 process.on('unhandledRejection', err => {
   server.logger.error(err);
-})
+});

@@ -5,6 +5,7 @@ const Events = /** @type {const} */({
   WorldRemove: 'worldRemove',
   PlayerJoin: 'playerJoin',
   PlayerLeave: 'playerLeave',
+  PacketSend: 'packetSend',
   PacketReceive: 'packetReceive',
   Error: 'error',
   PlayerChat: 'playerChat',

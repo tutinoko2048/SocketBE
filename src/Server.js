@@ -55,7 +55,7 @@ class Server extends WebSocket.Server {
       ws.on('message', packet => {
         // @ts-ignore
         const res = JSON.parse(packet);
-        this.events.emit(ServerEvents.PacketReceive, { ...res, world });
+        this.events.emit(ServerEvents.PacketReceive, { packet: res, world });
         world._handlePacket(res);
       });
       

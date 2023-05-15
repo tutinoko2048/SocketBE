@@ -6,6 +6,6 @@ declare class Events {
     _subscribed: Set<string>;
     on<K extends keyof ServerEvents>(eventName: K, fn: (arg: ServerEvents[K]) => void): (arg: ServerEvents[K]) => void;
     off<K extends keyof ServerEvents>(eventName: K, fn: (arg: ServerEvents[K]) => void): void;
-    emit(eventName:string, ...args: any[]): any;
+    emit<K extends keyof ServerEvents>(eventName: K, eventData: any): any;
 }
 import { ServerEvents } from "../types";
