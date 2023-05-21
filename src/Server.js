@@ -15,7 +15,8 @@ const defaultOption = {
   listUpdateInterval: 1000,
   packetTimeout: 200000,
   debug: false,
-  commandVersion: 31
+  commandVersion: 31,
+  formatter: {}
 }
 
 class Server extends WebSocket.Server {
