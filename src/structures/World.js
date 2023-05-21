@@ -116,10 +116,12 @@ class World {
   async getPlayerList() {
     const data = await this.runCommand('list');
     const status = data.statusCode == 0;
+    const players = status ? data.players.split(', ') : [];
+    const formattedPlayers = players.map(name => this.server.option.formatter.playerName?.(name) ?? name);
     return {
       current: status ? data.currentPlayerCount : 0,
       max: status ? data.maxPlayerCount : 0,
-      players: status ? data.players.split(', ') : []
+      players: formattedPlayers
     }
   }
   
@@ -138,8 +140,9 @@ class World {
    */
   async getLocalPlayer() {
     const res = await this.runCommand('getlocalplayername');
-    this.localPlayer = res.localplayername;
-    return res.localplayername;
+    const player = res.localplayername;
+    this.localPlayer = this.server.option.formatter.playerName?.(player) ?? player;
+    return this.localPlayer;
   }
   
   /**
@@ -173,11 +176,14 @@ class World {
     /** @type {PlayerInfo[]} */
     const details = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
     
+    const players = status ? res.players.split(', ') : [];
+    const formattedPlayers = players.map(name => this.server.option.formatter.playerName?.(name) ?? name);
+    
     return {
       details,
       current: status ? res.currentPlayerCount : 0,
       max: status ? res.maxPlayerCount : 0,
-      players: status ? res.players.split(', ') : []
+      players: formattedPlayers
     }
   }
 
@@ -202,6 +208,7 @@ class World {
     this.server.events.emit(header.eventName, { ...body, world: this }); // minecraft ws events
     
     if (header.eventName === 'PlayerMessage') {
+      body.sender = this.server.option.formatter.playerName?.(body.sender) ?? body.sender;
       if (body.type === 'title') {
         this.server.events.emit(ServerEvents.PlayerTitle, { ...body, world: this });
       } else {
