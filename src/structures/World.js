@@ -296,8 +296,20 @@ class World {
   
   /**
    * Closes a connection.
+   * @deprecated
    */
   close() {
+    process.emitWarning('World.close() Deprecated!', {
+      code: 'Deprecated',
+      detail: 'Use World.disconnect() instead',
+    });
+    this.ws.close();
+  }
+  
+  /**
+   * Disconnects this world.
+   */
+  disconnect() {
     this.ws.close();
   }
 }

@@ -150,6 +150,13 @@ class Server extends WebSocket.Server {
     const res = this.getWorlds().map(w => w.sendMessage(message, target));
     return Promise.all(res);
   }
+  
+  /**
+   * Disconnects all worlds
+   */
+  disconnectAll() {
+    this.getWorlds().forEach(w => w.disconnect());
+  }
 }
 
 module.exports = Server;

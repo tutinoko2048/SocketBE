@@ -26,7 +26,14 @@ declare class World {
     _stopInterval(): void;
     subscribeEvent(eventName: string): void;
     unsubscribeEvent(eventName: string): void;
+    
+    /**
+     * Use disconnect() instead.
+     * @deprecated
+     */
     close(): void;
+    disconnect(): void;
+    
     #private;
 }
 import WebSocket = require("ws");
