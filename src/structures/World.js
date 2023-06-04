@@ -171,11 +171,11 @@ class World {
    * @returns {Promise<PlayerDetail>}
    */
   async getPlayerDetail() {
-    const res = await this.runCommand('listd');
+    const res = await this.runCommand('listd stats');
     const status = res.statusCode === 0;
     /** @type {PlayerInfo[]} */
     const details = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
-    
+    /** @type {string[]} */
     const players = status ? res.players.split(', ') : [];
     const formattedPlayers = players.map(name => this.server.option.formatter.playerName?.(name) ?? name);
     

@@ -22,15 +22,20 @@ export interface PlayerDetail extends PlayerList {
 }
 
 export interface PlayerInfo {
-  activeSessionId: string,
-  clientId: string,
-  color: string,
-  deviceSessionId: string,
-  globalMultiplayerCorrelationId: string,
-  id: number,
-  name: string,
-  randomId: number,
-  uuid: string
+  activeSessionId: string;
+  avgpacketloss: number;
+  avgping: number;
+  clientId: string;
+  color: string;
+  deviceSessionId: string;
+  globalMultiplayerCorrelationId: string;
+  id: number;
+  maxbps: number;
+  name: string;
+  packetloss: number;
+  ping: number;
+  randomId: number;
+  uuid: string;
 }
 
 export type VersionResolvable = string | number | number[];
