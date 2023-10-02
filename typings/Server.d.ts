@@ -1,5 +1,5 @@
 export = Server;
-declare class Server extends WebSocket.Server<WebSocket.WebSocket> {
+declare class Server extends WebSocket.Server {
     constructor(option?: import("./types").ServerOption);
     option: import("./types").ServerOption;
     startTime: number;

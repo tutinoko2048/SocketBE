@@ -16,7 +16,7 @@ class World {
   /** @type {number[]} */
   #responseTimes;
   
-  /** @type {?NodeJS.Timer} */
+  /** @type {NodeJS.Timeout|null} */
   #countInterval;
   
   /** @type {Map<string, (arg: ServerPacket) => void>} */
@@ -264,10 +264,9 @@ class World {
   
   /** @ignore */
   _startInterval() {
-    if (!this.#countInterval) {
-      this.#updatePlayers();
-      this.#countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
-    }
+    if (this.#countInterval) return;
+    this.#updatePlayers();
+    this.#countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
   }
   
   /** @ignore */
