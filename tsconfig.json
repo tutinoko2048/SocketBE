@@ -1,17 +1,13 @@
 {
   "include": ["src/*"],
-  "files": ["typings/index.d.ts"],
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
-    //"emitDeclarationOnly": true,
-    "noEmit": true,
-    "lib": [ "es2019" ],
-    "target": "es2021",
-    "removeComments": true,
+    "target": "ESNext",
+    "module": "CommonJS",
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
-    "outDir": "typings"
+    "outDir": "dist"
   }
 }
