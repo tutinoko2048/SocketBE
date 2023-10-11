@@ -1,7 +1,7 @@
-exports.Util = require('./util/Util');
-exports.Logger = require('./util/Logger');
-exports.World = require('./structures/World');
-exports.Server = require('./Server');
-exports.Events = require('./util/Events');
-exports.ScoreboardManager = require('./managers/ScoreboardManager');
-exports.ScoreboardObjective = require('./structures/ScoreboardObjective');
+export * from './util/Util';
+export * from './util/Logger';
+export * from './structures/World';
+export * from './Server';
+export * from './util/Events';
+export * from './managers/ScoreboardManager';
+export * from './structures/ScoreboardObjective';
