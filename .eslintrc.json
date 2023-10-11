@@ -17,6 +17,5 @@
   },
   "parserOptions": {
     "ecmaVersion": 13
-  },
-  "ignorePatterns": [ "config.json" ]
+  }
 }

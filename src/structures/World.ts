@@ -1,92 +1,58 @@
-// @ts-check
+import WebSocket from 'ws';
+import { Util } from '../util/Util';
+import { randomUUID } from 'node:crypto';
+import { EventId } from '../util/Events';
+import { Logger } from '../util/Logger';
+import { ScoreboardManager } from '../managers/ScoreboardManager';
+import type { Server } from '../Server';
+import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo } from '../types';
 
-const WebSocket = require('ws');
-const { v4: uuidv4 } = require('uuid');
-const Util = require('../util/Util');
-const ServerEvents = require('../util/Events');
-const Logger = require('../util/Logger');
-const ScoreboardManager = require('../managers/ScoreboardManager');
+export class World {
+  /** A websocket instance of the world. */
+  public readonly ws: WebSocket.WebSocket;
+  private server: Server;
+  private responseTimes: number[];
+  private countInterval: NodeJS.Timeout | null;
+  private awaitingResponses: Map<string, (arg: ServerPacket) => void>
 
-/** @typedef {import('../../typings/types').ServerPacket} ServerPacket */
-/** @typedef {import('../../typings/types').PlayerList} PlayerList */
-/** @typedef {import('../../typings/types').PlayerDetail} PlayerDetail */
-/** @typedef {import('../../typings/types').PlayerInfo} PlayerInfo */
+  public name: string;
+  public readonly logger: Logger;
+  public lastPlayers: string[];
+  public maxPlayers: number;
+  public readonly scoreboards: ScoreboardManager;
+  public readonly connectedAt: number;
+  public readonly id: string;
+  protected localPlayer: string | null;
 
-class World {
-  /** @type {number[]} */
-  #responseTimes;
-  
-  /** @type {NodeJS.Timeout|null} */
-  #countInterval;
-  
-  /** @type {Map<string, (arg: ServerPacket) => void>} */
-  #awaitingResponses;
-  
-  /** @type {WebSocket.WebSocket} */
-  #ws;
-  
-  /**
-   * 
-   * @param {import('../Server')} server 
-   * @param {WebSocket.WebSocket} ws 
-   * @param {string} name
-   */
-  constructor(server, ws, name) {
-    this.#ws = ws;
-
-    /** @type {import('../Server')} */
+  constructor(server: Server, ws: WebSocket.WebSocket, name: string) {
+    this.ws = ws;
     this.server = server;
-    
-    /** @type {string} */
     this.name = name;
-    
-    /** @type {Logger} */
     this.logger = new Logger(this.name, this.server.option);
-
-    /** @type {string[]} */
     this.lastPlayers = [];
-    
-    /** @type {number} */
     this.maxPlayers = 0;
-
-    /** @type {ScoreboardManager} */
     this.scoreboards = new ScoreboardManager(this);
-    
-    /** @type {number} */
     this.connectedAt = Date.now();
-    
-    /** @type {string} */
-    this.id = uuidv4();
-    
-    /** @type {string|null} */
+    this.id = randomUUID();
     this.localPlayer = null;
-    
-    this.#countInterval;
-    this.#awaitingResponses = new Map();
-    this.#responseTimes = [];
-  }
-  
-  /**
-   * A websocket instance of the world.
-   */
-  get ws() {
-    return this.#ws;
+    this.countInterval;
+    this.awaitingResponses = new Map();
+    this.responseTimes = [];
   }
   
   /**
    * The latency between server and minecraft
-   * @type {number}
    */
-  get ping() {
-    return Util.median(this.#responseTimes);
+  get ping(): number {
+    return Util.median(this.responseTimes);
   }
   
   /**
    * Runs a particular command from the world.
-   * @param {string} command Command to run.
-   * @returns {Promise<Object>} A JSON structure with command response values.
+   * @param command Command to run.
+   * @returns A JSON structure with command response values.
    */
-  async runCommand(command) {
+  async runCommand(command: string): Promise<any> {
     const packet = Util.commandBuilder(command, this.server.option.commandVersion);
     this.sendPacket(packet);
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
@@ -95,10 +61,10 @@ class World {
   
   /**
    * Sends a messsage to the player.
-   * @param {string|Object} message The message to be displayed.
-   * @param {string} [target] Player name or target selector.
+   * @param  message The message to be displayed.
+   * @param target Player name or target selector.
    */
-  async sendMessage(message, target = '@a') {
+  async sendMessage(message: string | Object, target: string = '@a'): Promise<void> {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
     const rawtext = (typeof message === 'object')
@@ -111,9 +77,8 @@ class World {
   
   /**
    * Returns information about players in the world.
-   * @returns {Promise<PlayerList>}
    */
-  async getPlayerList() {
+  async getPlayerList(): Promise<PlayerList> {
     const data = await this.runCommand('list');
     const status = data.statusCode == 0;
     const players = status ? data.players.split(', ') : [];
@@ -127,9 +92,8 @@ class World {
   
   /**
    * Returns an array of player names in the world.
-   * @returns {Promise<string[]>}
    */
-  async getPlayers() {
+  async getPlayers(): Promise<string[]> {
     const { players } = await this.getPlayerList();
     return players;
   }
@@ -138,7 +102,7 @@ class World {
    * Returns the name of local player (client)
    * @returns {Promise<string>}
    */
-  async getLocalPlayer() {
+  async getLocalPlayer(): Promise<string> {
     const res = await this.runCommand('getlocalplayername');
     const player = res.localplayername;
     this.localPlayer = this.server.option.formatter.playerName?.(player) ?? player;
@@ -147,36 +111,28 @@ class World {
   
   /**
    * Returns all tags that a player has.
-   * @param {string} player
-   * @returns {Promise<string[]>}
    */
-  async getTags(player) {
+  async getTags(player: string): Promise<string[]> {
     const res = await this.runCommand(`tag "${player}" list`);
-    return /** @type {string} */(res.statusMessage).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
+    return (res.statusMessage as string).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
   
   /**
    * Tests whether an player has a particular tag.
-   * @param {string} player
-   * @param {string} tag
-   * @returns {Promise<boolean>}
    */
-  async hasTag(player, tag) {
+  async hasTag(player: string, tag: string): Promise<boolean> {
     const tags = await this.getTags(player);
     return tags.includes(tag);
   }
   
   /**
    * Returns information about players with more details in the world.
-   * @returns {Promise<PlayerDetail>}
    */
-  async getPlayerDetail() {
+  async getPlayerDetail(): Promise<PlayerDetail> {
     const res = await this.runCommand('listd stats');
     const status = res.statusCode === 0;
-    /** @type {PlayerInfo[]} */
-    const details = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
-    /** @type {string[]} */
-    const players = status ? res.players.split(', ') : [];
+    const details: PlayerInfo[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
+    const players: string[] = status ? res.players.split(', ') : [];
     const formattedPlayers = players.map(name => this.server.option.formatter.playerName?.(name) ?? name);
     
     return {
@@ -189,20 +145,17 @@ class World {
 
   /**
    * Sends a packet to the world.
-   * @param {ServerPacket} packet 
    */
-  sendPacket(packet) {
+  sendPacket(packet: ServerPacket) {
     this.ws.send(JSON.stringify(packet));
-    this.server.events.emit(ServerEvents.PacketSend, { packet, world: this });
+    this.server.events.emit(EventId.PacketSend, { packet, world: this });
   }
   
   /**
    * Handles incoming packets
-   * @param {ServerPacket} packet 
    * @returns {void}
-   * @ignore
    */
-  _handlePacket(packet) {
+  _handlePacket(packet: ServerPacket) {
     const { header, body } = packet;
     // @ts-ignore
     this.server.events.emit(header.eventName, { ...body, world: this }); // minecraft ws events
@@ -210,16 +163,16 @@ class World {
     if (header.eventName === 'PlayerMessage') {
       body.sender = this.server.option.formatter.playerName?.(body.sender) ?? body.sender;
       if (body.type === 'title') {
-        this.server.events.emit(ServerEvents.PlayerTitle, { ...body, world: this });
+        this.server.events.emit(EventId.PlayerTitle, { ...body, world: this });
       } else {
-        this.server.events.emit(ServerEvents.PlayerChat, { ...body, world: this });
+        this.server.events.emit(EventId.PlayerChat, { ...body, world: this });
       }
     }
     
     if (['commandResponse','error'].includes(header.messagePurpose)) {
-      if (!this.#awaitingResponses.has(packet.header.requestId)) return;
-      this.#awaitingResponses.get(packet.header.requestId)(packet.body);
-      this.#awaitingResponses.delete(packet.header.requestId);
+      if (!this.awaitingResponses.has(packet.header.requestId)) return;
+      this.awaitingResponses.get(packet.header.requestId)(packet.body);
+      this.awaitingResponses.delete(packet.header.requestId);
     }
   }
   
@@ -239,10 +192,10 @@ class World {
         rej(new Error(`response timeout\npacket: ${JSON.stringify(packet, null, 2)}`));
       }, this.server.option.packetTimeout);
       
-      this.#awaitingResponses.set(packetId, (response) => {
+      this.awaitingResponses.set(packetId, (response) => {
         clearTimeout(timeout);
-        if (this.#responseTimes.length > 20) this.#responseTimes.shift();
-        this.#responseTimes.push(Date.now() - sendTime);
+        if (this.responseTimes.length > 20) this.responseTimes.shift();
+        this.responseTimes.push(Date.now() - sendTime);
         res(response);
       });
     });
@@ -257,23 +210,23 @@ class World {
       this.lastPlayers = players;
       this.maxPlayers = max;
       
-      if (join.length > 0) this.server.events.emit(ServerEvents.PlayerJoin, { world: this, players: join });
-      if (leave.length > 0) this.server.events.emit(ServerEvents.PlayerLeave, { world: this, players: leave });
+      if (join.length > 0) this.server.events.emit(EventId.PlayerJoin, { world: this, players: join });
+      if (leave.length > 0) this.server.events.emit(EventId.PlayerLeave, { world: this, players: leave });
     } catch (e) {}
   }
   
   /** @ignore */
   _startInterval() {
-    if (this.#countInterval) return;
+    if (this.countInterval) return;
     this.#updatePlayers();
-    this.#countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
+    this.countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
   }
   
   /** @ignore */
   _stopInterval() {
-    if (this.#countInterval) {
-      clearInterval(this.#countInterval);
-      this.#countInterval = null;
+    if (this.countInterval) {
+      clearInterval(this.countInterval);
+      this.countInterval = null;
     }
   }
   
@@ -312,5 +265,3 @@ class World {
     this.ws.close();
   }
 }
-
-module.exports = World;

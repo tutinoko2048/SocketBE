@@ -1,17 +1,18 @@
-const { v4: uuidv4 } = require('uuid');
-const moment = require('moment-timezone');
+import { randomUUID } from 'node:crypto';
+import { VersionResolvable } from '../types';
+import moment from 'moment-timezone'
 
-class Util {
+type EventPurpose = 'subscribe' | 'unsubscribe';
+
+export class Util {
   static isEmpty(v) {
     return v === undefined || v === null || v === ''
   }
   
   /**
    * Returns current time with nice format.
-   * @param {string} timezone
-   * @param {string} [mode]
    */
-  static getTime(timezone, mode) {
+  static getTime(timezone: string, mode?: string) {
     const now = moment().tz(timezone);
     switch (mode) {
       case 'date':
@@ -27,16 +28,14 @@ class Util {
     }
   }
   
+
   /**
    * Creates event packet
-   * @param {string} eventName
-   * @param {'subscribe'|'unsubscribe'} eventPurpose
-   * @returns {Object}
    */
-  static eventBuilder(eventName, eventPurpose = 'subscribe') {
+  static eventBuilder(eventName: string, eventPurpose: EventPurpose = 'subscribe'): any {
     return {
       "header": {
-        "requestId": uuidv4(),
+        "requestId": randomUUID(),
         "messagePurpose": eventPurpose,
         "version": 1,
         "messageType": "commandRequest"
@@ -49,14 +48,11 @@ class Util {
   
   /**
    * Creates command packet
-   * @param {string} cmd
-   * @param {import('../../typings/types').VersionResolvable} [commandVersion]
-   * @returns {Object}
    */
-   static commandBuilder(cmd, commandVersion = 1) {
+   static commandBuilder(command: string, commandVersion: VersionResolvable = 1): any {
     return {
       header: {
-        requestId: uuidv4(),
+        requestId: randomUUID(),
         messagePurpose: "commandRequest",
         version: 1,
         messageType: "commandRequest"
@@ -65,7 +61,7 @@ class Util {
         origin: {
           type: "player"
         },
-        commandLine: cmd,
+        commandLine: command,
         version: commandVersion
       }
     };
@@ -109,5 +105,3 @@ class Util {
    return new Promise(res => setTimeout(res, ms));
  }
 }
-
-module.exports = Util;

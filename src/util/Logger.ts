@@ -1,4 +1,5 @@
-const Util = require('./Util');
+import { LoggerOption, ServerOption } from '../types';
+import { Util } from './Util';
 
 const color = {
   black: '\u001b[30m',
@@ -13,17 +14,13 @@ const color = {
   reset: '\u001b[0m',
 }
 
-/** @typedef {import('../../typings/types').LoggerOption} LoggerOption */
-/** @typedef {import('../../typings/types').ServerOption} ServerOption */
-
-class Logger {
-  /**
-   * @param {string} name
-   * @param {LoggerOption|ServerOption} option
-   */
-  constructor(name, option) {
+export class Logger {
+  public name: string;
+  private options: LoggerOption | ServerOption;
+  
+  constructor(name: string, option: LoggerOption | ServerOption) {
     this.name = name;
-    this.option = option;
+    this.options = option;
     
     this.debug('Logger: Initialized');
   }
@@ -45,12 +42,10 @@ class Logger {
   }
   
   debug(...args) {
-    if (this.option.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
+    if (this.options.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
   }
   
   getTime() {
-    return Util.getTime(this.option.timezone);
+    return Util.getTime(this.options.timezone);
   }
 }
-
-module.exports = Logger;
