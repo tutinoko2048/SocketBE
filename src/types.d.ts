@@ -1,6 +1,23 @@
-import { World } from './structures/World';
-import { EventId } from './util/Events';
+import { RawMessage } from '@minecraft/server';
 import WebSocket from 'ws';
+
+export enum PlayerMessageType {
+  Chat = 'chat',
+  Say = 'say',
+  Me = 'me',
+  Tell = 'tell',
+  Title = 'title'
+}
+
+export interface RawText {
+  rawtext: RawMessage
+}
+
+export interface CommandResult {
+  statusCode?: number;
+  statusMessage?: string;
+  [key: string]: any;
+}
 
 export interface ServerPacket {
   header: {
@@ -74,8 +91,9 @@ export interface LoggerOption {
   timezone?: string;
 }
 
-export interface ServerEvents {
-  [EventId.PlayerJoin]:  PlayerJoinEvent;
+/*
+export interface ServerEventTypeMap_old {
+  [EventId.PlayerJoin]: PlayerJoinEvent;
   [EventId.PlayerLeave]: PlayerLeaveEvent;
   [EventId.ServerOpen]: void,
   [EventId.ServerClose]: void,
@@ -86,7 +104,7 @@ export interface ServerEvents {
   [EventId.Error]: Error;
   [EventId.PlayerChat]: PlayerChatEvent;
   [EventId.PlayerTitle]: PlayerTitleEvent;
-  [EventId.Tick]: void
+  [EventId.Tick]: void;
 }
 
 export interface WorldEvent {
@@ -94,11 +112,11 @@ export interface WorldEvent {
 }
 
 export interface PlayerJoinEvent extends WorldEvent {
-  players: string[];
+  joinedPlayers: string[];
 }
 
 export interface PlayerLeaveEvent extends WorldEvent {
-  players: string[];
+  leftPlayers: string[];
 }
 
 export interface WorldAddEvent extends WorldEvent {}
@@ -123,3 +141,4 @@ export interface PlayerChatEvent extends WorldEvent {
 export interface PlayerTitleEvent extends Omit<PlayerChatEvent, 'type'> {
   'type': 'title';
 }
+*/

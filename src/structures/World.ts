@@ -5,7 +5,8 @@ import { EventId } from '../util/Events';
 import { Logger } from '../util/Logger';
 import { ScoreboardManager } from '../managers/ScoreboardManager';
 import type { Server } from '../Server';
-import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo } from '../types';
+import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult } from '../types';
+import { Events } from './Events';
 
 export class World {
   /** A websocket instance of the world. */
@@ -22,7 +23,7 @@ export class World {
   public readonly scoreboards: ScoreboardManager;
   public readonly connectedAt: number;
   public readonly id: string;
-  protected localPlayer: string | null;
+  public localPlayer: string | null;
 
   constructor(server: Server, ws: WebSocket.WebSocket, name: string) {
     this.ws = ws;
@@ -52,11 +53,11 @@ export class World {
    * @param command Command to run.
    * @returns A JSON structure with command response values.
    */
-  async runCommand(command: string): Promise<any> {
+  async runCommand(command: string): Promise<CommandResult> {
     const packet = Util.commandBuilder(command, this.server.option.commandVersion);
     this.sendPacket(packet);
     if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
-    return await this.#getResponse(packet);
+    return await this.getResponse(packet);
   }
   
   /**
@@ -64,7 +65,7 @@ export class World {
    * @param  message The message to be displayed.
    * @param target Player name or target selector.
    */
-  async sendMessage(message: string | Object, target: string = '@a'): Promise<void> {
+  async sendMessage(message: string | RawText, target: string = '@a'): Promise<void> {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
     const rawtext = (typeof message === 'object')
@@ -81,7 +82,7 @@ export class World {
   async getPlayerList(): Promise<PlayerList> {
     const data = await this.runCommand('list');
     const status = data.statusCode == 0;
-    const players = status ? data.players.split(', ') : [];
+    const players = status ? (data.players as string).split(', ') : [];
     const formattedPlayers = players.map(name => this.server.option.formatter.playerName?.(name) ?? name);
     return {
       current: status ? data.currentPlayerCount : 0,
@@ -100,7 +101,6 @@ export class World {
   
   /**
    * Returns the name of local player (client)
-   * @returns {Promise<string>}
    */
   async getLocalPlayer(): Promise<string> {
     const res = await this.runCommand('getlocalplayername');
@@ -146,19 +146,18 @@ export class World {
   /**
    * Sends a packet to the world.
    */
-  sendPacket(packet: ServerPacket) {
+  sendPacket(packet: ServerPacket): void {
     this.ws.send(JSON.stringify(packet));
     this.server.events.emit(EventId.PacketSend, { packet, world: this });
   }
   
   /**
    * Handles incoming packets
-   * @returns {void}
    */
-  _handlePacket(packet: ServerPacket) {
+  _handlePacket(packet: ServerPacket): void {
     const { header, body } = packet;
-    // @ts-ignore
-    this.server.events.emit(header.eventName, { ...body, world: this }); // minecraft ws events
+    
+    this.server.rawEvents.emit(header.eventName, { ...body, world: this }); // minecraft ws events
     
     if (header.eventName === 'PlayerMessage') {
       body.sender = this.server.option.formatter.playerName?.(body.sender) ?? body.sender;
@@ -176,14 +175,9 @@ export class World {
     }
   }
   
-  /**
-   *
-   * @param {ServerPacket} packet
-   * @returns {Promise<Object>}
-   */
-  #getResponse(packet) {
+  private getResponse(packet: ServerPacket): Promise<CommandResult> {
     const packetId = packet.header.requestId;
-    const sendTime = Date.now();
+    const sentAt = Date.now();
     
     return new Promise((res, rej) => {
       if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error(`client is offline\npacket: ${JSON.stringify(packet, null, 2)}`));
@@ -195,13 +189,13 @@ export class World {
       this.awaitingResponses.set(packetId, (response) => {
         clearTimeout(timeout);
         if (this.responseTimes.length > 20) this.responseTimes.shift();
-        this.responseTimes.push(Date.now() - sendTime);
+        this.responseTimes.push(Date.now() - sentAt);
         res(response);
       });
     });
   }
   
-  async #updatePlayers() {
+  private async updatePlayerList(): Promise<void> {
     try {
       const { players, max } = await this.getPlayerList();
       const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
@@ -210,20 +204,20 @@ export class World {
       this.lastPlayers = players;
       this.maxPlayers = max;
       
-      if (join.length > 0) this.server.events.emit(EventId.PlayerJoin, { world: this, players: join });
-      if (leave.length > 0) this.server.events.emit(EventId.PlayerLeave, { world: this, players: leave });
+      if (join.length > 0) this.server.events.emit(EventId.PlayerJoin, { world: this, joinedPlayers: join });
+      if (leave.length > 0) this.server.events.emit(EventId.PlayerLeave, { world: this, leftPlayers: leave });
     } catch (e) {}
   }
   
   /** @ignore */
-  _startInterval() {
+  _startInterval(): void {
     if (this.countInterval) return;
-    this.#updatePlayers();
-    this.countInterval = setInterval(this.#updatePlayers.bind(this), this.server.option.listUpdateInterval);
+    this.updatePlayerList();
+    this.countInterval = setInterval(this.updatePlayerList.bind(this), this.server.option.listUpdateInterval);
   }
   
   /** @ignore */
-  _stopInterval() {
+  _stopInterval(): void {
     if (this.countInterval) {
       clearInterval(this.countInterval);
       this.countInterval = null;
@@ -232,17 +226,17 @@ export class World {
   
   /**
    * Sends an event subscribe packet.
-   * @param {string} eventName A name of the event.
+   * @param eventName A name of the event.
    */
-  subscribeEvent(eventName) {
+  subscribeEvent(eventName: string): void {
     this.sendPacket(Util.eventBuilder(eventName, 'subscribe'));
   }
   
   /**
    * Sends an event unsubscribe packet.
-   * @param {string} eventName A name of the event.
+   * @param eventName A name of the event.
    */
-  unsubscribeEvent(eventName) {
+  unsubscribeEvent(eventName: string): void {
     this.sendPacket(Util.eventBuilder(eventName, 'unsubscribe'));
   }
   
@@ -250,7 +244,7 @@ export class World {
    * Closes a connection.
    * @deprecated
    */
-  close() {
+  close(): void {
     process.emitWarning('World.close() Deprecated!', {
       code: 'Deprecated',
       detail: 'Use World.disconnect() instead',
@@ -261,7 +255,7 @@ export class World {
   /**
    * Disconnects this world.
    */
-  disconnect() {
+  disconnect(): void {
     this.ws.close();
   }
 }
