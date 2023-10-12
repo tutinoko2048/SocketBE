@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { VersionResolvable } from '../types';
-import moment from 'moment-timezone'
+import * as moment from 'moment-timezone'
 
 type EventPurpose = 'subscribe' | 'unsubscribe';
 

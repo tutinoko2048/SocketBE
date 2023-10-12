@@ -1,9 +1,9 @@
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { Logger } from './util/Logger';
 import { Events } from './structures/Events';
 import { World } from './structures/World';
 import { Util } from './util/Util';
-import ip from 'ip';
+import * as ip from 'ip';
 import { version } from './util/constants';
 import { EventId } from './util/Events';
 import { CommandResult, RawText, ServerOption } from './types';
@@ -71,19 +71,19 @@ export class Server extends WebSocket.Server {
     this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
   
-  createWorld(ws: WebSocket.WebSocket) {
+  createWorld(ws: WebSocket) {
     const world = new World(this, ws, `World #${this.worldNumber++}`);
     
     world.sendPacket(Util.eventBuilder('commandResponse'));
     
     if (
-      this.events._subscribed.has(EventId.PlayerJoin) ||
-      this.events._subscribed.has(EventId.PlayerLeave)
+      this.events._subscriptionCache.has(EventId.PlayerJoin) ||
+      this.events._subscriptionCache.has(EventId.PlayerLeave)
     ) world._startInterval();
     
     if (
-      this.events._subscribed.has(EventId.PlayerChat) ||
-      this.events._subscribed.has(EventId.PlayerTitle)
+      this.events._subscriptionCache.has(EventId.PlayerChat) ||
+      this.events._subscriptionCache.has(EventId.PlayerTitle)
     ) world.subscribeEvent('PlayerMessage');
     
     this.worlds.set(world.id, world);
