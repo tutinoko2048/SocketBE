@@ -1,4 +1,5 @@
-const { Server } = require('./src');
+import { Server } from "./src";
+
 process.stdin.setEncoding("utf8");
 const reader = require("readline").createInterface({
   input: process.stdin,
@@ -10,7 +11,7 @@ const server = new Server({
   timezone: 'Asia/Tokyo'
 });
 
-server.events.on("serverOpen", () => {
+server.events.on('serverOpen', () => {
   server.logger.log("open");
 });
 
@@ -26,13 +27,13 @@ server.events.on("worldRemove", (ev) => {
 });
 
 server.events.on("playerJoin", (ev) => {
-  const { players } = ev;
-  server.logger.info(`Joined: ${players.join(', ')}`);
+  const { joinedPlayers } = ev;
+  server.logger.info(`Joined: ${joinedPlayers.join(', ')}`);
 });
 
 server.events.on("playerLeave", (ev) => {
-  const { players } = ev;
-  server.logger.info(`Left: ${players.join(', ')}`);
+  const { leftPlayers } = ev;
+  server.logger.info(`Left: ${leftPlayers.join(', ')}`);
 });
 
 server.events.on("playerChat", async (ev) => {

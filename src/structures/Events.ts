@@ -1,11 +1,7 @@
 import { EventEmitter } from 'node:events';
 import type { Server } from '../Server';
 
-interface BaseEventMap {
-  [key: string]: any;
-}
-
-export class Events<EventMap extends BaseEventMap> {
+export class Events<EventMap extends Record<string, any>> {
   public server: Server;
   public _subscribed: Set<string>;
   private events: EventEmitter;
