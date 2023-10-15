@@ -1,15 +1,14 @@
-import { WebSocket } from 'ws';
+import { WebSocket, Server as WebSocketServer } from 'ws';
 import { Logger } from './util/Logger';
 import { Events } from './structures/Events';
 import { World } from './structures/World';
 import { Util } from './util/Util';
 import * as ip from 'ip';
 import { version } from './util/constants';
-import { EventId } from './util/Events';
-import { CommandResult, RawText, ServerOption } from './types';
-import { ServerEvents } from './structures/ServerEvents';
+import { CommandResult, RawText, ServerOptions } from './types';
+import { ServerEvents, ServerEventTypes } from './structures/ServerEvents';
 
-const defaultOption: ServerOption = {
+const defaultOption: ServerOptions = {
   timezone: 'UTC',
   listUpdateInterval: 1000,
   packetTimeout: 200000,
@@ -18,10 +17,11 @@ const defaultOption: ServerOption = {
   formatter: {}
 }
 
-export class Server extends WebSocket.Server {
-  public readonly option: ServerOption;
+export class Server {
+  public readonly options: ServerOptions;
   private worldNumber: number;
   private worlds: Map<string, World>;
+  private wss: WebSocketServer;
 
   public readonly startTime: number;
   public readonly logger: Logger;
@@ -29,12 +29,12 @@ export class Server extends WebSocket.Server {
   public readonly events: ServerEvents;
   public readonly rawEvents: Events<any>;
 
-  constructor(option: ServerOption = {}) {
-    super({ ...defaultOption, ...option });
-    this.option = { ...defaultOption, ...option };
+  constructor(options: ServerOptions = {}) {
+    this.wss = new WebSocketServer({ ...defaultOption, ...options });
+    this.options = { ...defaultOption, ...options };
 
     this.startTime = Date.now();
-    this.logger = new Logger('Server', this.option);
+    this.logger = new Logger('Server', this.options);
     this.ip = ip.address();
     this.events = new ServerEvents(this);
     this.rawEvents = new Events(this);
@@ -43,13 +43,13 @@ export class Server extends WebSocket.Server {
 
     this.logger.info(`This server is running SocketBE version ${version}`);
     
-    this.on('connection', ws => {
+    this.wss.on('connection', ws => {
       const world = this.createWorld(ws);
       
       ws.on('message', (packet) => {
         // @ts-ignore
         const res = JSON.parse(packet);
-        this.events.emit(EventId.PacketReceive, { packet: res, world });
+        this.events.emit(ServerEventTypes.PacketReceive, { packet: res, world });
         world._handlePacket(res);
       });
       
@@ -57,16 +57,16 @@ export class Server extends WebSocket.Server {
         this.removeWorld(world);
       });
       
-      ws.on('error', e => this.events.emit(EventId.Error, e))
+      ws.on('error', e => this.events.emit(ServerEventTypes.Error, e))
     });
     
-    this.logger.info(`WebSocket Server is runnning on ${this.ip}:${this.option.port}`);
+    this.logger.info(`WebSocket Server is runnning on ${this.ip}:${this.options.port}`);
     
-    this.on('listening', () => this.events.emit(EventId.ServerOpen, null));
-    this.on('close', () => this.events.emit(EventId.ServerClose, null));
-    this.on('error', e => this.events.emit(EventId.Error, e));
+    this.wss.on('listening', () => this.events.emit(ServerEventTypes.ServerOpen, null));
+    this.wss.on('close', () => this.events.emit(ServerEventTypes.ServerClose, null));
+    this.wss.on('error', e => this.events.emit(ServerEventTypes.Error, e));
     
-    setInterval(() => this.events.emit(EventId.Tick, null), 1000 / 20);
+    setInterval(() => this.events.emit(ServerEventTypes.Tick, null), 1000 / 20);
     
     this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
@@ -77,24 +77,24 @@ export class Server extends WebSocket.Server {
     world.sendPacket(Util.eventBuilder('commandResponse'));
     
     if (
-      this.events._subscriptionCache.has(EventId.PlayerJoin) ||
-      this.events._subscriptionCache.has(EventId.PlayerLeave)
+      this.events._subscriptionCache.has(ServerEventTypes.PlayerJoin) ||
+      this.events._subscriptionCache.has(ServerEventTypes.PlayerLeave)
     ) world._startInterval();
     
     if (
-      this.events._subscriptionCache.has(EventId.PlayerChat) ||
-      this.events._subscriptionCache.has(EventId.PlayerTitle)
+      this.events._subscriptionCache.has(ServerEventTypes.PlayerChat) ||
+      this.events._subscriptionCache.has(ServerEventTypes.PlayerTitle)
     ) world.subscribeEvent('PlayerMessage');
     
     this.worlds.set(world.id, world);
-    this.events.emit(EventId.WorldAdd, { world });
+    this.events.emit(ServerEventTypes.WorldAdd, { world });
     
     return world;
   }
   
   private removeWorld(world: World) {
     world._stopInterval();
-    this.events.emit(EventId.WorldRemove, { world });
+    this.events.emit(ServerEventTypes.WorldRemove, { world });
     this.worlds.delete(world.id);
   }
   

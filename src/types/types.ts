@@ -19,19 +19,6 @@ export interface CommandResult {
   [key: string]: any;
 }
 
-export interface ServerPacket {
-  header: {
-    requestId: string,
-    messagePurpose: string,
-    version: number,
-    messageType: string,
-    eventName?: string
-  },
-  body: {
-    eventName?: string
-  } | any
-}
-
 export interface PlayerList {
   current: number,
   max: number,
@@ -70,7 +57,7 @@ export interface Formatter {
   playerName?: (name: string) => string;
 }
 
-export interface ServerOption extends WebSocket.ServerOptions {
+export interface ServerOptions extends WebSocket.ServerOptions {
   debug?: boolean;
   timezone?: string;
   packetTimeout?: number;
@@ -86,7 +73,7 @@ export interface ServerOption extends WebSocket.ServerOptions {
   formatter?: Formatter;
 }
 
-export interface LoggerOption {
+export interface LoggerOptions {
   debug?: boolean;
   timezone?: string;
 }

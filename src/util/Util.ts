@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { VersionResolvable } from '../types';
+import { ServerPacket, VersionResolvable } from '../types';
 import * as moment from 'moment-timezone'
 
 type EventPurpose = 'subscribe' | 'unsubscribe';
@@ -49,7 +49,7 @@ export class Util {
   /**
    * Creates command packet
    */
-   static commandBuilder(command: string, commandVersion: VersionResolvable = 1): any {
+   static commandBuilder(command: string, commandVersion: VersionResolvable = 1): ServerPacket {
     return {
       header: {
         requestId: randomUUID(),

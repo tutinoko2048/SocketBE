@@ -2,13 +2,28 @@ import { PlayerMessageType } from '../types';
 import { Events } from './Events';
 import type { World } from './World';
 
+export enum ServerEventTypes {
+  ServerOpen = 'serverOpen',
+  ServerClose = 'serverClose',
+  WorldAdd = 'worldAdd',
+  WorldRemove = 'worldRemove',
+  PlayerJoin = 'playerJoin',
+  PlayerLeave = 'playerLeave',
+  PacketSend = 'packetSend',
+  PacketReceive= 'packetReceive',
+  Error = 'error',
+  PlayerChat = 'playerChat',
+  PlayerTitle = 'playerTitle',
+  Tick = 'tick',
+}
+
 export interface ServerEventTypeMap {
-  playerJoin: PlayerJoinEvent;
-  playerLeave: PlayerLeaveEvent;
   serverOpen: void;
   serverClose: void;
   worldAdd: WorldAddEvent;
   worldRemove: WorldRemoveEvent;
+  playerJoin: PlayerJoinEvent;
+  playerLeave: PlayerLeaveEvent;
   packetSend: PacketSendEvent;
   packetReceive: PacketReceiveEvent;
   error: Error;

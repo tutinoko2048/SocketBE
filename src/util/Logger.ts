@@ -1,4 +1,4 @@
-import { LoggerOption, ServerOption } from '../types';
+import { LoggerOptions, ServerOptions } from '../types';
 import { Util } from './Util';
 
 const color = {
@@ -16,9 +16,9 @@ const color = {
 
 export class Logger {
   public name: string;
-  private options: LoggerOption | ServerOption;
+  private options: LoggerOptions | ServerOptions;
   
-  constructor(name: string, option: LoggerOption | ServerOption) {
+  constructor(name: string, option: LoggerOptions | ServerOptions) {
     this.name = name;
     this.options = option;
     
