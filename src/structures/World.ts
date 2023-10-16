@@ -12,17 +12,18 @@ export class World {
   /** A websocket instance of the world. */
   public readonly ws: WebSocket.WebSocket;
   public readonly server: Server;
-  private countInterval: NodeJS.Timeout | null;
-
-  public name: string;
   public readonly logger: Logger;
-  public lastPlayers: string[];
-  public maxPlayers: number;
   public readonly scoreboards: ScoreboardManager;
-  public readonly packets: PacketHandler
+  public readonly packets: PacketHandler;
   public readonly connectedAt: number;
   public readonly id: string;
-  public localPlayer: string | null;
+  public name: string;
+
+  protected lastPlayers: string[];
+  protected maxPlayers: number;
+  protected localPlayer: string | null;
+  private countInterval: NodeJS.Timeout | null;
+
 
   constructor(server: Server, ws: WebSocket.WebSocket, name: string) {
     this.ws = ws;
@@ -51,7 +52,7 @@ export class World {
    * @returns A JSON structure with command response values.
    * @throws
    */
-  async runCommand(command: string): Promise<CommandResult> {
+  public async runCommand(command: string): Promise<CommandResult> {
     const packet = Util.commandBuilder(command, this.server.options.commandVersion);
     this.sendPacket(packet);
     if (command.startsWith('tellraw')) return { statusCode: 0 }; // no packet returns on tellraw command
@@ -65,7 +66,7 @@ export class World {
    * @param  message The message to be displayed.
    * @param target Player name or target selector.
    */
-  async sendMessage(message: string | RawText, target: string = '@a'): Promise<void> {
+  public async sendMessage(message: string | RawText, target: string = '@a'): Promise<void> {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
     const rawtext = (typeof message === 'object')
@@ -79,7 +80,7 @@ export class World {
   /**
    * Returns information about players in the world.
    */
-  async getPlayerList(): Promise<PlayerList> {
+  public async getPlayerList(): Promise<PlayerList> {
     const data = await this.runCommand('list');
     const status = data.statusCode == 0;
     const players = status ? (data.players as string).split(', ') : [];
@@ -94,7 +95,7 @@ export class World {
   /**
    * Returns an array of player names in the world.
    */
-  async getPlayers(): Promise<string[]> {
+  public async getPlayers(): Promise<string[]> {
     const { players } = await this.getPlayerList();
     return players;
   }
@@ -102,7 +103,7 @@ export class World {
   /**
    * Returns the name of local player (client)
    */
-  async getLocalPlayer(): Promise<string> {
+  public async getLocalPlayer(): Promise<string> {
     const res = await this.runCommand('getlocalplayername');
     const player = res.localplayername;
     this.localPlayer = this.server.options.formatter.playerName?.(player) ?? player;
@@ -112,7 +113,7 @@ export class World {
   /**
    * Returns all tags that a player has.
    */
-  async getTags(player: string): Promise<string[]> {
+  public async getTags(player: string): Promise<string[]> {
     const res = await this.runCommand(`tag "${player}" list`);
     return (res.statusMessage as string).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
@@ -120,7 +121,7 @@ export class World {
   /**
    * Tests whether an player has a particular tag.
    */
-  async hasTag(player: string, tag: string): Promise<boolean> {
+  public async hasTag(player: string, tag: string): Promise<boolean> {
     const tags = await this.getTags(player);
     return tags.includes(tag);
   }
@@ -128,7 +129,7 @@ export class World {
   /**
    * Returns information about players with more details in the world.
    */
-  async getPlayerDetail(): Promise<PlayerDetail> {
+  public async getPlayerDetail(): Promise<PlayerDetail> {
     const res = await this.runCommand('listd stats');
     const status = res.statusCode === 0;
     const details: PlayerInfo[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
@@ -144,7 +145,7 @@ export class World {
   }
 
   /** Sends a packet to the world. */
-  sendPacket(packet: ServerPacket): void {
+  public sendPacket(packet: ServerPacket): void {
     this.packets.send(packet);
   }
 
@@ -181,7 +182,7 @@ export class World {
    * Sends an event subscribe packet.
    * @param eventName A name of the event.
    */
-  subscribeEvent(eventName: string): void {
+  public subscribeEvent(eventName: string): void {
     this.sendPacket(Util.eventBuilder(eventName, 'subscribe'));
   }
   
@@ -189,7 +190,7 @@ export class World {
    * Sends an event unsubscribe packet.
    * @param eventName A name of the event.
    */
-  unsubscribeEvent(eventName: string): void {
+  public unsubscribeEvent(eventName: string): void {
     this.sendPacket(Util.eventBuilder(eventName, 'unsubscribe'));
   }
   
@@ -208,7 +209,7 @@ export class World {
   /**
    * Disconnects this world.
    */
-  disconnect(): void {
+  public disconnect(): void {
     this.ws.close();
   }
 }

@@ -20,7 +20,7 @@ export class ScoreboardObjective {
    * Returns a specific score for a player.
    * @param player Name of the player to retrieve a score for.
    */
-  async getScore(player: string): Promise<number | undefined> {
+  public async getScore(player: string): Promise<number | undefined> {
     return await this.world.scoreboards.getScore(player, this.id);
   }
   
@@ -30,7 +30,7 @@ export class ScoreboardObjective {
    * @param score New value of the score.
    * @returns {Promise<?number>} New value of the score, returns null if failed to set the score.
    */
-  async setScore(player: string, score: number): Promise<number |undefined> {
+  public async setScore(player: string, score: number): Promise<number |undefined> {
     return await this.world.scoreboards.setScore(player, this.id, score);
   }
 
@@ -40,7 +40,7 @@ export class ScoreboardObjective {
    * @param score Amount of score to add.
    * @returns New value of the score, returns null if failed to add the score.
    */
-  async addScore(player: string, score: number): Promise<number | undefined> {
+  public async addScore(player: string, score: number): Promise<number | undefined> {
     return await this.world.scoreboards.addScore(player, this.id, score);
   }
     
@@ -49,11 +49,11 @@ export class ScoreboardObjective {
    * @param player Name of the player.
    * @returns Whether successful to reset score of player.
    */
-  async resetScore(player: string): Promise<boolean> {
+  public async resetScore(player: string): Promise<boolean> {
     return await this.world.scoreboards.resetScore(player, this.id);
   }
   
-  toJSON() {
+  public toJSON() {
     return { id: this.id, displayName: this.displayName }
   }
 }

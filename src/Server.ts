@@ -19,15 +19,15 @@ const defaultOption: ServerOptions = {
 
 export class Server {
   public readonly options: ServerOptions;
-  private worldNumber: number;
-  private readonly worlds: Map<string, World>;
   public readonly wss: WebSocketServer;
-
   public readonly startTime: number;
   public readonly logger: Logger;
   public readonly ip: string;
   public readonly events: ServerEvents;
   public readonly rawEvents: Events<any>;
+
+  private readonly worlds: Map<string, World>;
+  private worldNumber: number;
 
   constructor(options: ServerOptions = {}) {
     this.wss = new WebSocketServer({ ...defaultOption, ...options });
@@ -68,7 +68,7 @@ export class Server {
     this.logger.debug(`Server: Loaded (${(Date.now() - this.startTime) / 1000} s)`);
   }
   
-  createWorld(ws: WebSocket) {
+  private createWorld(ws: WebSocket) {
     const world = new World(this, ws, `World #${this.worldNumber++}`);
     
     world.sendPacket(Util.eventBuilder('commandResponse'));
@@ -99,21 +99,21 @@ export class Server {
    * Returns a world based on the provided id.
    * @param worldId An identifier of the world.
    */
-  getWorld(worldId: string): World | undefined {
+  public getWorld(worldId: string): World | undefined {
     return this.worlds.get(worldId);
   }
   
   /**
    * Returns an array of all the connected worlds.
    */
-  getWorlds(): World[] {
+  public getWorlds(): World[] {
     return [...this.worlds.values()];
   }
   
   /**
    * Sends a command to all the worlds.
    */
-  runCommand(command: string): Promise<CommandResult[]> {
+  public runCommand(command: string): Promise<CommandResult[]> {
     const res = this.getWorlds().map(w => w.runCommand(command));
     return Promise.all(res);
   }
@@ -123,7 +123,7 @@ export class Server {
    * @param message The message to be displayed.
    * @param target Player name or target selector
    */
-  sendMessage(message: string | RawText, target?: string): Promise<void[]> {
+  public sendMessage(message: string | RawText, target?: string): Promise<void[]> {
     const res = this.getWorlds().map(w => w.sendMessage(message, target));
     return Promise.all(res);
   }
@@ -131,7 +131,7 @@ export class Server {
   /**
    * Disconnects all worlds
    */
-  disconnectAll(): void {
+  public disconnectAll(): void {
     this.getWorlds().forEach(w => w.disconnect());
   }
 }

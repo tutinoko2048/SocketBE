@@ -25,27 +25,27 @@ export class Logger {
     this.debug('Logger: Initialized');
   }
   
-  log(...args) {
+  public log(...args) {
     console.log(`${color.blue}${this.getTime()}${color.reset} Log [${this.name}]`, ...args);
   }
   
-  info(...args) {
+  public info(...args) {
     console.log(`${color.blue}${this.getTime()} ${color.cyan}Info${color.reset} [${this.name}]`, ...args);
   }
   
-  warn(...args) {
+  public warn(...args) {
     console.log(`${color.blue}${this.getTime()} ${color.yellow}Warn${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
-  error(...args) {
+  public error(...args) {
     console.log(`${color.blue}${this.getTime()} ${color.red}Error${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
-  debug(...args) {
+  public debug(...args) {
     if (this.options.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
   }
   
-  getTime() {
+  private getTime() {
     return Util.getTime(this.options.timezone);
   }
 }
