@@ -4,22 +4,22 @@ import { randomUUID } from 'node:crypto';
 import { ServerEventTypes } from '../structures/ServerEvents';
 import { Logger } from '../util/Logger';
 import { ScoreboardManager } from '../managers/ScoreboardManager';
+import { PacketHandler } from './PacketHandler';
 import type { Server } from '../Server';
-import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult } from '../types';
+import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult, CommandResponsePacketBody } from '../types';
 
 export class World {
   /** A websocket instance of the world. */
   public readonly ws: WebSocket.WebSocket;
-  private server: Server;
-  private responseTimes: number[];
+  public readonly server: Server;
   private countInterval: NodeJS.Timeout | null;
-  private awaitingResponses: Map<string, (arg: ServerPacket) => void>
 
   public name: string;
   public readonly logger: Logger;
   public lastPlayers: string[];
   public maxPlayers: number;
   public readonly scoreboards: ScoreboardManager;
+  public readonly packets: PacketHandler
   public readonly connectedAt: number;
   public readonly id: string;
   public localPlayer: string | null;
@@ -36,27 +36,28 @@ export class World {
     this.id = randomUUID();
     this.localPlayer = null;
     this.countInterval;
-    this.awaitingResponses = new Map();
-    this.responseTimes = [];
   }
   
   /**
    * The latency between server and minecraft
    */
   get ping(): number {
-    return Util.median(this.responseTimes);
+    return Util.median(this.packets.responseTimes);
   }
   
   /**
    * Runs a particular command from the world.
    * @param command Command to run.
    * @returns A JSON structure with command response values.
+   * @throws
    */
   async runCommand(command: string): Promise<CommandResult> {
     const packet = Util.commandBuilder(command, this.server.options.commandVersion);
     this.sendPacket(packet);
-    if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
-    return await this.getResponse(packet);
+    if (command.startsWith('tellraw')) return { statusCode: 0 }; // no packet returns on tellraw command
+    
+    const response = await this.packets.getCommandResponse(packet);
+    return response.body;
   }
   
   /**
@@ -142,58 +143,11 @@ export class World {
     }
   }
 
-  /**
-   * Sends a packet to the world.
-   */
+  /** Sends a packet to the world. */
   sendPacket(packet: ServerPacket): void {
-    this.ws.send(JSON.stringify(packet));
-    this.server.events.emit(ServerEventTypes.PacketSend, { packet, world: this });
+    this.packets.send(packet);
   }
-  
-  /**
-   * Handles incoming packets
-   */
-  _handlePacket(packet: ServerPacket): void {
-    const { header, body } = packet;
-    
-    this.server.rawEvents.emit(header.eventName, { ...body, world: this }); // minecraft ws events
-    
-    if (header.eventName === 'PlayerMessage') {
-      body.sender = this.server.options.formatter.playerName?.(body.sender) ?? body.sender;
-      if (body.type === 'title') {
-        this.server.events.emit(ServerEventTypes.PlayerTitle, { ...body, world: this });
-      } else {
-        this.server.events.emit(ServerEventTypes.PlayerChat, { ...body, world: this });
-      }
-    }
-    
-    if (['commandResponse','error'].includes(header.messagePurpose)) {
-      if (!this.awaitingResponses.has(packet.header.requestId)) return;
-      this.awaitingResponses.get(packet.header.requestId)(packet);
-      this.awaitingResponses.delete(packet.header.requestId);
-    }
-  }
-  
-  private getResponse(packet: ServerPacket): Promise<CommandResult> {
-    const packetId = packet.header.requestId;
-    const sentAt = Date.now();
-    
-    return new Promise((res, rej) => {
-      if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error(`client is offline\npacket: ${JSON.stringify(packet, null, 2)}`));
-        
-      const timeout = setTimeout(() => {
-        rej(new Error(`response timeout\npacket: ${JSON.stringify(packet, null, 2)}`));
-      }, this.server.options.packetTimeout);
-      
-      this.awaitingResponses.set(packetId, (response: ServerPacket) => {
-        clearTimeout(timeout);
-        if (this.responseTimes.length > 20) this.responseTimes.shift();
-        this.responseTimes.push(Date.now() - sentAt);
-        res(response.body);
-      });
-    });
-  }
-  
+
   private async updatePlayerList(): Promise<void> {
     try {
       const { players, max } = await this.getPlayerList();

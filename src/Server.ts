@@ -20,8 +20,8 @@ const defaultOption: ServerOptions = {
 export class Server {
   public readonly options: ServerOptions;
   private worldNumber: number;
-  private worlds: Map<string, World>;
-  private wss: WebSocketServer;
+  private readonly worlds: Map<string, World>;
+  public readonly wss: WebSocketServer;
 
   public readonly startTime: number;
   public readonly logger: Logger;
@@ -47,10 +47,7 @@ export class Server {
       const world = this.createWorld(ws);
       
       ws.on('message', (packet) => {
-        // @ts-ignore
-        const res = JSON.parse(packet);
-        this.events.emit(ServerEventTypes.PacketReceive, { packet: res, world });
-        world._handlePacket(res);
+        world.packets.handle(packet);
       });
       
       ws.on('close', () => {

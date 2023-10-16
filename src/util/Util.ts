@@ -1,18 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { ServerPacket, VersionResolvable } from '../types';
+import { CommandRequestPacket, PacketPurpose, ServerPacket, VersionResolvable } from '../types';
 import * as moment from 'moment-timezone'
 
-type EventPurpose = 'subscribe' | 'unsubscribe';
-
-export class Util {
-  static isEmpty(v) {
-    return v === undefined || v === null || v === ''
-  }
-  
+export class Util {  
   /**
    * Returns current time with nice format.
    */
-  static getTime(timezone: string, mode?: string) {
+  static getTime(timezone: string, mode?: 'date' | 'year' | 'timestamp'): string {
     const now = moment().tz(timezone);
     switch (mode) {
       case 'date':
@@ -28,11 +22,10 @@ export class Util {
     }
   }
   
-
   /**
    * Creates event packet
    */
-  static eventBuilder(eventName: string, eventPurpose: EventPurpose = 'subscribe'): any {
+  static eventBuilder(eventName: string, eventPurpose: PacketPurpose = 'subscribe'): ServerPacket {
     return {
       "header": {
         "requestId": randomUUID(),
@@ -49,7 +42,7 @@ export class Util {
   /**
    * Creates command packet
    */
-   static commandBuilder(command: string, commandVersion: VersionResolvable = 1): ServerPacket {
+   static commandBuilder(command: string, commandVersion: VersionResolvable = 1): CommandRequestPacket {
     return {
       header: {
         requestId: randomUUID(),
@@ -58,9 +51,6 @@ export class Util {
         messageType: "commandRequest"
       },
       body: {
-        origin: {
-          type: "player"
-        },
         commandLine: command,
         version: commandVersion
       }
@@ -69,39 +59,23 @@ export class Util {
   
   /**
    * splits string nicely (ignore ' and ")
-   * @param {string} str
-   * @returns {string[]}
    */
-  static splitNicely(str) {
+  static splitNicely(str: string): string[] {
     let split = str.split(/(?<!['"]\w+) +(?!\w+['"])/);
     return split.map(x => x.replace(/^"(.*)"$/g, '$1'));
   }
   
-  /**
-   * 
-   * @param {number[]} numbers
-   * @returns {number}
-   */
-  static median(numbers) {
+  static median(numbers: number[]): number {
     const half = (numbers.length / 2) | 0;
     const arr = numbers.slice().sort((a,b) =>  a - b);
     return (arr.length % 2 ? arr[half] : (arr[half-1] + arr[half]) / 2) || 0;
   }
   
-  /**
-   * 
-   * @param {number[]} numbers
-   * @returns {number}
-   */
-  static average(numbers) {
+  static average(numbers: number[]): number {
     return (numbers.reduce((a,b) => a + b, 0) / numbers.length) || 0;
   }
-  
-  static commandString(str) {
-    return str ? `"${str}"` : '';
-  }
-  
-  static sleep(ms) {
+    
+  static sleep(ms: number): Promise<void> {
    return new Promise(res => setTimeout(res, ms));
  }
 }

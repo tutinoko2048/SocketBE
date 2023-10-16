@@ -14,7 +14,7 @@ export interface RawText {
 }
 
 export interface CommandResult {
-  statusCode?: number;
+  statusCode: number;
   statusMessage?: string;
   [key: string]: any;
 }
