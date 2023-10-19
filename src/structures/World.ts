@@ -1,20 +1,18 @@
-import WebSocket from 'ws';
-import { Util } from '../util/Util';
+import { WebSocket } from 'ws';
+import { Util, Logger } from '../util';
 import { randomUUID } from 'node:crypto';
-import { ServerEventTypes } from '../structures/ServerEvents';
-import { Logger } from '../util/Logger';
-import { ScoreboardManager } from '../managers/ScoreboardManager';
-import { PacketHandler } from './PacketHandler';
+import { ServerEventTypes } from '../structures';
+import { PacketManager, ScoreboardManager } from '../managers';
 import type { Server } from '../Server';
-import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult, CommandResponsePacketBody } from '../types';
+import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult } from '../types';
 
 export class World {
   /** A websocket instance of the world. */
-  public readonly ws: WebSocket.WebSocket;
+  public readonly ws: WebSocket;
   public readonly server: Server;
   public readonly logger: Logger;
   public readonly scoreboards: ScoreboardManager;
-  public readonly packets: PacketHandler;
+  public readonly packets: PacketManager;
   public readonly connectedAt: number;
   public readonly id: string;
   public name: string;
@@ -24,8 +22,7 @@ export class World {
   protected localPlayer: string | null;
   private countInterval: NodeJS.Timeout | null;
 
-
-  constructor(server: Server, ws: WebSocket.WebSocket, name: string) {
+  constructor(server: Server, ws: WebSocket, name: string) {
     this.ws = ws;
     this.server = server;
     this.name = name;
@@ -33,6 +30,7 @@ export class World {
     this.lastPlayers = [];
     this.maxPlayers = 0;
     this.scoreboards = new ScoreboardManager(this);
+    this.packets = new PacketManager(this);
     this.connectedAt = Date.now();
     this.id = randomUUID();
     this.localPlayer = null;
@@ -105,7 +103,7 @@ export class World {
    */
   public async getLocalPlayer(): Promise<string> {
     const res = await this.runCommand('getlocalplayername');
-    const player = res.localplayername;
+    const player = res.localplayername as string;
     this.localPlayer = this.server.options.formatter.playerName?.(player) ?? player;
     return this.localPlayer;
   }
@@ -115,7 +113,7 @@ export class World {
    */
   public async getTags(player: string): Promise<string[]> {
     const res = await this.runCommand(`tag "${player}" list`);
-    return (res.statusMessage as string).match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
+    return res.statusMessage.match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
   }
   
   /**
@@ -192,18 +190,6 @@ export class World {
    */
   public unsubscribeEvent(eventName: string): void {
     this.sendPacket(Util.eventBuilder(eventName, 'unsubscribe'));
-  }
-  
-  /**
-   * Closes a connection.
-   * @deprecated
-   */
-  close(): void {
-    process.emitWarning('World.close() Deprecated!', {
-      code: 'Deprecated',
-      detail: 'Use World.disconnect() instead',
-    });
-    this.ws.close();
   }
   
   /**

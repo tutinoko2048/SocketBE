@@ -1,20 +1,17 @@
 import { WebSocket, Server as WebSocketServer } from 'ws';
-import { Logger } from './util/Logger';
-import { Events } from './structures/Events';
-import { World } from './structures/World';
-import { Util } from './util/Util';
+import { Logger, Util, version } from './util';
+import { Events, World, ServerEvents, ServerEventTypes } from './structures';
 import * as ip from 'ip';
-import { version } from './util/constants';
 import { CommandResult, RawText, ServerOptions } from './types';
-import { ServerEvents, ServerEventTypes } from './structures/ServerEvents';
 
-const defaultOption: ServerOptions = {
+const defaultOptions: Partial<ServerOptions> = {
   timezone: 'UTC',
   listUpdateInterval: 1000,
   packetTimeout: 200000,
   debug: false,
   commandVersion: 31,
-  formatter: {}
+  formatter: {},
+  ws: {}
 }
 
 export class Server {
@@ -23,19 +20,25 @@ export class Server {
   public readonly startTime: number;
   public readonly logger: Logger;
   public readonly ip: string;
+  public readonly port: number;
   public readonly events: ServerEvents;
   public readonly rawEvents: Events<any>;
 
   private readonly worlds: Map<string, World>;
   private worldNumber: number;
 
-  constructor(options: ServerOptions = {}) {
-    this.wss = new WebSocketServer({ ...defaultOption, ...options });
-    this.options = { ...defaultOption, ...options };
+  constructor(options: ServerOptions) {
+    this.ip = ip.address();
+    this.port = options.port;
+    const websocketOptions = options.ws ?? {};
+    websocketOptions.port = options.port;
+    this.wss = new WebSocketServer(websocketOptions);
+    this.options = { ...defaultOptions, ...options };
+    this.options.ws = this.wss.options;
 
     this.startTime = Date.now();
     this.logger = new Logger('Server', this.options);
-    this.ip = ip.address();
+    this.port = this.wss.options.port;
     this.events = new ServerEvents(this);
     this.rawEvents = new Events(this);
     this.worlds = new Map();

@@ -1,5 +1,4 @@
-import { ScoreboardObjective } from '../structures/ScoreboardObjective';
-import type { World } from '../structures/World';
+import { ScoreboardObjective, type World } from '../structures';
 
 export enum ObjectiveSortOrder {
   Ascending = 'ascending',
@@ -27,7 +26,7 @@ export class ScoreboardManager {
    */
   public async getObjectives(): Promise<ScoreboardObjective[]> {
     const res = await this.world.runCommand('scoreboard objectives list');
-    const objectives = (res.statusMessage as string).split('\n').slice(1).map(entry => {
+    const objectives = res.statusMessage.split('\n').slice(1).map(entry => {
       const [ id, displayName ] = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0].slice(1,3);
       return new ScoreboardObjective(this.world, id, displayName);
     });

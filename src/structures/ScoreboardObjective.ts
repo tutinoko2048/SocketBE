@@ -1,4 +1,4 @@
-import type { World } from '../structures/World';
+import type { World } from '../structures';
 
 export class ScoreboardObjective {
   /** World instance that this objective belongs to. */

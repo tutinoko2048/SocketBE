@@ -1,5 +1,5 @@
 import { RawMessage } from '@minecraft/server';
-import WebSocket from 'ws';
+import { ServerOptions as WebSocketOptions } from 'ws';
 
 export enum PlayerMessageType {
   Chat = 'chat',
@@ -57,7 +57,9 @@ export interface Formatter {
   playerName?: (name: string) => string;
 }
 
-export interface ServerOptions extends WebSocket.ServerOptions {
+export interface ServerOptions {
+  port?: number;
+  ws?: WebSocketOptions;
   debug?: boolean;
   timezone?: string;
   packetTimeout?: number;
@@ -77,55 +79,3 @@ export interface LoggerOptions {
   debug?: boolean;
   timezone?: string;
 }
-
-/*
-export interface ServerEventTypeMap_old {
-  [EventId.PlayerJoin]: PlayerJoinEvent;
-  [EventId.PlayerLeave]: PlayerLeaveEvent;
-  [EventId.ServerOpen]: void,
-  [EventId.ServerClose]: void,
-  [EventId.WorldAdd]: WorldAddEvent;
-  [EventId.WorldRemove]: WorldRemoveEvent;
-  [EventId.PacketSend]: PacketSendEvent;
-  [EventId.PacketReceive]: PacketReceiveEvent;
-  [EventId.Error]: Error;
-  [EventId.PlayerChat]: PlayerChatEvent;
-  [EventId.PlayerTitle]: PlayerTitleEvent;
-  [EventId.Tick]: void;
-}
-
-export interface WorldEvent {
-  world: World;
-}
-
-export interface PlayerJoinEvent extends WorldEvent {
-  joinedPlayers: string[];
-}
-
-export interface PlayerLeaveEvent extends WorldEvent {
-  leftPlayers: string[];
-}
-
-export interface WorldAddEvent extends WorldEvent {}
-
-export interface WorldRemoveEvent extends WorldEvent {}
-
-export interface PacketSendEvent extends WorldEvent {
-  packet: any;
-}
-
-export interface PacketReceiveEvent extends WorldEvent {
-  packet: any;
-}
-
-export interface PlayerChatEvent extends WorldEvent {
-  'type': 'chat' | 'say' | 'me' | 'tell';
-  message: string;
-  sender: string;
-  receiver: string;
-}
-
-export interface PlayerTitleEvent extends Omit<PlayerChatEvent, 'type'> {
-  'type': 'title';
-}
-*/

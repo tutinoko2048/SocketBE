@@ -1,10 +1,8 @@
 import { RawData } from 'ws';
 import { CommandRequestPacket, CommandResponsePacket, PlayerMessageType, ServerPacket } from '../types';
-import type { Server } from '../Server';
-import type { World } from './World';
-import { PlayerChatEvent, PlayerTitleEvent, ServerEventTypes } from './ServerEvents';
+import { PlayerChatEvent, PlayerTitleEvent, ServerEventTypes, type World } from '../structures';
 
-export class PacketHandler {
+export class PacketManager {
   public readonly world: World;
   public readonly pendingResponses: Map<string, (arg: CommandResponsePacket) => void>;
   public readonly responseTimes: number[];
@@ -12,6 +10,7 @@ export class PacketHandler {
   constructor(world: World) {
     this.world = world;
     this.pendingResponses = new Map();
+    this.responseTimes = [];
   }
 
   public handle(data: RawData) {
