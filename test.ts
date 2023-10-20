@@ -11,7 +11,7 @@ const server = new Server({
   timezone: 'Asia/Tokyo'
 });
 
-server.events.on('serverOpen', () => {
+server.events.on("serverOpen", () => {
   server.logger.log("open");
 });
 
@@ -45,7 +45,7 @@ server.events.on("playerChat", async (ev) => {
   world.sendMessage(message);
 });
 
-server.events.on('error', e => {
+server.events.on("error", e => {
   server.logger.error(e);
 });
 

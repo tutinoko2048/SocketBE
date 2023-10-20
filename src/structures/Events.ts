@@ -3,7 +3,7 @@ import type { Server } from '../Server';
 
 export class Events<EventMap extends Record<string, any>> {
   public readonly server: Server;
-  public readonly _subscriptionCache: Set<string>;
+  public readonly _subscriptionCache: Set<keyof EventMap>;
   private events: EventEmitter;
 
   constructor(server: Server) {

@@ -35,6 +35,10 @@ export class World {
     this.id = randomUUID();
     this.localPlayer = null;
     this.countInterval;
+
+    this.sendPacket(Util.eventBuilder('commandResponse'));
+    this.initializeEvents();
+    this.ws.on('close', () => this.stopPlayerCounter());
   }
   
   /**
@@ -161,21 +165,6 @@ export class World {
     } catch (e) {}
   }
   
-  /** @ignore */
-  _startInterval(): void {
-    if (this.countInterval) return;
-    this.updatePlayerList();
-    this.countInterval = setInterval(this.updatePlayerList.bind(this), this.server.options.listUpdateInterval);
-  }
-  
-  /** @ignore */
-  _stopInterval(): void {
-    if (this.countInterval) {
-      clearInterval(this.countInterval);
-      this.countInterval = null;
-    }
-  }
-  
   /**
    * Sends an event subscribe packet.
    * @param eventName A name of the event.
@@ -197,5 +186,34 @@ export class World {
    */
   public disconnect(): void {
     this.ws.close();
+  }
+
+  private initializeEvents(): void {
+    const subscriptions = this.server.events._subscriptionCache;
+    if (
+      subscriptions.has(ServerEventTypes.PlayerJoin) ||
+      subscriptions.has(ServerEventTypes.PlayerLeave)
+    ) {
+      this.startPlayerCounter();
+    }
+
+    if (
+      subscriptions.has(ServerEventTypes.PlayerChat) ||
+      subscriptions.has(ServerEventTypes.PlayerTitle)
+    ) {
+      this.subscribeEvent('PlayerMessage');
+    }
+  }
+
+  private startPlayerCounter(): void {
+    if (this.countInterval) return;
+    this.updatePlayerList();
+    this.countInterval = setInterval(() => this.updatePlayerList(), this.server.options.listUpdateInterval);
+  }
+
+  private stopPlayerCounter(): void {
+    if (!this.countInterval) return;
+    clearInterval(this.countInterval);
+    this.countInterval = null;
   }
 }

@@ -1,10 +1,10 @@
 import { WebSocket, Server as WebSocketServer } from 'ws';
-import { Logger, Util, version } from './util';
+import { Logger, version } from './util';
 import { Events, World, ServerEvents, ServerEventTypes } from './structures';
 import * as ip from 'ip';
 import { CommandResult, RawText, ServerOptions } from './types';
 
-const defaultOptions: Partial<ServerOptions> = {
+const defaultOptions: ServerOptions = {
   timezone: 'UTC',
   listUpdateInterval: 1000,
   packetTimeout: 200000,
@@ -48,15 +48,8 @@ export class Server {
     
     this.wss.on('connection', ws => {
       const world = this.createWorld(ws);
-      
-      ws.on('message', (packet) => {
-        world.packets.handle(packet);
-      });
-      
-      ws.on('close', () => {
-        this.removeWorld(world);
-      });
-      
+      ws.on('message', (packet) => world.packets.handle(packet));
+      ws.on('close', () => this.removeWorld(world));
       ws.on('error', e => this.events.emit(ServerEventTypes.Error, e))
     });
     
@@ -73,27 +66,12 @@ export class Server {
   
   private createWorld(ws: WebSocket) {
     const world = new World(this, ws, `World #${this.worldNumber++}`);
-    
-    world.sendPacket(Util.eventBuilder('commandResponse'));
-    
-    if (
-      this.events._subscriptionCache.has(ServerEventTypes.PlayerJoin) ||
-      this.events._subscriptionCache.has(ServerEventTypes.PlayerLeave)
-    ) world._startInterval();
-    
-    if (
-      this.events._subscriptionCache.has(ServerEventTypes.PlayerChat) ||
-      this.events._subscriptionCache.has(ServerEventTypes.PlayerTitle)
-    ) world.subscribeEvent('PlayerMessage');
-    
     this.worlds.set(world.id, world);
     this.events.emit(ServerEventTypes.WorldAdd, { world });
-    
     return world;
   }
   
   private removeWorld(world: World) {
-    world._stopInterval();
     this.events.emit(ServerEventTypes.WorldRemove, { world });
     this.worlds.delete(world.id);
   }
