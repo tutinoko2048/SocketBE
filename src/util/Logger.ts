@@ -1,4 +1,4 @@
-import { LoggerOptions, ServerOptions } from '../types';
+import { ServerOptions } from '../types';
 import { Util } from './Util';
 
 const color = {
@@ -14,35 +14,53 @@ const color = {
   reset: '\u001b[0m',
 }
 
+export interface LoggerOptions {
+  debug?: boolean;
+  timezone?: string;
+
+  /** Whether the server emits logs. Defaults to true. */
+  emitLogs?: boolean;
+}
+
+const defaultOptions: LoggerOptions = {
+  debug: false,
+  emitLogs: true
+}
+
 export class Logger {
   public name: string;
-  private options: LoggerOptions | ServerOptions;
+  public options: LoggerOptions | ServerOptions;
   
-  constructor(name: string, option: LoggerOptions | ServerOptions) {
+  constructor(name: string, options?: LoggerOptions | ServerOptions) {
     this.name = name;
-    this.options = option;
+    this.options = { ...defaultOptions, ...options }
     
     this.debug('Logger: Initialized');
   }
   
-  public log(...args) {
-    console.log(`${color.blue}${this.getTime()}${color.reset} Log [${this.name}]`, ...args);
+  public log(...args): void {
+    if (this.options.emitLogs)
+      console.log(`${color.blue}${this.getTime()} ${color.reset}Log [${this.name}]`, ...args);
   }
   
   public info(...args) {
-    console.log(`${color.blue}${this.getTime()} ${color.cyan}Info${color.reset} [${this.name}]`, ...args);
+    if (this.options.emitLogs)
+      console.log(`${color.blue}${this.getTime()} ${color.cyan}Info${color.reset} [${this.name}]`, ...args);
   }
   
   public warn(...args) {
-    console.log(`${color.blue}${this.getTime()} ${color.yellow}Warn${color.reset} [${this.name}]`, ...args, color.reset);
+    if (this.options.emitLogs)
+      console.log(`${color.blue}${this.getTime()} ${color.yellow}Warn${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
   public error(...args) {
-    console.log(`${color.blue}${this.getTime()} ${color.red}Error${color.reset} [${this.name}]`, ...args, color.reset);
+    if (this.options.emitLogs)
+      console.log(`${color.blue}${this.getTime()} ${color.red}Error${color.reset} [${this.name}]`, ...args, color.reset);
   }
   
   public debug(...args) {
-    if (this.options.debug) console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
+    if (this.options.debug && this.options.emitLogs)
+      console.log(`${color.blue}${this.getTime()}${color.magenta} Debug [${this.name}]`, ...args, color.reset);
   }
   
   private getTime() {

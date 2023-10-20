@@ -10,6 +10,7 @@ const defaultOptions: ServerOptions = {
   packetTimeout: 200000,
   debug: false,
   commandVersion: 31,
+  emitLogs: true,
   formatter: {},
   ws: {}
 }
@@ -50,14 +51,14 @@ export class Server {
       const world = this.createWorld(ws);
       ws.on('message', (packet) => world.packets.handle(packet));
       ws.on('close', () => this.removeWorld(world));
-      ws.on('error', e => this.events.emit(ServerEventTypes.Error, e))
+      ws.on('error', (e) => this.events.emit(ServerEventTypes.Error, e))
     });
     
     this.logger.info(`WebSocket Server is runnning on ${this.ip}:${this.options.port}`);
     
     this.wss.on('listening', () => this.events.emit(ServerEventTypes.ServerOpen, null));
     this.wss.on('close', () => this.events.emit(ServerEventTypes.ServerClose, null));
-    this.wss.on('error', e => this.events.emit(ServerEventTypes.Error, e));
+    this.wss.on('error', (e) => this.events.emit(ServerEventTypes.Error, e));
     
     setInterval(() => this.events.emit(ServerEventTypes.Tick, null), 1000 / 20);
     

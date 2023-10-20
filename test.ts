@@ -1,10 +1,5 @@
 import { Server } from "./src";
-
-process.stdin.setEncoding("utf8");
-const reader = require("readline").createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+import { createInterface } from 'node:readline'
 
 const server = new Server({
   port: 8000,
@@ -49,6 +44,11 @@ server.events.on("error", e => {
   server.logger.error(e);
 });
 
+process.stdin.setEncoding("utf8");
+const reader = createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 reader.on("line", (line) => {
   if (line.startsWith('/')) {
     server.runCommand(line).then(console.log)

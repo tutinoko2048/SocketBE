@@ -73,9 +73,7 @@ export interface ServerOptions {
   commandVersion?: VersionResolvable;
   
   formatter?: Formatter;
-}
 
-export interface LoggerOptions {
-  debug?: boolean;
-  timezone?: string;
+  /** Whether the server emits logs. Defaults to true. */
+  emitLogs?: boolean;
 }
