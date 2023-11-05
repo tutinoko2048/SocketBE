@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { ServerEventTypes } from '../structures';
 import { PacketManager, ScoreboardManager } from '../managers';
 import type { Server } from '../Server';
-import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult } from '../types';
+import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult, Weather } from '../types';
 
 export class World {
   /** A websocket instance of the world. */
@@ -17,9 +17,9 @@ export class World {
   public readonly id: string;
   public name: string;
 
-  protected lastPlayers: string[];
-  protected maxPlayers: number;
-  protected localPlayer: string | null;
+  protected lastPlayers: string[] = [];
+  protected maxPlayers: number = 0;
+  protected localPlayerName: string | null;
   private countInterval: NodeJS.Timeout | null;
 
   constructor(server: Server, ws: WebSocket, name: string) {
@@ -27,14 +27,10 @@ export class World {
     this.server = server;
     this.name = name;
     this.logger = new Logger(this.name, this.server.options);
-    this.lastPlayers = [];
-    this.maxPlayers = 0;
     this.scoreboards = new ScoreboardManager(this);
     this.packets = new PacketManager(this);
     this.connectedAt = Date.now();
     this.id = randomUUID();
-    this.localPlayer = null;
-    this.countInterval;
 
     this.sendPacket(Util.eventBuilder('commandResponse'));
     this.initializeEvents();
@@ -105,11 +101,12 @@ export class World {
   /**
    * Returns the name of local player (client)
    */
-  public async getLocalPlayer(): Promise<string> {
+  public async getLocalPlayerName(force?: boolean): Promise<string> {
+    if (!force && this.localPlayerName) return this.localPlayerName;
     const res = await this.runCommand('getlocalplayername');
     const player = res.localplayername as string;
-    this.localPlayer = this.server.options.formatter.playerName?.(player) ?? player;
-    return this.localPlayer;
+    this.localPlayerName = this.server.options.formatter.playerName?.(player) ?? player;
+    return this.localPlayerName;
   }
   
   /**
@@ -144,6 +141,24 @@ export class World {
       max: status ? res.maxPlayerCount : 0,
       players: formattedPlayers
     }
+  }
+
+  public async getTimeOfDay() {
+    const res = await this.runCommand('time query daytime');
+    
+  }
+
+  public async setTimeOfDay(timeOfDay: number): Promise<void> {
+    await this.runCommand(`time set ${timeOfDay}`);
+  }
+
+  public async getWeather() {
+    const res = await this.runCommand('weather query');
+
+  }
+
+  public async setWeather(weather: Weather): Promise<void> {
+    await this.runCommand(`weather ${weather}`);
   }
 
   /** Sends a packet to the world. */

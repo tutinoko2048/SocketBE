@@ -1,6 +1,12 @@
 import { RawMessage } from '@minecraft/server';
 import { ServerOptions as WebSocketOptions } from 'ws';
 
+export enum Weather {
+  Clear = 'clear',
+  Rain = 'rain',
+  Thunder = 'thunder'
+}
+
 export enum PlayerMessageType {
   Chat = 'chat',
   Say = 'say',
