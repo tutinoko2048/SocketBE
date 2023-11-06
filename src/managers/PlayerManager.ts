@@ -8,16 +8,23 @@ export class PlayerManager {
     this.world = world;
   }
 
-  public add(playerName: string): Player {
+  public create(playerName: string): Player {
     const player = new Player(this.world, playerName);
     this.players.set(playerName, player);
     return player;
   }
 
-  public remove(playerName: string): void {
+  public delete(playerName: string): void {
     this.players.delete(playerName);
   }
 
+  public has(playerName: string | Player): boolean {
+    return this.players.has(playerName instanceof Player ? playerName.rawName : playerName);
+  }
+
+  /** 
+   * @param playerName Raw name of the player.
+   */
   public get(playerName: string): Player | undefined {
     return this.players.get(playerName);
   }

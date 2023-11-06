@@ -1,10 +1,10 @@
 import { WebSocket } from 'ws';
 import { Util, Logger } from '../util';
 import { randomUUID } from 'node:crypto';
-import { ServerEventTypes } from '../structures';
-import { PacketManager, ScoreboardManager } from '../managers';
+import { Player, ServerEventTypes } from '../structures';
+import { PacketManager, ScoreboardManager, PlayerManager } from '../managers';
 import type { Server } from '../Server';
-import { PlayerList, PlayerDetail, ServerPacket, PlayerInfo, RawText, CommandResult, Weather } from '../types';
+import { PlayerList, PlayerListDetail, ServerPacket, PlayerInfo, RawText, CommandResult, Weather, QueryResult } from '../types';
 
 export class World {
   /** A websocket instance of the world. */
@@ -13,13 +13,14 @@ export class World {
   public readonly logger: Logger;
   public readonly scoreboards: ScoreboardManager;
   public readonly packets: PacketManager;
+  public readonly players: PlayerManager;
   public readonly connectedAt: number;
   public readonly id: string;
   public name: string;
 
-  protected lastPlayers: string[] = [];
-  protected maxPlayers: number = 0;
-  protected localPlayerName: string | null;
+  public maxPlayers: number = 0;
+  private lastPlayers: string[] = [];
+  private localPlayerName: string | null;
   private countInterval: NodeJS.Timeout | null;
 
   constructor(server: Server, ws: WebSocket, name: string) {
@@ -29,11 +30,13 @@ export class World {
     this.logger = new Logger(this.name, this.server.options);
     this.scoreboards = new ScoreboardManager(this);
     this.packets = new PacketManager(this);
+    this.players = new PlayerManager(this);
     this.connectedAt = Date.now();
     this.id = randomUUID();
 
     this.sendPacket(Util.eventBuilder('commandResponse'));
     this.initializeEvents();
+    this.startPlayerCounter();
     this.ws.on('close', () => this.stopPlayerCounter());
   }
   
@@ -91,11 +94,11 @@ export class World {
   }
   
   /**
-   * Returns an array of player names in the world.
+   * Returns an array of player in the world.
    */
-  public async getPlayers(): Promise<string[]> {
-    const { players } = await this.getPlayerList();
-    return players;
+  public async getPlayers(forceFetch?: boolean): Promise<Player[]> {
+    if (forceFetch) await this.updatePlayerList();
+    return this.players.getAll();
   }
   
   /**
@@ -110,25 +113,9 @@ export class World {
   }
   
   /**
-   * Returns all tags that a player has.
-   */
-  public async getTags(player: string): Promise<string[]> {
-    const res = await this.runCommand(`tag "${player}" list`);
-    return res.statusMessage.match(/§a.*?§r/g).map((str) => str.replace(/§a|§r/g, ''));
-  }
-  
-  /**
-   * Tests whether an player has a particular tag.
-   */
-  public async hasTag(player: string, tag: string): Promise<boolean> {
-    const tags = await this.getTags(player);
-    return tags.includes(tag);
-  }
-  
-  /**
    * Returns information about players with more details in the world.
    */
-  public async getPlayerDetail(): Promise<PlayerDetail> {
+  public async getPlayerDetail(): Promise<PlayerListDetail> {
     const res = await this.runCommand('listd stats');
     const status = res.statusCode === 0;
     const details: PlayerInfo[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
@@ -169,14 +156,17 @@ export class World {
   private async updatePlayerList(): Promise<void> {
     try {
       const { players, max } = await this.getPlayerList();
-      const join = players.filter(i => this.lastPlayers.indexOf(i) === -1);
-      const leave = this.lastPlayers.filter(i => players.indexOf(i) === -1);
-      
+      const join = players.filter(name => this.lastPlayers.indexOf(name) === -1);
+      const leave = this.lastPlayers.filter(name => players.indexOf(name) === -1);
+
       this.lastPlayers = players;
       this.maxPlayers = max;
-      
+
+      join.forEach(name => this.players.create(name));
       if (join.length > 0) this.server.events.emit(ServerEventTypes.PlayerJoin, { world: this, joinedPlayers: join });
+
       if (leave.length > 0) this.server.events.emit(ServerEventTypes.PlayerLeave, { world: this, leftPlayers: leave });
+      leave.forEach(name => this.players.delete(name));
     } catch (e) {}
   }
   
@@ -205,12 +195,6 @@ export class World {
 
   private initializeEvents(): void {
     const subscriptions = this.server.events._subscriptionCache;
-    if (
-      subscriptions.has(ServerEventTypes.PlayerJoin) ||
-      subscriptions.has(ServerEventTypes.PlayerLeave)
-    ) {
-      this.startPlayerCounter();
-    }
 
     if (
       subscriptions.has(ServerEventTypes.PlayerChat) ||

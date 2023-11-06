@@ -1,5 +1,6 @@
 import { RawMessage } from '@minecraft/server';
 import { ServerOptions as WebSocketOptions } from 'ws';
+import { Player } from '../structures';
 
 export enum Weather {
   Clear = 'clear',
@@ -16,10 +17,11 @@ export enum PlayerMessageType {
 }
 
 export interface RawText {
-  rawtext: RawMessage
+  rawtext: RawMessage;
 }
 
 export interface CommandResult {
+  /** Status code of the command response. Returns 0 if successful. */
   statusCode: number;
   statusMessage?: string;
   [key: string]: any;
@@ -31,8 +33,8 @@ export interface PlayerList {
   players: string[]
 }
 
-export interface PlayerDetail extends PlayerList {
-  details: PlayerInfo[]
+export interface PlayerListDetail extends PlayerList {
+  details: PlayerInfo[];
 }
 
 export interface PlayerInfo {
@@ -50,6 +52,16 @@ export interface PlayerInfo {
   ping: number;
   randomId: number;
   uuid: string;
+}
+
+export interface QueryResult {
+  dimension: number;
+  /** number id */
+  id: number;
+  position: Vector3;
+  /** uuid-like id */
+  uniqueId: string;
+  yRot: number;
 }
 
 export type VersionResolvable = string | number | number[];
@@ -82,4 +94,10 @@ export interface ServerOptions {
 
   /** Whether the server emits logs. Defaults to true. */
   emitLogs?: boolean;
+}
+
+export interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
 }
