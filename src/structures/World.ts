@@ -19,9 +19,7 @@ export class World {
   public name: string;
 
   public maxPlayers: number = 0;
-  private lastPlayers: string[] = [];
   private localPlayerName: string | null;
-  private countInterval: NodeJS.Timeout | null;
 
   constructor(server: Server, ws: WebSocket, name: string) {
     this.ws = ws;
@@ -34,10 +32,9 @@ export class World {
     this.connectedAt = Date.now();
     this.id = randomUUID();
 
-    this.sendPacket(Util.eventBuilder('commandResponse'));
     this.initializeEvents();
-    this.startPlayerCounter();
-    this.ws.on('close', () => this.stopPlayerCounter());
+    this.players.startPlayerCounter();
+    this.ws.on('close', () => this.players.stopPlayerCounter());
   }
   
   /**
@@ -97,7 +94,7 @@ export class World {
    * Returns an array of player in the world.
    */
   public async getPlayers(forceFetch?: boolean): Promise<Player[]> {
-    if (forceFetch) await this.updatePlayerList();
+    if (forceFetch) await this.players.updatePlayerList();
     return this.players.getAll();
   }
   
@@ -152,23 +149,6 @@ export class World {
   public sendPacket(packet: ServerPacket): void {
     this.packets.send(packet);
   }
-
-  private async updatePlayerList(): Promise<void> {
-    try {
-      const { players, max } = await this.getPlayerList();
-      const join = players.filter(name => this.lastPlayers.indexOf(name) === -1);
-      const leave = this.lastPlayers.filter(name => players.indexOf(name) === -1);
-
-      this.lastPlayers = players;
-      this.maxPlayers = max;
-
-      join.forEach(name => this.players.create(name));
-      if (join.length > 0) this.server.events.emit(ServerEventTypes.PlayerJoin, { world: this, joinedPlayers: join });
-
-      if (leave.length > 0) this.server.events.emit(ServerEventTypes.PlayerLeave, { world: this, leftPlayers: leave });
-      leave.forEach(name => this.players.delete(name));
-    } catch (e) {}
-  }
   
   /**
    * Sends an event subscribe packet.
@@ -194,6 +174,8 @@ export class World {
   }
 
   private initializeEvents(): void {
+    this.sendPacket(Util.eventBuilder('commandResponse'));
+
     const subscriptions = this.server.events._subscriptionCache;
 
     if (
@@ -202,17 +184,5 @@ export class World {
     ) {
       this.subscribeEvent('PlayerMessage');
     }
-  }
-
-  private startPlayerCounter(): void {
-    if (this.countInterval) return;
-    this.updatePlayerList();
-    this.countInterval = setInterval(() => this.updatePlayerList(), this.server.options.listUpdateInterval);
-  }
-
-  private stopPlayerCounter(): void {
-    if (!this.countInterval) return;
-    clearInterval(this.countInterval);
-    this.countInterval = null;
   }
 }
