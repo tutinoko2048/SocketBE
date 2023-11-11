@@ -5,4 +5,5 @@ export const Server: typeof import("./Server");
 export const Events: typeof import("./util/Events");
 export const ScoreboardManager: typeof import("./managers/ScoreboardManager");
 export const ScoreboardObjective: typeof import("./structures/ScoreboardObjective");
+export const TimeoutError: typeof import("./structures/TimeoutError");
 export * from "./types";
