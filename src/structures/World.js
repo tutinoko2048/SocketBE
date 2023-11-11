@@ -6,6 +6,7 @@ const Util = require('../util/Util');
 const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
 const ScoreboardManager = require('../managers/ScoreboardManager');
+const TimeoutError = require('./TimeoutError');
 
 /** @typedef {import('../../typings/types').ServerPacket} ServerPacket */
 /** @typedef {import('../../typings/types').PlayerList} PlayerList */
@@ -236,7 +237,7 @@ class World {
       if (this.ws.readyState !== WebSocket.OPEN) return rej(new Error(`client is offline\npacket: ${JSON.stringify(packet, null, 2)}`));
         
       const timeout = setTimeout(() => {
-        rej(new Error(`response timeout\npacket: ${JSON.stringify(packet, null, 2)}`));
+        rej(new TimeoutError(`response timeout\npacket: ${JSON.stringify(packet, null, 2)}`));
       }, this.server.option.packetTimeout);
       
       this.#awaitingResponses.set(packetId, (response) => {
