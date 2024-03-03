@@ -80,7 +80,7 @@ class ScoreboardManager {
     const res = await this.#world.runCommand(`scoreboard players list "${player}"`);
     try {
       return Object.fromEntries(
-        [...res.statusMessage.matchAll(/: (\d*) \((.*?)\)/g)]
+        [...res.statusMessage.matchAll(/: (-*\d*) \((.*?)\)/g)]
           .map(data => [data[2], Number(data[1])])
       )
     } catch {
