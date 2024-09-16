@@ -1,7 +1,7 @@
 // @ts-check
 
 const WebSocket = require('ws');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 const Util = require('../util/Util');
 const ServerEvents = require('../util/Events');
 const Logger = require('../util/Logger');
@@ -57,7 +57,7 @@ class World {
     this.connectedAt = Date.now();
     
     /** @type {string} */
-    this.id = uuidv4();
+    this.id = randomUUID();
     
     /** @type {string|null} */
     this.localPlayer = null;

@@ -1,9 +1,9 @@
 const WebSocket = require('ws');
+const { ip } = require('address');
 const Logger = require('./util/Logger');
 const Events = require('./structures/Events');
 const World = require('./structures/World');
 const Util = require('./util/Util');
-const ip = require('ip');
 const { version } = require('./util/constants');
 const ServerEvents = require('./util/Events');
 
@@ -40,7 +40,7 @@ class Server extends WebSocket.Server {
     this.logger = new Logger('Server', this.option);
     
     /** @type {string} */
-    this.ip = ip.address();
+    this.ip = ip();
 
     /** @type {import('./structures/Events')} */
     this.events = new Events(this);

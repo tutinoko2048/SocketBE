@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 const moment = require('moment-timezone');
 
 class Util {
@@ -36,7 +36,7 @@ class Util {
   static eventBuilder(eventName, eventPurpose = 'subscribe') {
     return {
       "header": {
-        "requestId": uuidv4(),
+        "requestId": randomUUID(),
         "messagePurpose": eventPurpose,
         "version": 1,
         "messageType": "commandRequest"
@@ -56,7 +56,7 @@ class Util {
    static commandBuilder(cmd, commandVersion = 1) {
     return {
       header: {
-        requestId: uuidv4(),
+        requestId: randomUUID(),
         messagePurpose: "commandRequest",
         version: 1,
         messageType: "commandRequest"
