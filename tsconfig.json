@@ -1,17 +1,13 @@
 {
-  "include": ["src/*"],
-  "files": ["typings/index.d.ts"],
+  "include": ["src", "tsup.config.ts"],
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "declaration": true,
-    //"emitDeclarationOnly": true,
     "noEmit": true,
-    "lib": [ "es2019" ],
-    "target": "es2021",
-    "removeComments": true,
-    "allowSyntheticDefaultImports": true,
+    "target": "es2022",
     "moduleResolution": "Node",
-    "outDir": "typings"
+    "outDir": "dist",
+    "declaration": true,
+    "esModuleInterop": true
   }
 }

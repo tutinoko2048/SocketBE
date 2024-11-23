@@ -2,21 +2,26 @@
   "name": "socket-be",
   "version": "1.2.4",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
-  "main": "src/index.js",
-  "types": "typings/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "node test.js",
-    "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx & tsc"
+    "test": "node test.mjs",
+    "lint": "eslint ./src & tsc",
+    "build": "tsup"
   },
   "dependencies": {
-    "address": "^2.0.3",
-    "moment-timezone": "^0.5.45",
+    "@serenityjs/emitter": "^0.5.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.12",
-    "eslint": "^8.57.0",
-    "typescript": "^5.6.2"
+    "@eslint/js": "^9.14.0",
+    "@minecraft/server": "^1.15.0",
+    "@types/eslint": "^9.6.1",
+    "@types/ws": "^8.5.13",
+    "eslint": "^9.14.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.14.0"
   },
   "repository": {
     "type": "git",
@@ -34,7 +39,6 @@
   },
   "homepage": "https://github.com/tutinoko2048/SocketBE#readme",
   "files": [
-    "src",
-    "typings"
+    "dist"
   ]
 }
