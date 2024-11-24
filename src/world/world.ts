@@ -61,7 +61,7 @@ export class World {
     R extends Record<string, any> = Record<string, any>
   >(command: string): Promise<CommandResult<R>> {
     const packet = new CommandRequestPacket();
-    packet.version = 1; //TODO - specify the version from config
+    packet.version = this.server.options.commandVersion;
     packet.commandLine = command;
 
     const header = this.send(packet);

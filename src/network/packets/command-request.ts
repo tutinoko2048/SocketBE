@@ -1,12 +1,13 @@
 import { BasePacket } from './base';
 import { MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
+import type { VersionResolvable } from '../../types';
 
 @PacketClass(Packet.CommandRequest, MessagePurpose.CommandRequest)
 export class CommandRequestPacket extends BasePacket {
   public commandLine: string;
 
-  public version: number;
+  public version: VersionResolvable;
 
   public serialize(): string {
     return JSON.stringify({

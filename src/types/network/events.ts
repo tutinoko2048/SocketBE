@@ -4,14 +4,17 @@ import type {
   BasePacket,
   CommandRequestPacket,
   CommandResponsePacket,
+  EventSubscribePacket,
+  EventUnsubscribePacket,
   PlayerMessagePacket
 } from '../../network';
 
 
-//TODO - Add network events here
 export interface NetworkEvents {
   all: [NetworkEvent<BasePacket>];
   [Packet.CommandRequest]: [NetworkEvent<CommandRequestPacket>];
   [Packet.CommandResponse]: [NetworkEvent<CommandResponsePacket>];
   [Packet.PlayerMessage]: [NetworkEvent<PlayerMessagePacket>];
+  [Packet.EventSubscribe]: [NetworkEvent<EventSubscribePacket>];
+  [Packet.EventUnsubscribe]: [NetworkEvent<EventUnsubscribePacket>];
 }

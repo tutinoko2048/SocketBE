@@ -3,6 +3,8 @@ export enum Packet {
   // BlockPlaced = 'BlockPlaced',
   CommandRequest = 'commandRequest',
   CommandResponse = 'commandResponse',
+  EventSubscribe = 'subscribe',
+  EventUnsubscribe = 'unsubscribe',
   PlayerMessage = 'PlayerMessage',
   // PlayerTravelled = 'PlayerTravelled',
 }

@@ -7,7 +7,6 @@ import type {
   PlayerTitleSignal,
 } from '../../events';
 
-//TODO - split server, network, world events
 export interface ServerEvents {
   [ServerEvent.Open]: [];
   [ServerEvent.Close]: [];

@@ -31,7 +31,6 @@ export class Connection {
     this.ws.send(payload);
   }
 
-  //TODO - call onCommandResponse
   public onCommandResponse(requestId: string, packet: CommandResponsePacket) {
     const callback = this.awaitingResponses.get(requestId);
     if (!callback) return console.error('[Network] Received invalid command response', packet.data);

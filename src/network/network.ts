@@ -5,7 +5,7 @@ import { NetworkEmitter } from './emitter';
 import { MessagePurpose, Packet, PacketBound, ServerEvent } from '../enums';
 import type { ServerOptions, WebSocket } from 'ws';
 import type { Server } from '../server';
-import { Packets, type BasePacket } from './packets';
+import { EventSubscribePacket, Packets, type BasePacket } from './packets';
 import type { IHeader, IPacket, NetworkEvent, NetworkEvents } from '../types';
 import type { NetworkHandler } from './handler';
 import { World } from '../world';
@@ -89,7 +89,12 @@ export class Network extends NetworkEmitter {
     const world = new World(this.server, connection);
     this.server.worlds.set(connection, world);
 
-    //TODO - Send subscribe packets
+    for (const registered of this.getRegisteredEvents()) {
+      const packet = new EventSubscribePacket();
+      packet.eventName = registered as Packet;
+
+      this.send(connection, packet);
+    }
   }
   
   public onConnectionMessage(connection: Connection, data: string) {
@@ -156,7 +161,7 @@ export class Network extends NetworkEmitter {
         break;
       }
       default:
-        console.error('[Network] Unknown message purpose', rawPacket.header.messagePurpose);
+        console.error('[Network] Invalid message purpose', rawPacket.header.messagePurpose);
     }
   }
 
