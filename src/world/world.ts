@@ -1,11 +1,11 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket } from '../network';
-import type { RawMessage } from '@minecraft/server';
+import { PlayerJoinSignal, PlayerLeaveSignal } from '../events';
+import type { RawText } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
-import { PlayerJoinSignal, PlayerLeaveSignal } from '../events';
 
 
 export class World {
@@ -43,9 +43,10 @@ export class World {
     return this.connection.establishedAt;
   }
 
-  //TODO - implement averagePing
   public get averagePing() {
-    throw Error('Not implemented');
+    const responseTimes = this.connection.responseTimes;
+    if (responseTimes.length === 0) return -1;
+    return responseTimes.reduce((a, b) => a + b) / responseTimes.length;
   }
 
   public send(packet: BasePacket): IHeader {
@@ -78,7 +79,7 @@ export class World {
    * @param message The message to be displayed.
    * @param target Player name or target selector.
    */
-  public async sendMessage(message: string | RawMessage, target = '@a') {
+  public async sendMessage(message: string | RawText, target = '@a') {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
     const rawtext = (typeof message === 'object')
@@ -192,22 +193,6 @@ export class World {
       this.countInterval = null;
     }
   }
-  
-  // /**
-  //  * Sends an event subscribe packet.
-  //  * @param {string} eventName A name of the event.
-  //  */
-  // subscribeEvent(eventName) {
-  //   this.sendPacket(Util.eventBuilder(eventName, 'subscribe'));
-  // }
-  
-  // /**
-  //  * Sends an event unsubscribe packet.
-  //  * @param {string} eventName A name of the event.
-  //  */
-  // unsubscribeEvent(eventName) {
-  //   this.sendPacket(Util.eventBuilder(eventName, 'unsubscribe'));
-  // }
   
   /**
    * Disconnects this world.

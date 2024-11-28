@@ -38,6 +38,7 @@ export class Connection {
   }
 
   public awaitCommandResponse(requestId: string, packet: CommandRequestPacket): Promise<CommandResponsePacket> {  
+    const sentAt = Date.now();
     return new Promise((res, rej) => {
       if (!this.isOpen) return rej(new InvalidConnectionError(this.identifier));
 
@@ -49,6 +50,9 @@ export class Connection {
         this.awaitingResponses.delete(requestId);
         clearTimeout(timeout);
         res(response);
+
+        if (this.responseTimes.length > 20) this.responseTimes.shift();
+        this.responseTimes.push(Date.now() - sentAt);
       });
     });
   }
