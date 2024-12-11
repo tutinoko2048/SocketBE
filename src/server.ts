@@ -41,19 +41,23 @@ export class Server extends Emitter<ServerEvents> {
   /**
    * Sends a command to all the worlds.
    */
-  public async broadcastCommand(command: string): Promise<CommandResult<Record<string, any>>[]> {
-    const res = this.getWorlds().map(w => w.runCommand(command));
-    return await Promise.all(res);
+  public async broadcastCommand<
+    R extends Record<string, any> = Record<string, any>
+  >(command: string): Promise<CommandResult<R>[]> {
+    return await Promise.all(
+      this.getWorlds().map(w => w.runCommand<R>(command))
+    );
   }
   
   /**
    * Sends a message to all the worlds.
    * @param message The message to be displayed.
-   * @param Player name or target selector
+   * @param target name or target selector
    */
   public async broadcastMessage(message: string | RawMessage, target?: string): Promise<void> {
-    const res = this.getWorlds().map(w => w.sendMessage(message, target));
-    await Promise.all(res);
+    await Promise.all(
+      this.getWorlds().map(w => w.sendMessage(message, target))
+    );
   }
   
   /**

@@ -1,6 +1,6 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket } from '../network';
-import { PlayerJoinSignal, PlayerLeaveSignal } from '../events';
+import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import type { RawText } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail } from '../types';
@@ -82,7 +82,7 @@ export class World {
   public async sendMessage(message: string | RawText, target = '@a') {
     if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
     
-    const rawtext = (typeof message === 'object')
+    const rawtext: RawText = (typeof message === 'object')
       ? message
       : { rawtext: [{ text: String(message) }] }
     
@@ -119,8 +119,7 @@ export class World {
   public async getLocalPlayer(): Promise<string> {
     const res = await this.runCommand('getlocalplayername');
     const player = res.localplayername;
-    this.localPlayer = this.formatPlayer(player);
-    return this.localPlayer;
+    return this.formatPlayer(player);
   }
   
   /**
@@ -199,6 +198,14 @@ export class World {
    */
   public async disconnect() {
     await this.runCommand('closewebsocket');
+  }
+
+  public onConnect() {
+    this.getLocalPlayer().then(player => {
+      this.localPlayer = player;
+
+      new WorldInitializeSignal(this).emit();
+    }).catch(console.error);
   }
 
   public onDisconnect() {

@@ -3,6 +3,7 @@ export enum ServerEvent {
   Close,
   WorldAdd,
   WorldRemove,
+  WorldInitialize,
   PlayerJoin,
   PlayerLeave,
   PlayerChat,

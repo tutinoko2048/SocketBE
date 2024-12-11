@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "socket-be": ["../src/index.ts"]
+    }
+  }
+}

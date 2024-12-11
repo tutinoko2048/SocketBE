@@ -2,21 +2,20 @@ import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { Connection } from './connection';
 import { NetworkEmitter } from './emitter';
+import { World } from '../world';
+import { WorldAddSignal } from '../events';
 import { MessagePurpose, Packet, PacketBound, ServerEvent } from '../enums';
-import type { ServerOptions, WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import type { Server } from '../server';
 import { EventSubscribePacket, Packets, type BasePacket } from './packets';
 import type { IHeader, IPacket, NetworkEvent, NetworkEvents } from '../types';
 import type { NetworkHandler } from './handler';
-import { World } from '../world';
 
 
 export class Network extends NetworkEmitter {
   public readonly server: Server;
   
   public readonly wss: WebSocketServer;
-
-  public readonly options: ServerOptions;
 
   public readonly connections: Set<Connection> = new Set();
 
@@ -87,14 +86,20 @@ export class Network extends NetworkEmitter {
     console.log('Connection opened', connection.identifier);
 
     const world = new World(this.server, connection);
+
+    new WorldAddSignal(world).emit();
+    
     this.server.worlds.set(connection, world);
 
+    // send all registered events
     for (const registered of this.getRegisteredEvents()) {
       const packet = new EventSubscribePacket();
       packet.eventName = registered as Packet;
 
       this.send(connection, packet);
     }
+
+    world.onConnect();
   }
   
   public onConnectionMessage(connection: Connection, data: string) {
@@ -167,6 +172,8 @@ export class Network extends NetworkEmitter {
 
   public onConnectionClose(connection: Connection, code: number) {
     console.log('Connection closed with code', code, connection.identifier);
+    const world = this.server.worlds.get(connection);
+    world.onDisconnect();
     this.server.worlds.delete(connection);
     this.connections.delete(connection);
   }

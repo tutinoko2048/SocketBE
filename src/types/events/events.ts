@@ -5,15 +5,17 @@ import type {
   PlayerLeaveSignal,
   PlayerMessageSignal,
   PlayerTitleSignal,
+  WorldAddSignal,
+  WorldInitializeSignal,
+  WorldRemoveSignal,
 } from '../../events';
 
 export interface ServerEvents {
   [ServerEvent.Open]: [];
   [ServerEvent.Close]: [];
-  //TODO - add world events
-  [ServerEvent.WorldAdd]: [];
-  [ServerEvent.WorldRemove]: [];
-
+  [ServerEvent.WorldAdd]: [WorldAddSignal];
+  [ServerEvent.WorldRemove]: [WorldRemoveSignal];
+  [ServerEvent.WorldInitialize]: [WorldInitializeSignal];
   [ServerEvent.PlayerJoin]: [PlayerJoinSignal];
   [ServerEvent.PlayerLeave]: [PlayerLeaveSignal];
   [ServerEvent.PlayerChat]: [PlayerChatSignal];
