@@ -9,7 +9,7 @@
     "require": "./dist/index.js"
   },
   "scripts": {
-    "test": "tsup --config test/tsup.config.ts && node test/dist/index.js",
+    "test": "tsup --config test/tsup.config.ts && node --enable-source-maps test/dist/index.js",
     "lint": "eslint ./src & tsc",
     "build": "tsup"
   },

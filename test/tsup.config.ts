@@ -5,4 +5,5 @@ export default defineConfig({
   outDir: 'test/dist',
   tsconfig: 'test/tsconfig.json',
   clean: true,
+  sourcemap: true
 });

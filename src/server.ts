@@ -1,6 +1,6 @@
-import Emitter from '@serenityjs/emitter';
 import { Network, type Connection } from './network';
 import { Handlers } from './handlers';
+import { ExtendedEmitter } from './utils';
 import type { RawMessage } from '@minecraft/server';
 import type { World } from './world';
 import type { CommandResult, ServerEvents, ServerOptions } from './types';
@@ -10,10 +10,11 @@ const defaultOption: ServerOptions = {
   packetTimeout: 10_000,
   debug: false,
   commandVersion: 31,
-  formatter: {}
+  formatter: {},
+  listUpdateInterval: 1000
 }
 
-export class Server extends Emitter<ServerEvents> {
+export class Server extends ExtendedEmitter<ServerEvents> {
   public readonly network: Network;
 
   public readonly worlds: Map<Connection, World> = new Map();

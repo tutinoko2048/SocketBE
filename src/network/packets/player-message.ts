@@ -16,6 +16,8 @@ export class PlayerMessagePacket extends BasePacket {
     const packet = new PlayerMessagePacket();
     packet.message = data.message;
     packet.sender = data.sender;
+    packet.receiver = data.receiver;
+    packet.type = data.type;
 
     return packet;
   }

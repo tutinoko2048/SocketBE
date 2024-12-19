@@ -1,15 +1,17 @@
 import type { MessagePurpose, Packet } from '../../enums';
 
+type RawData = Record<string, any>;
+
 export class BasePacket {
   public static id: Packet;
 
   public static purpose: MessagePurpose;
 
-  public serialize(): string {
+  public serialize(): RawData {
     throw Error('BasePacket.serialize() is not implemented');
   }
 
-  public static deserialize(_data: Record<string, any>): BasePacket {
+  public static deserialize(_data: RawData): BasePacket {
     throw Error('BasePacket.deserialize() is not implemented');
   }
   

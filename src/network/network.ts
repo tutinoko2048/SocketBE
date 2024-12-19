@@ -1,18 +1,18 @@
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { Connection } from './connection';
-import { NetworkEmitter } from './emitter';
+import { ExtendedEmitter } from '../utils';
 import { World } from '../world';
-import { WorldAddSignal } from '../events';
 import { MessagePurpose, Packet, PacketBound, ServerEvent } from '../enums';
+import { EventSubscribePacket, Packets, type BasePacket } from './packets';
+import * as events from '../events';
 import type { WebSocket } from 'ws';
 import type { Server } from '../server';
-import { EventSubscribePacket, Packets, type BasePacket } from './packets';
 import type { IHeader, IPacket, NetworkEvent, NetworkEvents } from '../types';
 import type { NetworkHandler } from './handler';
 
 
-export class Network extends NetworkEmitter {
+export class Network extends ExtendedEmitter<NetworkEvents> {
   public readonly server: Server;
   
   public readonly wss: WebSocketServer;
@@ -62,6 +62,7 @@ export class Network extends NetworkEmitter {
       header,
       body: packet.serialize()
     });
+    
     connection.send(payload);
     
     return header;
@@ -75,28 +76,38 @@ export class Network extends NetworkEmitter {
     const connection = new Connection(this, ws);
     this.connections.add(connection);
 
-    ws.on('open', this.onConnectionOpen.bind(this, connection));
     ws.on('message', this.onConnectionMessage.bind(this, connection));
     ws.on('close', this.onConnectionClose.bind(this, connection));
-
+    
     console.log('New connection', connection.identifier);
-  }  
-
-  public onConnectionOpen(connection: Connection) {
-    console.log('Connection opened', connection.identifier);
 
     const world = new World(this.server, connection);
 
-    new WorldAddSignal(world).emit();
+    new events.WorldAddSignal(world).emit();
     
     this.server.worlds.set(connection, world);
 
     // send all registered events
-    for (const registered of this.getRegisteredEvents()) {
+    const registeredEvents: Set<Packet | 'all'> = this.getRegisteredEvents();
+
+    for (const registered of this.server.getRegisteredEvents()) {
+      // get subscribed EventSignal class
+      const Signal = Object.values(events).find(Signal => Signal.identifier === registered);
+      if (!Signal) continue;
+      for (const packetId of Signal.packets) {
+        registeredEvents.add(packetId);
+      }
+    }
+
+    for (const registered of registeredEvents) {
+      if (registered === 'all') continue;
+
       const packet = new EventSubscribePacket();
-      packet.eventName = registered as Packet;
+      packet.eventName = registered;
 
       this.send(connection, packet);
+      console.log('subscribe', registered);
+      
     }
 
     world.onConnect();
@@ -106,7 +117,7 @@ export class Network extends NetworkEmitter {
     let rawPacket: IPacket;
     try {
       rawPacket = JSON.parse(data);
-      console.log('onConnectionMessage', rawPacket);
+      // console.log('onConnectionMessage', rawPacket);
     } catch {
       console.error('[Network] Failed to parse packet from', connection.identifier);
       return;
@@ -114,12 +125,16 @@ export class Network extends NetworkEmitter {
 
     if (!rawPacket?.header?.messagePurpose) return console.error('[Network] Received invalid packet from', connection.identifier);
 
-    switch (rawPacket.header.messagePurpose) {
+    const { messagePurpose } = rawPacket.header;
+    switch (messagePurpose) {
       case MessagePurpose.CommandResponse:
+      case MessagePurpose.Error:
       case MessagePurpose.Event: {
-        const packetId = rawPacket.header.messagePurpose === MessagePurpose.Event
+        const packetId = messagePurpose === MessagePurpose.Event
           ? rawPacket.header.eventName
-          : Packet.CommandResponse;
+          : messagePurpose === MessagePurpose.Error
+            ? Packet.CommandError
+            : Packet.CommandResponse;
         const PacketType = Packets[packetId];
         if (!PacketType) {
           console.error('[Network] Unknown packet for packetId', packetId);
@@ -150,19 +165,15 @@ export class Network extends NetworkEmitter {
               instance.handle(packet, connection, rawPacket.header);
               handled = true;
             } catch (error) {
-              console.error(`[Network] Error while handling packet ${Packet[packetId]}`, error);
+              console.error(`[Network] Error while handling packet ${Packet[packetId]}\n`, error);
             }
           }
           if (!handled) {
-            console.error(`[Network] No handler found for packet ${Packet[packetId]}`);
+            // console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
           }
         } catch (error) {
           console.error('[Network] Failed to deserialize packet', error);
         }
-        break;
-      }
-      case MessagePurpose.Error: {
-        console.error('[Network] Error packet received', rawPacket.body);
         break;
       }
       default:

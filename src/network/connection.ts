@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
 import type { WebSocket } from 'ws';
 import type { Network } from './network';
-import type { CommandRequestPacket, CommandResponsePacket } from './packets';
-import { CommandTimeoutError, InvalidConnectionError } from '../errors';
+import { CommandErrorPacket, type CommandRequestPacket, type CommandResponsePacket } from './packets';
+import { CommandError, CommandTimeoutError, InvalidConnectionError } from '../errors';
 
 
 export class Connection {
@@ -12,7 +12,7 @@ export class Connection {
 
   public readonly identifier: string = randomUUID();
 
-  public readonly awaitingResponses: Map<string, (arg: CommandResponsePacket) => void> = new Map();
+  public readonly awaitingResponses: Map<string, (arg: CommandResponsePacket | CommandErrorPacket) => void> = new Map();
   
   public readonly responseTimes: number[] = [];
 
@@ -31,7 +31,7 @@ export class Connection {
     this.ws.send(payload);
   }
 
-  public onCommandResponse(requestId: string, packet: CommandResponsePacket) {
+  public onCommandResponse(requestId: string, packet: CommandResponsePacket | CommandErrorPacket) {
     const callback = this.awaitingResponses.get(requestId);
     if (!callback) return console.error('[Network] Received invalid command response', packet.data);
     callback(packet);
@@ -49,6 +49,13 @@ export class Connection {
       this.awaitingResponses.set(requestId, (response) => {
         this.awaitingResponses.delete(requestId);
         clearTimeout(timeout);
+
+        if (response instanceof CommandErrorPacket) {
+          return rej(
+            new CommandError(response.statusCode, response.statusMessage)
+          );
+        }
+
         res(response);
 
         if (this.responseTimes.length > 20) this.responseTimes.shift();

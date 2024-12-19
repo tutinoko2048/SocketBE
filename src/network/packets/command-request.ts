@@ -9,11 +9,11 @@ export class CommandRequestPacket extends BasePacket {
 
   public version: VersionResolvable;
 
-  public serialize(): string {
-    return JSON.stringify({
+  public serialize() {
+    return {
       commandLine: this.commandLine,
       version: this.version,
-    });
+    };
   }
 
   public static deserialize(data: Record<string, any>): CommandRequestPacket {

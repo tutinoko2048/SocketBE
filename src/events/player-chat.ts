@@ -1,10 +1,12 @@
-import { ServerEvent } from '../enums';
+import { Packet, ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
 import type { World } from '../world';
 
 
 export class PlayerChatSignal extends WorldEventSignal {
   public static readonly identifier: ServerEvent = ServerEvent.PlayerChat;
+
+  public static readonly packets: Packet[] = [Packet.PlayerMessage];
   
   public readonly sender: string;
   

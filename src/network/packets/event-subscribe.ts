@@ -6,9 +6,9 @@ import { MessagePurpose, Packet } from '../../enums';
 export class EventSubscribePacket extends BasePacket {
   public eventName: Packet;
   
-  public serialize(): string {
-    return JSON.stringify({
+  public serialize() {
+    return {
       eventName: this.eventName
-    });
+    };
   }
 }
