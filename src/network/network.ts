@@ -88,7 +88,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     this.server.worlds.set(connection, world);
 
     // send all registered events
-    const registeredEvents: Set<Packet | 'all'> = this.getRegisteredEvents();
+    const registeredEvents: Set<Packet | 'all' | 'raw'> = this.getRegisteredEvents();
 
     for (const registered of this.server.getRegisteredEvents()) {
       // get subscribed EventSignal class
@@ -100,7 +100,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
 
     for (const registered of registeredEvents) {
-      if (registered === 'all') continue;
+      if (registered === 'all' || registered === 'raw') continue;
 
       const packet = new EventSubscribePacket();
       packet.eventName = registered;
@@ -117,24 +117,33 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     let rawPacket: IPacket;
     try {
       rawPacket = JSON.parse(data);
-      // console.log('onConnectionMessage', rawPacket);
+
+      if (!(
+        typeof rawPacket === 'object' &&
+        typeof rawPacket.header === 'object' &&
+        typeof rawPacket.body === 'object'
+      )) return;
+      
+      this.emit('raw', { ...rawPacket, connection });
     } catch {
       console.error('[Network] Failed to parse packet from', connection.identifier);
       return;
     }
 
-    if (!rawPacket?.header?.messagePurpose) return console.error('[Network] Received invalid packet from', connection.identifier);
-
-    const { messagePurpose } = rawPacket.header;
+    const { messagePurpose } = rawPacket.header;    
     switch (messagePurpose) {
       case MessagePurpose.CommandResponse:
       case MessagePurpose.Error:
       case MessagePurpose.Event: {
-        const packetId = messagePurpose === MessagePurpose.Event
-          ? rawPacket.header.eventName
-          : messagePurpose === MessagePurpose.Error
-            ? Packet.CommandError
-            : Packet.CommandResponse;
+        let packetId: Packet;
+        if (messagePurpose === MessagePurpose.CommandResponse) {
+          packetId = Packet.CommandResponse;
+        } else if (messagePurpose === MessagePurpose.Error) {
+          packetId = Packet.CommandError;
+        } else if (messagePurpose === MessagePurpose.Event) {
+          packetId = rawPacket.header.eventName;
+        }
+        
         const PacketType = Packets[packetId];
         if (!PacketType) {
           console.error('[Network] Unknown packet for packetId', packetId);
@@ -177,7 +186,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
         break;
       }
       default:
-        console.error('[Network] Invalid message purpose', rawPacket.header.messagePurpose);
+        console.error('[Network] Invalid message purpose:', messagePurpose);
     }
   }
 

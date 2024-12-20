@@ -51,9 +51,7 @@ export class Connection {
         clearTimeout(timeout);
 
         if (response instanceof CommandErrorPacket) {
-          return rej(
-            new CommandError(response.statusCode, response.statusMessage)
-          );
+          return rej(new CommandError(response.statusCode, response.statusMessage));
         }
 
         res(response);

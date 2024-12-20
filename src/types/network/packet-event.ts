@@ -8,3 +8,9 @@ export interface NetworkEvent<T extends BasePacket> {
   bound: PacketBound;
   header: IHeader;
 }
+
+export interface RawNetworkEvent<T = Record<string, any>> {
+  header: IHeader;
+  body: T;
+  connection: Connection;
+}

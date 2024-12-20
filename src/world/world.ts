@@ -6,6 +6,8 @@ import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { InvalidConnectionError, CommandTimeoutError, CommandError } from '../errors';
 
 
 export class World {
@@ -57,6 +59,11 @@ export class World {
    * Runs a particular command from the world.
    * @param command Command to run.
    * @returns A JSON structure with command response values.
+   * 
+   * @throws This function can throw errors.
+   * {@link InvalidConnectionError}
+   * {@link CommandTimeoutError}
+   * {@link CommandError}
    */
   public async runCommand<
     R extends Record<string, any> = Record<string, any>
