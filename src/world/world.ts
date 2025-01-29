@@ -1,6 +1,7 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
+import { Player } from './player';
 import type { RawText } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail } from '../types';
@@ -19,12 +20,12 @@ export class World {
   
   public readonly scoreboard: Scoreboard;
 
-  public localPlayer: string | null = null;
+  public readonly players: Map<string, Player> = new Map();
+
+  public localPlayer: Player | null = null;
   
   public maxPlayers: number = -1;
   
-  public lastPlayers: string[] = [];
-
   private readonly index = World.index++;
 
   private countInterval: NodeJS.Timeout | null = null;
@@ -86,16 +87,21 @@ export class World {
    * @param message The message to be displayed.
    * @param target Player name or target selector.
    */
-  public async sendMessage(message: string | RawText, target = '@a') {
-    if (!target.match(/@s|@p|@a|@r|@e/)) target = `"${target}"`;
+  public async sendMessage(message: string | RawText, target: string | Player = '@a') {
+    let commandTarget: string;
+    //TODO - implement EntityQueryOptions
+    if (typeof target === 'string') {
+      if (!target.match(/@s|@p|@a|@r|@e/)) commandTarget = `"${target}"`;
+    } else {
+      commandTarget = `"${target.rawName}"`;
+    }
     
     const rawtext: RawText = (typeof message === 'object')
       ? message
       : { rawtext: [{ text: String(message) }] }
     
-    await this.runCommand(`tellraw ${target} ${JSON.stringify(rawtext)}`);
+    await this.runCommand(`tellraw ${commandTarget} ${JSON.stringify(rawtext)}`);
   }
-  
   
   /**
    * Returns information about players in the world.
@@ -104,7 +110,7 @@ export class World {
     const data = await this.runCommand('list');
     const status = data.statusCode == 0;
     const players: string[] = status ? data.players.split(', ') : [];
-    const formattedPlayers = players.map(name => this.formatPlayer(name));
+    const formattedPlayers = players.map(name => this.formatPlayerName(name));
     return {
       current: status ? data.currentPlayerCount : 0,
       max: status ? data.maxPlayerCount : 0,
@@ -115,36 +121,20 @@ export class World {
   /**
    * Returns an array of player names in the world.
    */
-  public async getPlayers(): Promise<string[]> {
-    const { players } = await this.getPlayerList();
-    return players;
+  public async getPlayers(): Promise<Player[]> {
+    await this.updatePlayerList();
+    return [...this.players.values()];
   }
   
   /**
    * Returns the name of local player (client)
    */
-  public async getLocalPlayer(): Promise<string> {
+  public async getLocalPlayer(): Promise<Player> {
+    if (this.localPlayer) return this.localPlayer;
+
     const res = await this.runCommand('getlocalplayername');
-    const player = res.localplayername;
-    return this.formatPlayer(player);
-  }
-  
-  /**
-   * Returns all tags that a player has.
-   */
-  public async getTags(player: string): Promise<string[]> {
-    const res = await this.runCommand(`tag "${player}" list`);
-    const tags: string[] = (res.statusMessage.match(/§a.*?§r/g) as string[])
-      .map(str => str.replace(/§a|§r/g, ''));
-    return tags;
-  }
-  
-  /**
-   * Tests whether an player has a particular tag.
-   */
-  public async hasTag(player: string, tag: string): Promise<boolean> {
-    const tags = await this.getTags(player);
-    return tags.includes(tag);
+    const localPlayerName: string = res.localplayername;
+    return this.resolvePlayer(localPlayerName);
   }
   
   /**
@@ -155,7 +145,7 @@ export class World {
     const status = res.statusCode === 0;
     const details: PlayerDetail[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
     const players: string[] = status ? res.players.split(', ') : [];
-    const formattedPlayers = players.map(name => this.formatPlayer(name));
+    const formattedPlayers = players.map(name => this.formatPlayerName(name));
     
     return {
       details,
@@ -167,21 +157,22 @@ export class World {
   
   private async updatePlayerList(isFirst = false) {
     try {
-      const { players, max } = await this.getPlayerList();
-      const joins = players.filter(i => this.lastPlayers.indexOf(i) === -1);
-      const leaves = this.lastPlayers.filter(i => players.indexOf(i) === -1);
+      const { players: newPlayers, max } = await this.getPlayerList();
+      const joins = newPlayers.filter(rawName => !this.players.has(rawName))
+      const leaves = [...this.players.keys()].filter(rawName => !newPlayers.includes(rawName));
       
-      this.lastPlayers = players;
       this.maxPlayers = max;
 
       if (isFirst) return;
 
-      for (const player of joins) {
-        new PlayerJoinSignal(this, player).emit();
+      for (const join of joins) {
+        const player = this.resolvePlayer(join);
+        if (!isFirst) new PlayerJoinSignal(this, player).emit();
       }
 
-      for (const player of leaves) {
-        new PlayerLeaveSignal(this, player).emit();
+      for (const leave of leaves) {
+        const player = this.resolvePlayer(leave);
+        if (!isFirst) new PlayerLeaveSignal(this, player).emit();
       }
     } catch {}
   }
@@ -212,14 +203,21 @@ export class World {
       this.localPlayer = player;
 
       new WorldInitializeSignal(this).emit();
-    }).catch(console.error);
+    }).catch(() => console.error('Failed to get local player'));
   }
 
   public onDisconnect() {
     this.stopInterval();
   }
 
-  private formatPlayer(player: string) {
-    return this.server.options.formatter.playerName?.(player) ?? player;
+  public resolvePlayer(rawName: string): Player {
+    let player = this.players.get(rawName);
+    player ??= new Player(this, rawName);
+    this.players.set(rawName, player);
+    return player;
+  }
+
+  public formatPlayerName(playerName: string) {
+    return this.server.options.formatter.playerName?.(playerName) ?? playerName;
   }
 }

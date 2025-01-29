@@ -1,5 +1,5 @@
 import { ServerEvent } from '../enums';
-import type { World } from '../world';
+import type { Player, World } from '../world';
 import { PlayerChatSignal } from './player-chat';
 
 
@@ -10,7 +10,7 @@ export class PlayerTitleSignal extends PlayerChatSignal {
 
   public constructor(
     world: World, 
-    sender: string, 
+    sender: Player, 
     message: string,
     receiver: string, 
   ) {

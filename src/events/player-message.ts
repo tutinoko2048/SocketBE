@@ -1,7 +1,7 @@
 import { ServerEvent, type PlayerMessageType } from '../enums';
 import { PlayerChatSignal } from './player-chat';
 import type { RawText } from '@minecraft/server';
-import type { World } from '../world';
+import type { Player, World } from '../world';
 
 
 type MessageType = PlayerMessageType.Me | PlayerMessageType.Say | PlayerMessageType.Tell;
@@ -15,7 +15,7 @@ export class PlayerMessageSignal extends PlayerChatSignal {
 
   public constructor(
     world: World, 
-    sender: string, 
+    sender: Player, 
     message: string, 
     receiver: string, 
     type: MessageType

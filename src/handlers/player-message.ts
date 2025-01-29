@@ -7,7 +7,9 @@ export class PlayerMessageHandler extends NetworkHandler {
 
   public handle(packet: PlayerMessagePacket, connection: Connection): void {
     const world = this.server.getWorldByConnection(connection);
-    const { sender, message, receiver } = packet;
+    const { sender: senderName, message, receiver } = packet;
+
+    const sender = world.resolvePlayer(senderName);
     
     switch (packet.type) {
       case PlayerMessageType.Chat: {
