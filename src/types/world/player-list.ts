@@ -19,6 +19,9 @@ export interface PlayerDetail {
   ping: number;
   randomId: number;
   uuid: string;
+
+  /** Only on bedrock server */
+  xuid?: string;
 }
 
 export interface PlayerListDetail extends PlayerList {

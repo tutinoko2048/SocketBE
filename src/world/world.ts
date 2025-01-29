@@ -2,9 +2,9 @@ import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
-import type { RawText } from '@minecraft/server';
+import type { RawText, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
-import type { PlayerList, PlayerDetail, PlayerListDetail } from '../types';
+import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -154,6 +154,26 @@ export class World {
       players: formattedPlayers
     }
   }
+
+  /**
+   * Returns the top solid block at a particular position.
+   * @param position If not specified, the position of the local player is used.
+   */
+  public async getTopSolidBlock(position?: Vector3): Promise<BlockInfo> {
+    const positionArg = position ? `${position.x} ${position.y} ${position.z}` : '~ ~ ~';
+    const res = await this.runCommand<BlockInfo>(`gettopsolidblock ${positionArg}`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
+    const block: BlockInfo = { blockName: res.blockName, position: res.position };
+    return block;
+  }
+
+  /**
+   * Disconnects this world.
+   */
+  public async disconnect() {
+    await this.runCommand('closewebsocket');
+  }
   
   private async updatePlayerList(isFirst = false) {
     try {
@@ -173,6 +193,7 @@ export class World {
       for (const leave of leaves) {
         const player = this.resolvePlayer(leave);
         if (!isFirst) new PlayerLeaveSignal(this, player).emit();
+        this.players.delete(leave);
       }
     } catch {}
   }
@@ -189,13 +210,6 @@ export class World {
       clearInterval(this.countInterval);
       this.countInterval = null;
     }
-  }
-  
-  /**
-   * Disconnects this world.
-   */
-  public async disconnect() {
-    await this.runCommand('closewebsocket');
   }
 
   public onConnect() {
