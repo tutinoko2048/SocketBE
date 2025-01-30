@@ -1,33 +1,39 @@
-import { ServerEvent, type PlayerMessageType } from '../enums';
 import { PlayerChatSignal } from './player-chat';
+import { ServerEvent, type PlayerMessageType } from '../enums';
+import { RawTextUtil } from '../utils';
 import type { RawText } from '@minecraft/server';
 import type { Player, World } from '../world';
+import type { RawTextResolvable } from '../types';
 
 
 type MessageType = PlayerMessageType.Me | PlayerMessageType.Say | PlayerMessageType.Tell;
 
-export class PlayerMessageSignal extends PlayerChatSignal {
+export class PlayerMessageSignal extends PlayerChatSignal implements RawTextResolvable {
   public static readonly identifier: ServerEvent = ServerEvent.PlayerMessage;
 
-  public readonly receiver: string;
-
   public readonly type: MessageType;
+  
+  public readonly receiver?: Player;
 
   public constructor(
     world: World, 
     sender: Player, 
     message: string, 
-    receiver: string, 
-    type: MessageType
+    type: MessageType,
+    receiver?: Player, 
   ) {
     super(world, sender, message);
-    this.receiver = receiver;
     this.type = type;
+    this.receiver = receiver;
+  }
+
+  public isRawText(): boolean {
+    return RawTextUtil.isRawText(this.message);
   }
 
   public getRawText(): RawText | undefined {
     try {
-      return JSON.parse(this.message) as RawText;
+      return RawTextUtil.parseRawText(this.message);
     } catch {}
   }
 }

@@ -4,20 +4,20 @@ import { BasePacket } from './base';
 
 @PacketClass(Packet.PlayerMessage)
 export class PlayerMessagePacket extends BasePacket {  
+  public type: PlayerMessageType;
+
   public message: string;
   
   public sender: string;
 
   public receiver: string;
-  
-  public type: PlayerMessageType;
 
   public static deserialize(data: Record<string, any>): PlayerMessagePacket {
     const packet = new PlayerMessagePacket();
+    packet.type = data.type;
     packet.message = data.message;
     packet.sender = data.sender;
     packet.receiver = data.receiver;
-    packet.type = data.type;
 
     return packet;
   }

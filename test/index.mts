@@ -29,7 +29,7 @@ server.network.on('all', event => {
 });
 
 server.on(ServerEvent.PlayerChat, event => {
-  console.log('Player chat', event.sender, event.message);
+  console.dir(event, { depth: 1 });
 })
 
 server.on(ServerEvent.WorldAdd, event => {
@@ -42,6 +42,14 @@ server.on(ServerEvent.WorldInitialize, event => {
 
 server.on(ServerEvent.WorldRemove, event => {
   console.log('World removed', event.world.connection.identifier);
+})
+
+server.on(ServerEvent.PlayerMessage, event => {
+  console.dir(event, { depth: 1 });
+})
+
+server.on(ServerEvent.PlayerTitle, event => {
+  console.dir(event, { depth: 1 });
 })
 
 server.on(ServerEvent.PlayerJoin, event => {
