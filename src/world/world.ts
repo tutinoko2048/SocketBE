@@ -211,7 +211,7 @@ export class World {
    * @param duration The duration of the weather (in ticks).
    */
   public async setWeather(weatherType: WeatherType, duration?: number): Promise<void> {
-    const res = await this.runCommand(`weather ${weatherType}`);
+    const res = await this.runCommand(`weather ${weatherType} ${duration ?? ''}`);
     if (res.statusCode !== 0) throw new Error(res.statusMessage);
   }
   
