@@ -35,7 +35,7 @@ export class Server extends ExtendedEmitter<ServerEvents> {
     return this.worlds.get(connection);
   }
 
-  public getWorlds() {
+  public getWorlds(): World[] {
     return [...this.worlds.values()];
   }
 

@@ -1,5 +1,5 @@
 import { Scoreboard } from './scoreboard';
-import { CommandRequestPacket } from '../network';
+import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
 import { WeatherType } from '../enums';
@@ -67,14 +67,17 @@ export class World {
    * - {@link CommandTimeoutError}  
    * - {@link CommandError}  
    */
-  public async runCommand<
-    R extends Record<string, any> = Record<string, any>
-  >(command: string): Promise<CommandResult<R>> {
+  public async runCommand<R extends Record<string, any> = Record<string, any>>(
+    command: string,
+    noResponse = false
+  ): Promise<CommandResult<R>> {
     const packet = new CommandRequestPacket();
     packet.version = this.server.options.commandVersion;
     packet.commandLine = command;
 
     const header = this.send(packet);
+
+    if (noResponse) return CommandResponsePacket.createEmptyResult<R>();
 
     const response = await this.connection.awaitCommandResponse(header.requestId, packet);
     return response.toCommandResult<R>();
@@ -219,7 +222,7 @@ export class World {
    * Disconnects this world.
    */
   public async disconnect() {
-    await this.runCommand('closewebsocket');
+    await this.runCommand('closewebsocket', true);
   }
   
   private async updatePlayerList(isFirst = false) {
@@ -230,8 +233,6 @@ export class World {
       
       this.maxPlayers = max;
 
-      if (isFirst) return;
-
       for (const join of joins) {
         const player = this.resolvePlayer(join, true);
         if (!isFirst) new PlayerJoinSignal(this, player).emit();
@@ -239,16 +240,15 @@ export class World {
 
       for (const leave of leaves) {
         const player = this.resolvePlayer(leave); // Player should exist, no need to register
-        if (!isFirst) new PlayerLeaveSignal(this, player).emit();
+        new PlayerLeaveSignal(this, player).emit(); // isFirst always false here
         this.players.delete(leave);
       }
     } catch {}
   }
-  
 
   private startInterval() {
     if (this.countInterval) return;
-    void this.updatePlayerList();
+    void this.updatePlayerList(true);
     this.countInterval = setInterval(this.updatePlayerList.bind(this), this.server.options.listUpdateInterval);
   }
   

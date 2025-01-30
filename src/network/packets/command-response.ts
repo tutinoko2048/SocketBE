@@ -19,11 +19,11 @@ export class CommandResponsePacket extends BasePacket {
     return this.data as CommandResult<T>;
   }
 
-  public static createEmptyResult(): CommandResult<Record<string, unknown>> {
+  public static createEmptyResult<T extends Record<string, any>>(): CommandResult<T> {
     return {
       statusCode: 0,
       statusMessage: '',
-    };
+    } as CommandResult<T>;
   }
 
   public static deserialize(data: Record<string, any>): CommandResponsePacket {

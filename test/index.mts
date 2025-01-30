@@ -9,6 +9,11 @@ const rl = createInterface({
 rl.on('line', line => {
   const command = line.trim();
   if (command === '') return;
+
+  if (command === '.disconnect') {
+    return server.getWorlds().forEach(world => world.disconnect());
+  }
+
   server.broadcastCommand(command).then(res => {
     console.log(res);
   }).catch(console.error);
