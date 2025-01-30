@@ -5,3 +5,5 @@ export * from './objective-sort-order';
 export * from './packet';
 export * from './player-message-type';
 export * from './server-event';
+export * from './time-of-day';
+export * from './weather-type';

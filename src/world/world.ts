@@ -2,6 +2,7 @@ import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
+import { WeatherType } from '../enums';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo } from '../types';
@@ -62,9 +63,9 @@ export class World {
    * @returns A JSON structure with command response values.
    * 
    * @throws This function can throw errors.
-   * {@link InvalidConnectionError}
-   * {@link CommandTimeoutError}
-   * {@link CommandError}
+   * - {@link InvalidConnectionError}  
+   * - {@link CommandTimeoutError}  
+   * - {@link CommandError}  
    */
   public async runCommand<
     R extends Record<string, any> = Record<string, any>
@@ -77,9 +78,6 @@ export class World {
 
     const response = await this.connection.awaitCommandResponse(header.requestId, packet);
     return response.toCommandResult<R>();
-
-    //TODO - recheck tellraw command response
-    // if (command.startsWith('tellraw')) return {}; // no packet returns on tellraw command
   }
   
   /**
@@ -100,7 +98,8 @@ export class World {
       ? message
       : { rawtext: [{ text: String(message) }] }
     
-    await this.runCommand(`tellraw ${commandTarget} ${JSON.stringify(rawtext)}`);
+    const res = await this.runCommand(`tellraw ${commandTarget} ${JSON.stringify(rawtext)}`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
   }
   
   /**
@@ -133,6 +132,8 @@ export class World {
     if (this.localPlayer) return this.localPlayer;
 
     const res = await this.runCommand('getlocalplayername');
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
     const localPlayerName: string = res.localplayername;
     return this.resolvePlayer(localPlayerName);
   }
@@ -168,6 +169,52 @@ export class World {
     return block;
   }
 
+  public async getCurrentTick(): Promise<number> {
+    const res = await this.runCommand<{ data: number }>('time query gametime');
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    
+    return res.data;
+  }
+
+  public async getDay(): Promise<number> {
+    const res = await this.runCommand<{ data: number }>('time query day');
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    
+    return res.data;
+  }
+
+  public async getTimeOfDay(): Promise<number> {
+    const res = await this.runCommand<{ data: number }>('time query daytime');
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    
+    return res.data;
+  }
+
+  public async setTimeOfDay(time: number): Promise<void> {
+    const res = await this.runCommand(`time set ${time}`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+  }
+
+  public async getWeather(): Promise<WeatherType> {
+    const res = await this.runCommand<{ data: number }>('weather query');
+    
+    switch (res.data) {
+      case 0: return WeatherType.Clear;
+      case 1: return WeatherType.Rain;
+      case 2: return WeatherType.Thunder;
+      default: throw new Error('Unknown weather type: ' + res.data);
+    }
+  }
+
+  /**
+   * @param weatherType The type of weather to apply.
+   * @param duration The duration of the weather (in ticks).
+   */
+  public async setWeather(weatherType: WeatherType, duration?: number): Promise<void> {
+    const res = await this.runCommand(`weather ${weatherType}`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+  }
+  
   /**
    * Disconnects this world.
    */
@@ -186,12 +233,12 @@ export class World {
       if (isFirst) return;
 
       for (const join of joins) {
-        const player = this.resolvePlayer(join);
+        const player = this.resolvePlayer(join, true);
         if (!isFirst) new PlayerJoinSignal(this, player).emit();
       }
 
       for (const leave of leaves) {
-        const player = this.resolvePlayer(leave);
+        const player = this.resolvePlayer(leave); // Player should exist, no need to register
         if (!isFirst) new PlayerLeaveSignal(this, player).emit();
         this.players.delete(leave);
       }
@@ -224,10 +271,13 @@ export class World {
     this.stopInterval();
   }
 
-  public resolvePlayer(rawName: string): Player {
+  /**
+   * @param register If true, the player will be registered in the world.
+   */
+  public resolvePlayer(rawName: string, register = false): Player {
     let player = this.players.get(rawName);
     player ??= new Player(this, rawName);
-    this.players.set(rawName, player);
+    if (register) this.players.set(rawName, player);
     return player;
   }
 
