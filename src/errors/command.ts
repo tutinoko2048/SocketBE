@@ -6,7 +6,7 @@ export class CommandError extends Error {
     public readonly statusCode: number,
     public readonly statusMessage: string
   ) {
-    super(`[CommandError] ${statusMessage} (${statusCode})`);
+    super(`${statusMessage} (${statusCode})`);
     this.name = this.constructor.name;
   }
 }
