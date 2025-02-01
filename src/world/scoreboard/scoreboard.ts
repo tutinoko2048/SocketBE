@@ -1,12 +1,15 @@
+import { Player } from '../player';
+import { ScoreboardObjective } from './objective';
 import type { DisplaySlotId, ObjectiveSortOrder } from '../../enums';
 import type { World } from '../world';
-import { ScoreboardObjective } from './objective';
 
 export class Scoreboard {
   /**
    * World instance that this manager belongs to.
    */
   public readonly world: World;
+
+  public readonly objectives = new Map<string, ScoreboardObjective>();
 
   constructor(world: World) {
     this.world = world;
@@ -17,9 +20,19 @@ export class Scoreboard {
    */
   public async getObjectives(): Promise<ScoreboardObjective[]> {
     const res = await this.world.runCommand('scoreboard objectives list');
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
     const objectives = res.statusMessage.split('\n').slice(1).map(entry => {
       const [ id, displayName ] = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0].slice(1,3);
-      return new ScoreboardObjective(this.world, id, displayName);
+      let objective = this.objectives.get(id);
+      if (objective) {
+        // @ts-expect-error overwrite displayName internally
+        objective.displayName = displayName;
+      } else {
+        objective = new ScoreboardObjective(this, id, displayName);
+      }
+      this.objectives.set(id, objective);
+      return objective;
     });
     
     return objectives;
@@ -30,38 +43,49 @@ export class Scoreboard {
    */
   public async getObjective(objectiveId: string): Promise<ScoreboardObjective | undefined> {
     const res = await this.getObjectives();
-    return res.find(objective => objective.id === objectiveId); 
+    return res.find(objective => objective.id === objectiveId);
   }
   
   /**
    * Adds a new objective to the scoreboard.
    */
-  public async addObjective(objectiveId: string, displayName = ''): Promise<ScoreboardObjective | null> {
-    if (await this.getObjective(objectiveId)) return null;
-    const res = await this.world.runCommand(`scoreboard objectives add "${objectiveId}" dummy "${displayName}"`);
-    if (res.statusCode !== 0) return null;
-    return new ScoreboardObjective(this.world, objectiveId, displayName);
+  public async addObjective(objectiveId: string, displayName?: string): Promise<ScoreboardObjective | null> {
+    let commandString = `scoreboard objectives add "${objectiveId}" dummy`;
+    if (displayName) commandString += ` "${displayName}"`;
+
+    const res = await this.world.runCommand(commandString);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
+    const objective = new ScoreboardObjective(this, objectiveId, displayName ?? objectiveId);
+    this.objectives.set(objectiveId, objective);
+
+    return objective;
   }
   
   /**
    * Removes an objective from the scoreboard.
-   * @param objectiveId Objective to remove from scoreboard.
-   * @returns Whether successful to remove objective.
    */
-  public async removeObjective(objectiveId: string | ScoreboardObjective): Promise<boolean> {
-    const objective = Scoreboard.resolveObjective(objectiveId);
-    if (!(await this.getObjective(objective))) return false;
-    const res = await this.world.runCommand(`scoreboard objectives remove ${objective}`);
-    return res.statusCode === 0;
+  public async removeObjective(objective: ScoreboardObjective | string): Promise<boolean> {
+    const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
+
+    const res = await this.world.runCommand(`scoreboard objectives remove "${objectiveId}"`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
+    this.objectives.delete(objectiveId);
+
+    return true;
   }
 
   /**
    * Returns all of scores that player has.
-   * @param player Player to retrieve the score for.
    * @returns Score values.
    */
-  public async getScores(player: string): Promise<Record<string, number | null>> {
-    const res = await this.world.runCommand(`scoreboard players list "${player}"`);
+  public async getScores(player: Player | string): Promise<Record<string, number | null>> {
+    const playerName = player instanceof Player ? player.rawName : player;
+    
+    const res = await this.world.runCommand(`scoreboard players list "${playerName}"`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+
     try {
       return Object.fromEntries(
         [...res.statusMessage.matchAll(/: (-*\d*) \((.*?)\)/g)]
@@ -74,86 +98,72 @@ export class Scoreboard {
   
   /**
    * Returns a score given a player and objective.
-   * @param player Name of the player to retrieve the score for.
-   * @param objectiveId Objective to retrieve the score for.
-   * @returns Score value.
    */
-  public async getScore(player: string, objectiveId: string | ScoreboardObjective): Promise<number | null> {
-    const objective = Scoreboard.resolveObjective(objectiveId);
-    const res = await this.getScores(player);
-    return res[objective];
+  public async getScore(player: Player | string, objective: ScoreboardObjective | string): Promise<number | null> {
+    const scores = await this.getScores(player);
+    const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
+    return scores[objectiveId];
   }
   
   /**
    * Sets the score given a player and objective.
-   * @param player Name of the player.
-   * @param objectiveId Objective to apply the score to.
-   * @param score New value of the score.
-   * @returns New value of the score, returns null if failed to set the score.
+   * @returns New value of the score.
    */
-  public async setScore(player: string, objectiveId: string | ScoreboardObjective, score: number): Promise<number | null> {
-    const objective = Scoreboard.resolveObjective(objectiveId);
-    const res = await this.world.runCommand(`scoreboard players set "${player}" "${objective}" ${score}`);
-    return res.statusCode === 0 ? score : null;
+  public async setScore(player: Player | string, objective: ScoreboardObjective | string, score: number): Promise<number> {
+    const playerName = player instanceof Player ? player.rawName : player;
+    const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
+
+    const res = await this.world.runCommand(`scoreboard players set "${playerName}" "${objectiveId}" ${score}`);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    
+    return score;
   }
   
   /**
    * Adds the score given a player and objective.
-   * @param player Name of the player.
-   * @param objectiveId Objective to apply the score to.
-   * @param score The amount of score to add.
-   * @returns New value of the score, returns null if failed to add the score.
+   * @returns New value of the score.
    */
-  public async addScore(player: string, objectiveId: string | ScoreboardObjective, score: number): Promise<number | null> {
-    let res = await this.getScore(player, objectiveId);
-    if (isNaN(res)) return null;
-    const value = res += score;
-    return await this.setScore(player, objectiveId, value);
+  public async addScore(player: Player | string, objective: ScoreboardObjective | string, score: number): Promise<number> {
+    const current = await this.getScore(player, objective) ?? 0;
+    return await this.setScore(player, objective, current + score);
   }
   
   /**
    * Removes the score given a player and objective.
-   * @param player Name of the player.
-   * @param objectiveId Objective to apply the score to.
-   * @param score The amount of score to remove.
-   * @returns New value of the score, returns null if failed to remove the score.
+   * @returns New value of the score.
    */
-  public async removeScore(player: string, objectiveId: string | ScoreboardObjective, score: number) {
-    let res = await this.getScore(player, objectiveId);
-    if (isNaN(res)) return null;
-    const value = res -= score;
-    return await this.setScore(player, objectiveId, value);
+  public async removeScore(player: Player | string, objective: ScoreboardObjective | string, score: number): Promise<number> {
+    const current = await this.getScore(player, objective) ?? 0;
+    return await this.setScore(player, objective, current - score);
   }
   
   /**
    * Removes a player from an objective.
-   * @param player Name of the player.
-   * @param objectiveId Objective that player is removed from.
-   * @returns Whether successful to reset score of player.
    */
-  public async resetScore(player: string, objectiveId: string | ScoreboardObjective = ''): Promise<boolean> {
-    const objective = Scoreboard.resolveObjective(objectiveId);
-    const res = await this.world.runCommand(`scoreboard players reset "${player}" "${objective}"`);
-    return res.statusCode === 0;
+  public async resetScore(player: Player | string, objective: ScoreboardObjective | string = ''): Promise<void> {
+    const playerName = player instanceof Player ? player.rawName : player;
+    const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
+
+    let commandString = `scoreboard players reset "${playerName}"`;
+    if (objectiveId) commandString += ` "${objectiveId}"`;
+    
+    const res = await this.world.runCommand(commandString);
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
   }
   
   /**
    * Sets an objective into a display slot with specified additional display settings.
    */
-  public async setDisplay(displaySlotId: DisplaySlotId, objectiveId?: string | ScoreboardObjective, sortOrder?: ObjectiveSortOrder): Promise<boolean> {
+  public async setDisplay(
+    displaySlotId: DisplaySlotId,
+    objective?: ScoreboardObjective | string,
+    sortOrder?: ObjectiveSortOrder
+  ): Promise<void> {
     let commandString = `scoreboard objectives setdisplay ${displaySlotId}`;
-    if (objectiveId) commandString += ` "${Scoreboard.resolveObjective(objectiveId)}"`;
+    if (objective) commandString += ` "${objective instanceof ScoreboardObjective ? objective.id : objective}"`;
     if (sortOrder) commandString += ` ${sortOrder}`;
+
     const res = await this.world.runCommand(commandString);
-    return res.statusCode === 0;
-  }
-  
-  /**
-   * Returns an objective id.
-   * @param  objective Objective or its id to resolve.
-   * @returns objectiveId The id of the objective.
-   */
-  public static resolveObjective(objective: string | ScoreboardObjective): string {
-    return typeof objective === 'string' ? objective : objective.id;
+    if (res.statusCode !== 0) throw new Error(res.statusMessage);
   }
 }

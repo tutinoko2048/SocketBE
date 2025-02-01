@@ -1,7 +1,8 @@
-import type { World } from '../world';
+import type { Player } from '../player';
+import type { Scoreboard } from './scoreboard';
 
 export class ScoreboardObjective {
-  public readonly world: World;
+  public readonly scoreboard: Scoreboard;
 
   /**
    * Identifier of the scoreboard objective.
@@ -11,59 +12,47 @@ export class ScoreboardObjective {
   /**
    * Returns the player-visible name of this scoreboard objective.
    */
-  public readonly displayName?: string;
+  public readonly displayName: string;
   
-  constructor(world: World, objectiveId: string, displayName = '') {
-    this.world = world;
+  constructor(scoreboard: Scoreboard, objectiveId: string, displayName: string) {
+    this.scoreboard = scoreboard;
     this.id = objectiveId;
     this.displayName = displayName;
   }
   
   /**
    * Returns a specific score for a player.
-   * @param player Name of the player to retrieve a score for.
    */
-  public async getScore(player: string): Promise<number | null> {
-    return await this.world.scoreboard.getScore(player, this.id);
+  public async getScore(player: Player | string): Promise<number> {
+    return await this.scoreboard.getScore(player, this);
   }
   
   /**
    * Sets a score for a player.
-   * @param player Name of the player.
-   * @param score New value of the score.
-   * @returns New value of the score, returns null if failed to set the score.
    */
-  public async setScore(player: string, score: number): Promise<number | null> {
-    return await this.world.scoreboard.setScore(player, this.id, score);
+  public async setScore(player: Player | string, score: number): Promise<number> {
+    return await this.scoreboard.setScore(player, this, score);
   }
 
   /**
    * Adds a score for a player.
-   * @param player Name of the player.
-   * @param score Amount of score to add.
-   * @returns New value of the score, returns null if failed to add the score.
    */
-  public async addScore(player: string, score: number): Promise<number | null> {
-    return await this.world.scoreboard.addScore(player, this.id, score);
+  public async addScore(player: Player | string, score: number): Promise<number> {
+    return await this.scoreboard.addScore(player, this, score);
   }
   
   /**
    * Removes a score for a player.
-   * @param player Name of the player.
-   * @param score Amount of score to remove.
-   * @returns New value of the score, returns null if failed to remove the score.
    */
-  public async removeScore(player: string, score: number): Promise<number | null> {
-    return await this.world.scoreboard.removeScore(player, this.id, score);
+  public async removeScore(player: Player | string, score: number): Promise<number> {
+    return await this.scoreboard.removeScore(player, this, score);
   }
   
   /**
    * Removes a player from this scoreboard objective.
-   * @param player Name of the player.
-   * @returns Whether successful to reset score of player.
    */
-  public async resetScore(player: string): Promise<boolean> {
-    return await this.world.scoreboard.resetScore(player, this.id);
+  public async resetScore(player: Player | string): Promise<void> {
+    await this.scoreboard.resetScore(player, this);
   }
   
   public toJSON() {

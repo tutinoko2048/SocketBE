@@ -6,17 +6,30 @@ const rl = createInterface({
   output: process.stdout
 });
 
-rl.on('line', line => {
-  const command = line.trim();
+rl.on('line', async line => {
+  const [command, ...args] = line.trim().split(' ');
   if (command === '') return;
 
   if (command === '.disconnect') {
     return server.getWorlds().forEach(world => world.disconnect());
   }
 
-  server.broadcastCommand(command).then(res => {
-    console.log(res);
-  }).catch(console.error);
+  if (command === '.eval') {
+    const world = server.getWorlds()[0];
+    try {
+      const result = await eval(args.join(' '));
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+    return;
+  }
+
+  for (const world of server.getWorlds()) {
+    world.runCommand([command, ...args].join(' ')).then(res => {
+      console.log(res);
+    }).catch(console.error);
+  }
 });
 
 const server = new Server();
@@ -33,8 +46,20 @@ server.network.on('all', event => {
   }
 });
 
-server.on(ServerEvent.PlayerChat, event => {
-  console.dir(event, { depth: 1 });
+server.on(ServerEvent.PlayerChat, async event => {
+  console.dir(event, { depth: 0 });
+  const [command, ...args] = event.message.trim().split(' ');
+  if (command === '.set') {
+    const [_radius, block] = args;
+    const radius = parseInt(_radius);
+    for (let x = 0; x < radius; x++) {
+      for (let y = 0; y < radius; y++) {
+        for (let z = 0; z < radius; z++) {
+          event.world.runCommand(`setblock ${x} ${y} ${z} ${block}`).catch(console.error);
+        }
+      }
+    }
+  }
 })
 
 server.on(ServerEvent.WorldAdd, event => {
