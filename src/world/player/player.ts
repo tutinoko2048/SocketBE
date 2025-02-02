@@ -1,6 +1,7 @@
+import { PlayerLoadSignal } from '../../events';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
-import type { QueryTargetResult } from '../../types';
+import type { PlayerDetail, QueryTargetResult } from '../../types';
 
 export class Player {
   public readonly world: World;
@@ -9,11 +10,23 @@ export class Player {
 
   public readonly rawName: string;
 
+  public readonly uniqueId: number = 0;
+
+  public readonly uuid: string = '';
+
+  public readonly deviceId: string = '';
+
+  /** Only defined on bedrock server */
+  public readonly xuid?: string;
+
+  public isLoaded = false;
+
   public constructor(world: World, rawName: string) {
     this.world = world;
     this.rawName = rawName;
 
     this.name = this.world.formatPlayerName(rawName);
+    this.load().catch(console.error);
   }
 
   public async sendMessage(message: string | RawText): Promise<void> {
@@ -51,5 +64,36 @@ export class Player {
 
     const detail: QueryTargetResult = JSON.parse(res.details)[0];
     return detail;
+  }
+
+  public async getPing(): Promise<number> {
+    const detail = await this.getDetails();
+    return detail.avgping;
+  }
+
+  public async getDetails(): Promise<PlayerDetail> {
+    const { details } = await this.world.getPlayerDetail();
+    const detail = details.find(d => d.name === this.rawName);
+    if (!detail) throw new Error('Failed to get player detail');
+
+    return detail;
+  }
+
+  private async load(): Promise<void> {
+    const detail = await this.getDetails();
+    // @ts-expect-error Assign uuid internally
+    this.uuid = detail.uuid;
+
+    // @ts-expect-error Assign deviceId internally
+    this.deviceId = detail.deviceSessionId;
+
+    // @ts-expect-error Assign uniqueId internally
+    this.uniqueId = detail.id;
+
+    // @ts-expect-error Assign xuid internally
+    this.xuid = detail.xuid;
+
+    this.isLoaded = true;
+    new PlayerLoadSignal(this.world, this).emit();
   }
 }

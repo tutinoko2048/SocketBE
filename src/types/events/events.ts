@@ -3,6 +3,7 @@ import type {
   PlayerChatSignal,
   PlayerJoinSignal,
   PlayerLeaveSignal,
+  PlayerLoadSignal,
   PlayerMessageSignal,
   PlayerTitleSignal,
   WorldAddSignal,
@@ -18,6 +19,7 @@ export interface ServerEvents {
   [ServerEvent.WorldInitialize]: [WorldInitializeSignal];
   [ServerEvent.PlayerJoin]: [PlayerJoinSignal];
   [ServerEvent.PlayerLeave]: [PlayerLeaveSignal];
+  [ServerEvent.PlayerLoad]: [PlayerLoadSignal];
   [ServerEvent.PlayerChat]: [PlayerChatSignal];
   [ServerEvent.PlayerMessage]: [PlayerMessageSignal];
   [ServerEvent.PlayerTitle]: [PlayerTitleSignal];

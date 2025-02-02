@@ -6,6 +6,7 @@ export enum ServerEvent {
   WorldInitialize,
   PlayerJoin,
   PlayerLeave,
+  PlayerLoad,
   PlayerChat,
   PlayerTitle,
   PlayerMessage,
