@@ -3,6 +3,7 @@ import type { WebSocket } from 'ws';
 import type { Network } from './network';
 import { CommandErrorPacket, type CommandRequestPacket, type CommandResponsePacket } from './packets';
 import { CommandError, CommandTimeoutError, InvalidConnectionError } from '../errors';
+import { CommandStatusCode } from '../enums';
 
 
 export class Connection {
@@ -12,7 +13,12 @@ export class Connection {
 
   public readonly identifier: string = randomUUID();
 
-  public readonly awaitingResponses: Map<string, (arg: CommandResponsePacket | CommandErrorPacket) => void> = new Map();
+  public readonly awaitingResponses = new Map<string, {
+    resolve: (arg: CommandResponsePacket) => void;
+    reject: (arg: CommandError) => void;
+    timeout: NodeJS.Timeout;
+    sentAt: number;
+  }>();
   
   public readonly responseTimes: number[] = [];
 
@@ -31,34 +37,45 @@ export class Connection {
     this.ws.send(payload);
   }
 
-  public onCommandResponse(requestId: string, packet: CommandResponsePacket | CommandErrorPacket) {
-    const callback = this.awaitingResponses.get(requestId);
-    if (!callback) return console.error('[Network] Received invalid command response', packet.data);
-    callback(packet);
+  public onCommandResponse(requestId: string, packet: CommandResponsePacket | CommandErrorPacket): void {
+    const data = this.awaitingResponses.get(requestId);
+    if (!data) return console.error('[Network] Received invalid command response', packet.data);
+
+    this.awaitingResponses.delete(requestId);
+    clearTimeout(data.timeout);
+    
+    if (packet instanceof CommandErrorPacket) {
+      data.reject(
+        new CommandError(CommandStatusCode[packet.statusCode], packet.statusMessage, packet.statusCode)
+      );
+    } else {
+      data.resolve(packet);
+    }
+
+    if (this.responseTimes.length > 20) this.responseTimes.shift();
+    this.responseTimes.push(Date.now() - data.sentAt);
   }
 
   public awaitCommandResponse(requestId: string, packet: CommandRequestPacket): Promise<CommandResponsePacket> {  
     const sentAt = Date.now();
-    return new Promise((res, rej) => {
-      if (!this.isOpen) return rej(new InvalidConnectionError(this.identifier));
+
+    return new Promise((resolve, reject) => {
+      if (!this.isOpen) return reject(new InvalidConnectionError(this.identifier));
 
       const timeout = setTimeout(() => {
-        rej(new CommandTimeoutError(packet.commandLine));
+        reject(new CommandTimeoutError(packet.commandLine));
       }, 10 * 1000);
 
-      this.awaitingResponses.set(requestId, (response) => {
-        this.awaitingResponses.delete(requestId);
-        clearTimeout(timeout);
-
-        if (response instanceof CommandErrorPacket) {
-          return rej(new CommandError(response.statusCode, response.statusMessage));
-        }
-
-        res(response);
-
-        if (this.responseTimes.length > 20) this.responseTimes.shift();
-        this.responseTimes.push(Date.now() - sentAt);
-      });
+      this.awaitingResponses.set(requestId, { resolve, reject, timeout, sentAt });
     });
+  }
+
+  public clearAwaitingResponses() {
+    for (const { timeout, reject } of this.awaitingResponses.values()) {
+      clearTimeout(timeout);
+      reject(
+        new CommandError('Aborted', 'Connection closed before response was received.')
+      );
+    }
   }
 }

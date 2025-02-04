@@ -270,6 +270,7 @@ export class World {
 
   public onDisconnect() {
     this.stopInterval();
+    this.connection.clearAwaitingResponses();
   }
 
   /**
