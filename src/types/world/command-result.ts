@@ -1,4 +1,6 @@
+import type { CommandStatusCode } from '../../enums';
+
 export type CommandResult<T extends Record<string, unknown>> = {
-  statusCode: number;
+  statusCode: CommandStatusCode;
   statusMessage: string;
 } & T;

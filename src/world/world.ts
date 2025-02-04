@@ -2,7 +2,7 @@ import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
-import { WeatherType } from '../enums';
+import { CommandStatusCode, WeatherType } from '../enums';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo } from '../types';
@@ -23,7 +23,7 @@ export class World {
 
   public readonly players: Map<string, Player> = new Map();
 
-  public localPlayer: Player | null = null;
+  public readonly localPlayer: Player | null = null;
   
   public maxPlayers: number = -1;
   
@@ -102,7 +102,7 @@ export class World {
       : { rawtext: [{ text: String(message) }] }
     
     const res = await this.runCommand(`tellraw ${commandTarget} ${JSON.stringify(rawtext)}`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
   
   /**
@@ -110,7 +110,7 @@ export class World {
    */
   public async getPlayerList(): Promise<PlayerList> {
     const data = await this.runCommand('list');
-    const status = data.statusCode == 0;
+    const status = data.statusCode >= CommandStatusCode.Success;
     const players: string[] = status ? data.players.split(', ') : [];
     const formattedPlayers = players.map(name => this.formatPlayerName(name));
     return {
@@ -135,7 +135,7 @@ export class World {
     if (this.localPlayer) return this.localPlayer;
 
     const res = await this.runCommand('getlocalplayername');
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const localPlayerName: string = res.localplayername;
     return this.resolvePlayer(localPlayerName);
@@ -146,7 +146,7 @@ export class World {
    */
   public async getPlayerDetail(): Promise<PlayerListDetail> {
     const res = await this.runCommand('listd stats');
-    const status = res.statusCode === 0;
+    const status = res.statusCode >= CommandStatusCode.Success;
     const details: PlayerDetail[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
     const players: string[] = status ? res.players.split(', ') : [];
     const formattedPlayers = players.map(name => this.formatPlayerName(name));
@@ -166,7 +166,7 @@ export class World {
   public async getTopSolidBlock(position?: Vector3): Promise<BlockInfo> {
     const positionArg = position ? `${position.x} ${position.y} ${position.z}` : '~ ~ ~';
     const res = await this.runCommand<BlockInfo>(`gettopsolidblock ${positionArg}`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const block: BlockInfo = { blockName: res.blockName, position: res.position };
     return block;
@@ -174,28 +174,28 @@ export class World {
 
   public async getCurrentTick(): Promise<number> {
     const res = await this.runCommand<{ data: number }>('time query gametime');
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
     
     return res.data;
   }
 
   public async getDay(): Promise<number> {
     const res = await this.runCommand<{ data: number }>('time query day');
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
     
     return res.data;
   }
 
   public async getTimeOfDay(): Promise<number> {
     const res = await this.runCommand<{ data: number }>('time query daytime');
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
     
     return res.data;
   }
 
   public async setTimeOfDay(time: number): Promise<void> {
     const res = await this.runCommand(`time set ${time}`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
   public async getWeather(): Promise<WeatherType> {
@@ -215,7 +215,7 @@ export class World {
    */
   public async setWeather(weatherType: WeatherType, duration?: number): Promise<void> {
     const res = await this.runCommand(`weather ${weatherType} ${duration ?? ''}`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
   
   /**
@@ -261,6 +261,7 @@ export class World {
 
   public onConnect() {
     this.getLocalPlayer().then(player => {
+      // @ts-expect-error Assign player internally
       this.localPlayer = player;
 
       new WorldInitializeSignal(this).emit();

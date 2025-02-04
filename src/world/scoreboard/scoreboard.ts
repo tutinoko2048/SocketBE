@@ -1,6 +1,6 @@
 import { Player } from '../player';
 import { ScoreboardObjective } from './objective';
-import type { DisplaySlotId, ObjectiveSortOrder } from '../../enums';
+import { CommandStatusCode, type DisplaySlotId, type ObjectiveSortOrder } from '../../enums';
 import type { World } from '../world';
 
 export class Scoreboard {
@@ -20,7 +20,7 @@ export class Scoreboard {
    */
   public async getObjectives(): Promise<ScoreboardObjective[]> {
     const res = await this.world.runCommand('scoreboard objectives list');
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const objectives = res.statusMessage.split('\n').slice(1).map(entry => {
       const [ id, displayName ] = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0].slice(1,3);
@@ -54,7 +54,7 @@ export class Scoreboard {
     if (displayName) commandString += ` "${displayName}"`;
 
     const res = await this.world.runCommand(commandString);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const objective = new ScoreboardObjective(this, objectiveId, displayName ?? objectiveId);
     this.objectives.set(objectiveId, objective);
@@ -69,7 +69,7 @@ export class Scoreboard {
     const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
 
     const res = await this.world.runCommand(`scoreboard objectives remove "${objectiveId}"`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     this.objectives.delete(objectiveId);
 
@@ -84,7 +84,7 @@ export class Scoreboard {
     const playerName = player instanceof Player ? player.rawName : player;
     
     const res = await this.world.runCommand(`scoreboard players list "${playerName}"`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     try {
       return Object.fromEntries(
@@ -114,7 +114,7 @@ export class Scoreboard {
     const objectiveId = objective instanceof ScoreboardObjective ? objective.id : objective;
 
     const res = await this.world.runCommand(`scoreboard players set "${playerName}" "${objectiveId}" ${score}`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
     
     return score;
   }
@@ -148,7 +148,7 @@ export class Scoreboard {
     if (objectiveId) commandString += ` "${objectiveId}"`;
     
     const res = await this.world.runCommand(commandString);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
   
   /**
@@ -164,6 +164,6 @@ export class Scoreboard {
     if (sortOrder) commandString += ` ${sortOrder}`;
 
     const res = await this.world.runCommand(commandString);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 }

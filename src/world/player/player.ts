@@ -1,4 +1,5 @@
 import { PlayerLoadSignal } from '../../events';
+import { CommandStatusCode } from '../../enums';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { PlayerDetail, QueryTargetResult } from '../../types';
@@ -38,7 +39,7 @@ export class Player {
    */
   public async getTags(): Promise<string[]> {
     const res = await this.world.runCommand(`tag "${this.rawName}" list`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const tags = res.statusMessage.match(/§a.*?§r/g)
       .map(str => str.replace(/§a|§r/g, ''));
@@ -60,7 +61,7 @@ export class Player {
 
   public async query(): Promise<QueryTargetResult> {
     const res = await this.world.runCommand<{ details: string }>(`querytarget "${this.rawName}"`);
-    if (res.statusCode !== 0) throw new Error(res.statusMessage);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     const detail: QueryTargetResult = JSON.parse(res.details)[0];
     return detail;

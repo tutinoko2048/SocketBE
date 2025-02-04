@@ -50,8 +50,8 @@ server.on(ServerEvent.PlayerChat, async event => {
   console.dir(event, { depth: 0 });
   const [command, ...args] = event.message.trim().split(' ');
   if (command === '.set') {
-    const [_radius, block] = args;
-    const radius = parseInt(_radius);
+    const [block, _radius] = args;
+    const radius = parseInt(_radius) || 5;
     for (let x = 0; x < radius; x++) {
       for (let y = 0; y < radius; y++) {
         for (let z = 0; z < radius; z++) {

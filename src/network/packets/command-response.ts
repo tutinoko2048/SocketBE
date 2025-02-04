@@ -1,5 +1,5 @@
 import { BasePacket } from './base';
-import { MessagePurpose, Packet } from '../../enums';
+import { CommandStatusCode, MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
 import type { CommandResult } from '../../types';
 
@@ -7,8 +7,8 @@ import type { CommandResult } from '../../types';
 export class CommandResponsePacket extends BasePacket {
   public data: Record<string, any>;
 
-  public get statusCode(): number {
-    return this.data.statusCode as number;
+  public get statusCode(): CommandStatusCode {
+    return this.data.statusCode as CommandStatusCode;
   }
 
   public get statusMessage(): string {
@@ -21,7 +21,7 @@ export class CommandResponsePacket extends BasePacket {
 
   public static createEmptyResult<T extends Record<string, any>>(): CommandResult<T> {
     return {
-      statusCode: 0,
+      statusCode: CommandStatusCode.Success,
       statusMessage: '',
     } as CommandResult<T>;
   }
