@@ -56,7 +56,7 @@ export class Connection {
     this.responseTimes.push(Date.now() - data.sentAt);
   }
 
-  public awaitCommandResponse(requestId: string, packet: CommandRequestPacket): Promise<CommandResponsePacket> {  
+  public awaitCommandResponse(requestId: string, packet: CommandRequestPacket, timeoutDuration = 10_000): Promise<CommandResponsePacket> {  
     const sentAt = Date.now();
 
     return new Promise((resolve, reject) => {
@@ -64,7 +64,7 @@ export class Connection {
 
       const timeout = setTimeout(() => {
         reject(new CommandTimeoutError(packet.commandLine));
-      }, 10 * 1000);
+      }, timeoutDuration);
 
       this.awaitingResponses.set(requestId, { resolve, reject, timeout, sentAt });
     });

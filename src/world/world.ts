@@ -5,7 +5,7 @@ import { Player } from './player';
 import { CommandStatusCode, WeatherType } from '../enums';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
-import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo } from '../types';
+import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -69,17 +69,17 @@ export class World {
    */
   public async runCommand<R extends Record<string, any> = Record<string, any>>(
     command: string,
-    noResponse = false
+    options?: CommandOptions,
   ): Promise<CommandResult<R>> {
     const packet = new CommandRequestPacket();
-    packet.version = this.server.options.commandVersion;
+    packet.version = options?.version ?? this.server.options.commandVersion;
     packet.commandLine = command;
 
     const header = this.send(packet);
 
-    if (noResponse) return CommandResponsePacket.createEmptyResult<R>();
+    if (options?.noResponse) return CommandResponsePacket.createEmptyResult<R>();
 
-    const response = await this.connection.awaitCommandResponse(header.requestId, packet);
+    const response = await this.connection.awaitCommandResponse(header.requestId, packet, options?.timeout);
     return response.toCommandResult<R>();
   }
   
@@ -222,7 +222,7 @@ export class World {
    * Disconnects this world.
    */
   public async disconnect() {
-    await this.runCommand('closewebsocket', true);
+    await this.runCommand('closewebsocket', { noResponse: true });
   }
   
   private async updatePlayerList(isFirst = false) {
