@@ -1,4 +1,4 @@
-import type { RawText } from '@minecraft/server';
+import type { RawMessage, RawText } from '@minecraft/server';
 
 export class RawTextUtil {
   public static isRawText(text: string): boolean {
@@ -12,6 +12,27 @@ export class RawTextUtil {
     const rawtext: RawText = JSON.parse(text);
     
     if (!('rawtext' in rawtext)) throw new SyntaxError('Invalid rawtext');
+
+    return rawtext;
+  }
+
+  /**
+   * Creates a RawText object from a string, RawMessage, or an array of strings and/or RawMessages.
+   * @param message - The message(s) to be converted into RawText.
+   * @returns The resulting RawText object.
+   */
+  public static createRawText(message: string | RawMessage | (string | RawMessage)[]): RawText {
+    const rawtext: RawText = { rawtext: [] };
+
+    if (typeof message === 'string') {
+      rawtext.rawtext.push({ text: message });
+
+    } else if (Array.isArray(message)) {
+      rawtext.rawtext = message.map(msg => typeof msg === 'string' ? { text: msg } : msg);
+
+    } else {
+      rawtext.rawtext.push(message);
+    }
 
     return rawtext;
   }

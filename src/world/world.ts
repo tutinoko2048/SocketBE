@@ -3,7 +3,8 @@ import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
 import { CommandStatusCode, WeatherType } from '../enums';
-import type { RawText, Vector3 } from '@minecraft/server';
+import { RawTextUtil } from '../utils';
+import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions } from '../types';
 import type { BasePacket, Connection } from '../network';
@@ -88,18 +89,20 @@ export class World {
    * @param message The message to be displayed.
    * @param target Player name or target selector.
    */
-  public async sendMessage(message: string | RawText, target: string | Player = '@a') {
+  public async sendMessage(message: string | RawMessage | (string | RawMessage)[], target: string | Player = '@a') {
     let commandTarget: string;
     //TODO - implement EntityQueryOptions
     if (typeof target === 'string') {
-      if (!target.match(/@s|@p|@a|@r|@e/)) commandTarget = `"${target}"`;
+      if (target.match(/@s|@p|@a|@r|@e/)) {
+        commandTarget = target;
+      } else {
+        commandTarget = `"${target}"`;
+      }
     } else {
       commandTarget = `"${target.rawName}"`;
     }
     
-    const rawtext: RawText = (typeof message === 'object')
-      ? message
-      : { rawtext: [{ text: String(message) }] }
+    const rawtext = RawTextUtil.createRawText(message);
     
     const res = await this.runCommand(`tellraw ${commandTarget} ${JSON.stringify(rawtext)}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);

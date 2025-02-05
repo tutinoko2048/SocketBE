@@ -17,7 +17,8 @@ rl.on('line', async line => {
   if (command === '.eval') {
     const world = server.getWorlds()[0];
     try {
-      const result = await eval(args.join(' '));
+      const env = { world, server };
+      const result = await (new Function(...Object.keys(env), `return (${args.join(' ')});`))(...Object.values(env));
       console.log(result);
     } catch (error) {
       console.error(error);

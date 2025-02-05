@@ -1,6 +1,6 @@
 import { PlayerLoadSignal } from '../../events';
 import { CommandStatusCode, type AbilityType } from '../../enums';
-import type { RawText, Vector3 } from '@minecraft/server';
+import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { PlayerDetail, QueryTargetResult } from '../../types';
 
@@ -29,7 +29,7 @@ export class Player {
     this.name = this.world.formatPlayerName(rawName);
   }
 
-  public async sendMessage(message: string | RawText): Promise<void> {
+  public async sendMessage(message: string | RawMessage | (string | RawMessage)[]): Promise<void> {
     await this.world.sendMessage(message, this);
   }
 
@@ -89,6 +89,18 @@ export class Player {
 
   public async updateAbility(ability: AbilityType, value: boolean): Promise<void> {
     const res = await this.world.runCommand(`ability "${this.rawName}" ${ability} ${value}`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+  }
+
+  public async getLevel(): Promise<number> {
+    const res = await this.world.runCommand<{ level: number }>(`xp 0 "${this.rawName}"`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return res.level;
+  }
+
+  public async addLevel(level: number): Promise<void> {
+    const res = await this.world.runCommand(`xp ${level}L "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
