@@ -274,12 +274,15 @@ export class World {
   }
 
   /**
-   * @param register If true, the player will be registered in the world.
+   * @param initialize If true, the player will be registered in the world.
    */
-  public resolvePlayer(rawName: string, register = false): Player {
+  public resolvePlayer(rawName: string, initialize = false): Player {
     let player = this.players.get(rawName);
     player ??= new Player(this, rawName);
-    if (register) this.players.set(rawName, player);
+    if (initialize) {
+      this.players.set(rawName, player);
+      player.load().catch(console.error);
+    }
     return player;
   }
 

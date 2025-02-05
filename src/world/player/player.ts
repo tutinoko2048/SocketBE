@@ -27,7 +27,6 @@ export class Player {
     this.rawName = rawName;
 
     this.name = this.world.formatPlayerName(rawName);
-    this.load().catch(console.error);
   }
 
   public async sendMessage(message: string | RawText): Promise<void> {
@@ -80,7 +79,7 @@ export class Player {
     return detail;
   }
 
-  private async load(): Promise<void> {
+  public async load(): Promise<void> {
     const detail = await this.getDetails();
     // @ts-expect-error Assign uuid internally
     this.uuid = detail.uuid;
