@@ -1,5 +1,5 @@
 import { PlayerLoadSignal } from '../../events';
-import { CommandStatusCode } from '../../enums';
+import { CommandStatusCode, type AbilityType } from '../../enums';
 import type { RawText, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { PlayerDetail, QueryTargetResult } from '../../types';
@@ -77,6 +77,19 @@ export class Player {
     if (!detail) throw new Error('Failed to get player detail');
 
     return detail;
+  }
+
+  public async getAbilities(): Promise<Record<AbilityType, boolean>> {
+    const res = await this.world.runCommand<{ details: string }>(`ability "${this.rawName}"`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    const abilities: Record<AbilityType, boolean> = JSON.parse(res.details);
+    return abilities;
+  }
+
+  public async updateAbility(ability: AbilityType, value: boolean): Promise<void> {
+    const res = await this.world.runCommand(`ability "${this.rawName}" ${ability} ${value}`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
   public async load(): Promise<void> {
