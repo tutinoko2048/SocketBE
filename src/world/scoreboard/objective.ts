@@ -1,4 +1,4 @@
-import type { Player } from '../player';
+import type { Player } from '../entity';
 import type { Scoreboard } from './scoreboard';
 
 export class ScoreboardObjective {
