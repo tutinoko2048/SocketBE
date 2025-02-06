@@ -3,7 +3,7 @@ import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Player } from './player';
 import { CommandStatusCode, WeatherType } from '../enums';
-import { RawTextUtil } from '../utils';
+import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions } from '../types';

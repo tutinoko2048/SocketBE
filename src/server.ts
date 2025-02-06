@@ -1,6 +1,6 @@
 import { Network, type Connection } from './network';
 import { Handlers } from './handlers';
-import { ExtendedEmitter } from './utils';
+import { ExtendedEmitter } from './emitter';
 import type { RawMessage } from '@minecraft/server';
 import type { World } from './world';
 import type { CommandResult, ServerEvents, ServerOptions } from './types';

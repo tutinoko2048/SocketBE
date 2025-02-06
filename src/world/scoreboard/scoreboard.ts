@@ -4,9 +4,6 @@ import { CommandStatusCode, type DisplaySlotId, type ObjectiveSortOrder } from '
 import type { World } from '../world';
 
 export class Scoreboard {
-  /**
-   * World instance that this manager belongs to.
-   */
   public readonly world: World;
 
   public readonly objectives = new Map<string, ScoreboardObjective>();

@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'crypto';
 import { Connection } from './connection';
-import { ExtendedEmitter } from '../utils';
+import { ExtendedEmitter } from '../emitter';
 import { World } from '../world';
 import { MessagePurpose, Packet, PacketBound, ServerEvent } from '../enums';
 import { EventSubscribePacket, Packets, type BasePacket } from './packets';
