@@ -1,12 +1,12 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
-import { Player } from './entity';
+import { EntityFilterUtil, Player } from './entity';
 import { CommandStatusCode, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
-import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions } from '../types';
+import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions, EntityQueryOptions } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -103,17 +103,18 @@ export class World {
    * @param message The message to be displayed.
    * @param target Player name or target selector.
    */
-  public async sendMessage(message: string | RawMessage | (string | RawMessage)[], target: string | Player = '@a') {
+  public async sendMessage(message: string | RawMessage | (string | RawMessage)[], target: string | Player | EntityQueryOptions = '@a') {
     let commandTarget: string;
-    //TODO - implement EntityQueryOptions
     if (typeof target === 'string') {
-      if (target.match(/@s|@p|@a|@r|@e/)) {
+      if (target.match(/^@/)) { // selector
         commandTarget = target;
-      } else {
+      } else { // player name
         commandTarget = `"${target}"`;
       }
-    } else {
+    } else if (target instanceof Player) {
       commandTarget = `"${target.rawName}"`;
+    } else {
+      commandTarget = EntityFilterUtil.buildSelector('@a', target);
     }
     
     const rawtext = RawTextUtil.createRawText(message);

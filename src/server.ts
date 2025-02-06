@@ -3,7 +3,7 @@ import { Handlers } from './handlers';
 import { ExtendedEmitter } from './emitter';
 import type { RawMessage } from '@minecraft/server';
 import type { World } from './world';
-import type { CommandResult, ServerEvents, ServerOptions } from './types';
+import type { CommandResult, EntityQueryOptions, ServerEvents, ServerOptions } from './types';
 
 const defaultOption: ServerOptions = {
   port: 8000,
@@ -55,7 +55,10 @@ export class Server extends ExtendedEmitter<ServerEvents> {
    * @param message The message to be displayed.
    * @param target name or target selector
    */
-  public async broadcastMessage(message: string | RawMessage, target?: string): Promise<void> {
+  public async broadcastMessage(
+    message: string | RawMessage | (string | RawMessage)[],
+    target?: string | EntityQueryOptions
+  ): Promise<void> {
     await Promise.all(
       this.getWorlds().map(w => w.sendMessage(message, target))
     );

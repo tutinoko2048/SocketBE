@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
-    "@minecraft/server": "^1.15.0",
+    "@minecraft/server": "^1.17.0-beta.1.21.50-stable",
     "@types/eslint": "^9.6.1",
     "@types/ws": "^8.5.13",
     "eslint": "^9.14.0",
