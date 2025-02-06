@@ -11,22 +11,46 @@ export class Player {
 
   public readonly rawName: string;
 
-  public readonly uniqueId: number = 0;
+  private _uniqueId: number = 0;
 
-  public readonly uuid: string = '';
+  private _uuid: string = '';
 
-  public readonly deviceId: string = '';
+  private _deviceId: string = '';
 
-  /** Only defined on bedrock server */
-  public readonly xuid?: string;
+  private _xuid?: string;
 
-  public isLoaded = false;
+  private _isLoaded = false;
 
   public constructor(world: World, rawName: string) {
     this.world = world;
     this.rawName = rawName;
 
     this.name = this.world.formatPlayerName(rawName);
+  }
+
+  public get isValid() {
+    return this.world.isValid && this.world.players.has(this.rawName);
+  }
+  
+  public get isLoaded() {
+    return this._isLoaded;
+  }
+
+  public get uniqueId() {
+    return this._uniqueId;
+  }
+
+  public get uuid() {
+    return this._uuid;
+  }
+
+  public get deviceId() {
+    return this._deviceId;
+  }
+
+  /** Only defined on bedrock server */
+  public get xuid() {
+    return this._xuid;
   }
 
   public async sendMessage(message: string | RawMessage | (string | RawMessage)[]): Promise<void> {
@@ -106,19 +130,14 @@ export class Player {
 
   public async load(): Promise<void> {
     const detail = await this.getDetails();
-    // @ts-expect-error Assign uuid internally
-    this.uuid = detail.uuid;
 
-    // @ts-expect-error Assign deviceId internally
-    this.deviceId = detail.deviceSessionId;
-
-    // @ts-expect-error Assign uniqueId internally
-    this.uniqueId = detail.id;
-
-    // @ts-expect-error Assign xuid internally
-    this.xuid = detail.xuid;
-
-    this.isLoaded = true;
+    this._uuid = detail.uuid;
+    this._deviceId = detail.deviceSessionId;
+    this._uniqueId = detail.id;
+    this._xuid = detail.xuid;
+    
+    this._isLoaded = true;
+    
     new PlayerLoadSignal(this.world, this).emit();
   }
 }

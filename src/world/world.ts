@@ -24,14 +24,16 @@ export class World {
 
   public readonly players: Map<string, Player> = new Map();
 
-  public readonly localPlayer: Player | null = null;
+  private _localPlayer: Player | null = null;
   
-  public maxPlayers: number = -1;
+  private _maxPlayers: number = -1;
+  
+  private _isValid = true;
+  
+  private countInterval: NodeJS.Timeout | null = null;
   
   private readonly index = World.index++;
 
-  private countInterval: NodeJS.Timeout | null = null;
-  
   constructor(server: Server, connection: Connection) {
     this.server = server;
     this.connection = connection;
@@ -52,6 +54,18 @@ export class World {
     const responseTimes = this.connection.responseTimes;
     if (responseTimes.length === 0) return -1;
     return responseTimes.reduce((a, b) => a + b) / responseTimes.length;
+  }
+
+  public get localPlayer() {
+    return this._localPlayer;
+  }
+
+  public get maxPlayers() {
+    return this._maxPlayers;
+  }
+
+  public get isValid() {
+    return this._isValid;
   }
 
   public send(packet: BasePacket): IHeader {
@@ -135,7 +149,7 @@ export class World {
    * Returns the name of local player (client)
    */
   public async getLocalPlayer(): Promise<Player> {
-    if (this.localPlayer) return this.localPlayer;
+    if (this._localPlayer) return this._localPlayer;
 
     const res = await this.runCommand('getlocalplayername');
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
@@ -234,7 +248,7 @@ export class World {
       const joins = newPlayers.filter(rawName => !this.players.has(rawName))
       const leaves = [...this.players.keys()].filter(rawName => !newPlayers.includes(rawName));
       
-      this.maxPlayers = max;
+      this._maxPlayers = max;
 
       for (const join of joins) {
         const player = this.resolvePlayer(join, true);
@@ -264,8 +278,7 @@ export class World {
 
   public onConnect() {
     this.getLocalPlayer().then(player => {
-      // @ts-expect-error Assign player internally
-      this.localPlayer = player;
+      this._localPlayer = player;
 
       new WorldInitializeSignal(this).emit();
     }).catch(() => console.error('Failed to get local player'));
@@ -274,6 +287,7 @@ export class World {
   public onDisconnect() {
     this.stopInterval();
     this.connection.clearAwaitingResponses();
+    this._isValid = false;
   }
 
   /**
