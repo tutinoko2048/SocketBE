@@ -1,6 +1,6 @@
 import { PlayerLoadSignal } from '../../events';
 import { CommandStatusCode, GameMode, type AbilityType } from '../../enums';
-import { EntityFilterUtil } from './filter';
+import { EntityQueryUtil } from './query';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { EntityQueryOptions, PlayerDetail, QueryTargetResult } from '../../types';
@@ -158,7 +158,7 @@ export class Player {
   }
 
   public async matches(options: EntityQueryOptions): Promise<boolean> {
-    const selector = EntityFilterUtil.buildSelector('@a', {
+    const selector = EntityQueryUtil.buildSelector('@a', {
       name: this.rawName,
       ...options
     });

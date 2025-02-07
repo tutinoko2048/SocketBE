@@ -1,6 +1,6 @@
-import { EntityFilterUtil, GameMode, InputPermissionCategory } from '../src';
+import { EntityQueryUtil, GameMode, InputPermissionCategory } from '../src';
 
-const args = EntityFilterUtil.buildSelector('@a', {
+const args = EntityQueryUtil.buildSelector('@a', {
   tags: ['tag1', 'tag2'],
   gameMode: GameMode.survival,
   minLevel: 10,

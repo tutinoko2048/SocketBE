@@ -12,22 +12,21 @@ function getEntries<T extends Record<string, unknown>>(obj: T): Entries<T> {
   return Object.entries(obj) as Entries<T>;
 }
 
-export class EntityFilterUtil {
-  public static buildSelector(selector: Selector, filter: EntityQueryOptions): string {
-    let _selector = selector;
-    if (filter.random) _selector = '@r';
+export class EntityQueryUtil {
+  public static buildSelector(defaultSelector: Selector, options: EntityQueryOptions): string {
+    let selector = defaultSelector;
+    if (options.random) selector = '@r';
 
-    const args = EntityFilterUtil.buildArguments(filter);
+    const args = EntityQueryUtil.buildArguments(options);
 
-    return `${_selector}[${args.join(',')}]`;
+    return `${selector}[${args.join(',')}]`;
   }
   
-  public static buildArguments(filter: EntityQueryOptions): string[] {
+  public static buildArguments(options: EntityQueryOptions): string[] {
     const args: string[] = [];
     
-    for (const [name, value] of getEntries(filter)) {
+    for (const [name, value] of getEntries(options)) {
       switch (name) {
-        // EntityFilter
         case 'excludeFamilies':
           args.push(...value.map(f => `family=!${f}`));
           break;
@@ -91,7 +90,7 @@ export class EntityFilterUtil {
             if (typeof value === 'string' || typeof value === 'boolean') {
               parts.push(value.toString());
             } else {
-              parts.push(EntityFilterUtil.stringifyRangedNumber(value));
+              parts.push(EntityQueryUtil.stringifyRangedNumber(value));
             }
             
             return parts.join('');
@@ -111,7 +110,7 @@ export class EntityFilterUtil {
 
             if (exclude) parts.push(`!`);
             parts.push(
-              EntityFilterUtil.stringifyRangedNumber({ greaterThanOrEqual: minScore, lessThanOrEqual: maxScore })
+              EntityQueryUtil.stringifyRangedNumber({ greaterThanOrEqual: minScore, lessThanOrEqual: maxScore })
             );
             
             return `${objective}=${parts.join('')}`;
@@ -134,9 +133,9 @@ export class EntityFilterUtil {
             const parts: string[] = [];
 
             parts.push(`item=${item}`);
-            if (quantity) parts.push(`quantity=${EntityFilterUtil.stringifyRangedNumber(quantity)}`);
+            if (quantity) parts.push(`quantity=${EntityQueryUtil.stringifyRangedNumber(quantity)}`);
             if (location) parts.push(`location=${location}`);
-            if (slot) parts.push(`slot=${EntityFilterUtil.stringifyRangedNumber(slot)}`);
+            if (slot) parts.push(`slot=${EntityQueryUtil.stringifyRangedNumber(slot)}`);
             if (data) parts.push(`data=${data}`);
 
             return `{${parts.join(',')}}`;
@@ -154,7 +153,6 @@ export class EntityFilterUtil {
           break;
         }
 
-        // EntityQueryOptions
         case 'closest':
           args.push(`c=${value}`);
           break;

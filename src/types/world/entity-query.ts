@@ -1,31 +1,27 @@
-import type { EntityFilter as MCEntityFilter, EntityQueryOptions as MCEntityQueryOptions } from '@minecraft/server';
+import type { EntityQueryOptions as MCEntityQueryOptions } from '@minecraft/server';
 import type { EquipmentSlot, GameMode, InputPermissionCategory } from '../../enums';
 
 type Flatten<T> = { [K in keyof T]: T[K] };
 type Override<Base, T> = Flatten<Omit<Base, keyof T> & T>;
 
-export type EntityFilter = Override<MCEntityFilter, Filter>;
-
-export type EntityQueryOptions = Override<MCEntityQueryOptions, Filter>;
-
-export interface Filter {
+export type EntityQueryOptions = Override<MCEntityQueryOptions, {
   gameMode?: GameMode;
   excludeGameModes?: GameMode[];
 
   /** hasitem in commands */
-  itemOptions?: EntityItemFilter[];
+  itemOptions?: EntityQueryItemOptions[];
 
   /** has_property in commands */
-  propertyOptions?: PropertyFilter[];
+  propertyOptions?: EntityQueryPropertyOptions[];
 
   /** haspermission in commands */
-  permissionOptions?: PermissionFilter[];
+  permissionOptions?: EntityQueryPermissionOptions[];
 
   /** Represents \@r selector */
   random?: boolean;
-}
+}>;
 
-export interface EntityItemFilter {
+export interface EntityQueryItemOptions {
   item: string;
   quantity?: RangedNumber;
   location?: EquipmentSlot;
@@ -33,13 +29,13 @@ export interface EntityItemFilter {
   data?: number;
 }
 
-export interface PropertyFilter {
+export interface EntityQueryPropertyOptions {
   propertyId: string;
   exclude?: boolean;
   value: string | boolean | RangedNumber;
 }
 
-export interface PermissionFilter {
+export interface EntityQueryPermissionOptions {
   permission: InputPermissionCategory;
   enabled: boolean;
 }
