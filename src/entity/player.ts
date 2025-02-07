@@ -3,7 +3,7 @@ import { CommandStatusCode, GameMode, type AbilityType } from '../enums';
 import { EntityQueryUtil } from './query';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
-import type { EntityQueryOptions, PlayerDetail, QueryTargetResult } from '../types';
+import type { EntityQueryOptions, GiveItemOptions, PlayerDetail, QueryTargetResult } from '../types';
 
 export class Player {
   public readonly world: World;
@@ -164,6 +164,32 @@ export class Player {
     });
     const res = await this.world.runCommand(`testfor ${selector}`);
     return res.statusCode === CommandStatusCode.Success;
+  }
+
+  public async giveItem(itemId: string, amount: number = 1, options?: GiveItemOptions) {
+    const components: Record<string, any> = {};
+
+    if (options?.canDestroy) {
+      components['minecraft:can_destroy'] = { blocks: options.canDestroy };
+    }
+
+    if (options?.canPlaceOn) {
+      components['minecraft:can_place_on'] = { blocks: options.canPlaceOn };
+    }
+
+    if (options?.lockMode) {
+      components['minecraft:item_lock'] = { mode: options.lockMode };
+    }
+
+    if (options?.keepOnDeath) {
+      components['minecraft:keep_on_death'] = {};
+    }
+
+    let commandString = `give "${this.rawName}" ${itemId} ${amount} ${options?.data ?? 0}`;
+    if (Object.keys(components).length) commandString += ` ${JSON.stringify(components)}`;
+
+    const res = await this.world.runCommand(commandString);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
   public async load(): Promise<void> {

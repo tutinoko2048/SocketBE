@@ -4,6 +4,7 @@ export * from './display-slot-id';
 export * from './equipment-slot';
 export * from './game-mode';
 export * from './input-permission-category';
+export * from './item-lock-mode';
 export * from './message-purpose';
 export * from './network-bound';
 export * from './objective-sort-order';

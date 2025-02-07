@@ -1,4 +1,5 @@
 import type { Vector3 } from '@minecraft/server';
+import type { ItemLockMode } from '../../enums';
 
 export interface PlayerList {
   current: number;
@@ -38,3 +39,10 @@ export interface QueryTargetResult {
   yRot: number;
 }
 
+export interface GiveItemOptions {
+  data?: number;
+  canDestroy?: string[];
+  canPlaceOn?: string[];
+  lockMode?: ItemLockMode;
+  keepOnDeath?: boolean;
+}
