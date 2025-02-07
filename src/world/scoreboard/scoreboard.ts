@@ -1,4 +1,4 @@
-import { Player } from '../entity';
+import { Player } from '../../entity';
 import { ScoreboardObjective } from './objective';
 import { CommandStatusCode, type DisplaySlotId, type ObjectiveSortOrder } from '../../enums';
 import type { World } from '../world';

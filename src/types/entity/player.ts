@@ -1,3 +1,5 @@
+import type { Vector3 } from '@minecraft/server';
+
 export interface PlayerList {
   current: number;
   max: number;
@@ -27,3 +29,12 @@ export interface PlayerDetail {
 export interface PlayerListDetail extends PlayerList {
   details: PlayerDetail[];
 }
+
+export interface QueryTargetResult {
+  dimension: number;
+  id: number;
+  position: Vector3;
+  uniqueId: string;
+  yRot: number;
+}
+

@@ -1,4 +1,5 @@
 export * from './emitter';
+export * from './entity';
 export * from './enums';
 export * from './errors';
 export * from './events';

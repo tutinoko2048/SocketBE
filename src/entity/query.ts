@@ -1,4 +1,4 @@
-import type { EntityQueryOptions, RangedNumber, Selector } from '../../types';
+import type { EntityQueryOptions, RangedNumber, Selector } from '../types';
 
 type Entries<T> = (
   keyof T extends infer U

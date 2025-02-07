@@ -1,7 +1,7 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket, CommandResponsePacket } from '../network';
 import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
-import { EntityQueryUtil, Player } from './entity';
+import { EntityQueryUtil, Player } from '../entity';
 import { CommandStatusCode, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';

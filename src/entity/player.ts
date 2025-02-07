@@ -1,9 +1,9 @@
-import { PlayerLoadSignal } from '../../events';
-import { CommandStatusCode, GameMode, type AbilityType } from '../../enums';
+import { PlayerLoadSignal } from '../events';
+import { CommandStatusCode, GameMode, type AbilityType } from '../enums';
 import { EntityQueryUtil } from './query';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
-import type { EntityQueryOptions, PlayerDetail, QueryTargetResult } from '../../types';
+import type { EntityQueryOptions, PlayerDetail, QueryTargetResult } from '../types';
 
 export class Player {
   public readonly world: World;
@@ -148,7 +148,7 @@ export class Player {
           .then(match => (match ? resolve(gameMode) : reject()))
           .catch(reject);
       })
-    )
+    );
 
     try {
       return await Promise.any(promises);
