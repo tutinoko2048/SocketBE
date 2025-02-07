@@ -1,8 +1,9 @@
 import { PlayerLoadSignal } from '../../events';
-import { CommandStatusCode, type GameMode, type AbilityType } from '../../enums';
+import { CommandStatusCode, GameMode, type AbilityType } from '../../enums';
+import { EntityFilterUtil } from './filter';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
-import type { PlayerDetail, QueryTargetResult } from '../../types';
+import type { EntityQueryOptions, PlayerDetail, QueryTargetResult } from '../../types';
 
 export class Player {
   public readonly world: World;
@@ -131,6 +132,38 @@ export class Player {
   public async setGameMode(mode: GameMode): Promise<void> {
     const res = await this.world.runCommand(`gamemode ${mode} "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+  }
+
+  public async getGameMode(): Promise<GameMode> {
+    const modes: GameMode[] = [
+      GameMode.adventure,
+      GameMode.survival,
+      GameMode.creative,
+      GameMode.spectator
+    ];
+
+    const promises = modes.map(gameMode =>
+      new Promise<GameMode>((resolve, reject) => {
+        this.matches({ gameMode })
+          .then(match => (match ? resolve(gameMode) : reject()))
+          .catch(reject);
+      })
+    )
+
+    try {
+      return await Promise.any(promises);
+    } catch {
+      throw new Error('Failed to get game mode');
+    }
+  }
+
+  public async matches(options: EntityQueryOptions): Promise<boolean> {
+    const selector = EntityFilterUtil.buildSelector('@a', {
+      name: this.rawName,
+      ...options
+    });
+    const res = await this.world.runCommand(`testfor ${selector}`);
+    return res.statusCode === CommandStatusCode.Success;
   }
 
   public async load(): Promise<void> {
