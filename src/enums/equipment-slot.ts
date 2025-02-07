@@ -1,0 +1,16 @@
+export enum EquipmentSlot {
+  Armor = 'slot.armor', 
+  ArmorBody = 'slot.armor.body',
+  ArmorChest = 'slot.armor.chest',
+  ArmorFeet = 'slot.armor.feet',
+  ArmorHead = 'slot.armor.head',
+  ArmorLegs = 'slot.armor.legs',
+  Chest = 'slot.chest',
+  EnderChest = 'slot.enderchest',
+  Equippable = 'slot.equippable',
+  Hotbar = 'slot.hotbar',
+  Inventory = 'slot.inventory',
+  Saddle = 'slot.saddle',
+  Mainhand = 'slot.weapon.mainhand',
+  Offhand = 'slot.weapon.offhand',
+}

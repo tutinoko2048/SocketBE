@@ -1,6 +1,7 @@
 export * from './ability-type';
 export * from './command-status-code';
 export * from './display-slot-id';
+export * from './equipment-slot';
 export * from './game-mode';
 export * from './input-permission-category';
 export * from './message-purpose';

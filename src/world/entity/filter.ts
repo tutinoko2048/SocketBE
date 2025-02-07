@@ -1,4 +1,4 @@
-import type { EntityQueryOptions, RangedNumber } from '../../types';
+import type { EntityQueryOptions, RangedNumber, Selector } from '../../types';
 
 type Entries<T> = (
   keyof T extends infer U
@@ -13,7 +13,7 @@ function getEntries<T extends Record<string, unknown>>(obj: T): Entries<T> {
 }
 
 export class EntityFilterUtil {
-  public static buildSelector(selector: string, filter: EntityQueryOptions): string {
+  public static buildSelector(selector: Selector, filter: EntityQueryOptions): string {
     let _selector = selector;
     if (filter.random) _selector = '@r';
 
@@ -130,13 +130,14 @@ export class EntityFilterUtil {
 
         /** {@link EntityQueryOptions.itemOptions} */
         case 'itemOptions': {
-          const options = value.map(({ item, quantity, location, slot }) => {
+          const options = value.map(({ item, quantity, location, slot, data }) => {
             const parts: string[] = [];
 
             parts.push(`item=${item}`);
             if (quantity) parts.push(`quantity=${EntityFilterUtil.stringifyRangedNumber(quantity)}`);
             if (location) parts.push(`location=${location}`);
             if (slot) parts.push(`slot=${EntityFilterUtil.stringifyRangedNumber(slot)}`);
+            if (data) parts.push(`data=${data}`);
 
             return `{${parts.join(',')}}`;
           });

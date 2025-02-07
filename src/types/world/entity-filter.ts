@@ -1,5 +1,5 @@
 import type { EntityFilter as MCEntityFilter, EntityQueryOptions as MCEntityQueryOptions } from '@minecraft/server';
-import type { GameMode, InputPermissionCategory } from '../../enums';
+import type { EquipmentSlot, GameMode, InputPermissionCategory } from '../../enums';
 
 type Flatten<T> = { [K in keyof T]: T[K] };
 type Override<Base, T> = Flatten<Omit<Base, keyof T> & T>;
@@ -28,8 +28,9 @@ export interface Filter {
 export interface EntityItemFilter {
   item: string;
   quantity?: RangedNumber;
-  location?: string;
+  location?: EquipmentSlot;
   slot?: RangedNumber;
+  data?: number;
 }
 
 export interface PropertyFilter {

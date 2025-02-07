@@ -18,7 +18,7 @@ export interface ServerOptions {
   webSocketOptions?: WebSocketOptions;
 }
 
-export type VersionResolvable = string | number | number[];
+export type VersionResolvable = string | number | [number, number, number];
 
 export interface Formatter {
   /**

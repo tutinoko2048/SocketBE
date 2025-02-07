@@ -1,5 +1,5 @@
 import { PlayerLoadSignal } from '../../events';
-import { CommandStatusCode, type AbilityType } from '../../enums';
+import { CommandStatusCode, type GameMode, type AbilityType } from '../../enums';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { PlayerDetail, QueryTargetResult } from '../../types';
@@ -125,6 +125,11 @@ export class Player {
 
   public async addLevel(level: number): Promise<void> {
     const res = await this.world.runCommand(`xp ${level}L "${this.rawName}"`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+  }
+
+  public async setGameMode(mode: GameMode): Promise<void> {
+    const res = await this.world.runCommand(`gamemode ${mode} "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 

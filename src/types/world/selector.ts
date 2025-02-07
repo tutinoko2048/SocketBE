@@ -1,0 +1,1 @@
+export type Selector = '@a' | '@p' | '@r' | '@e' | '@s';

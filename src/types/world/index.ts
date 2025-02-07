@@ -5,3 +5,4 @@ export * from './entity-filter';
 export * from './player-list';
 export * from './query-target';
 export * from './rawtext-resolvable';
+export * from './selector';
