@@ -6,7 +6,7 @@ import { CommandStatusCode, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
-import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions, EntityQueryOptions } from '../types';
+import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions, EntityQueryOptions, SetBlockOptions, IBlockVolume, FillBlocksOptions } from '../types';
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -178,11 +178,11 @@ export class World {
   }
 
   /**
-   * Returns the top solid block at a particular position.
-   * @param position If not specified, the position of the local player is used.
+   * Returns the top solid block at a particular location.
+   * @param location If not specified, the location of the local player is used.
    */
-  public async getTopSolidBlock(position?: Vector3): Promise<BlockInfo> {
-    const positionArg = position ? `${position.x} ${position.y} ${position.z}` : '~ ~ ~';
+  public async getTopSolidBlock(location?: Vector3): Promise<BlockInfo> {
+    const positionArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
     const res = await this.runCommand<BlockInfo>(`gettopsolidblock ${positionArg}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
@@ -235,7 +235,61 @@ export class World {
     const res = await this.runCommand(`weather ${weatherType} ${duration ?? ''}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
-  
+
+  public async setBlock(location: Vector3, blockId: string, options?: SetBlockOptions) {
+    const locationArg = `${location.x} ${location.y} ${location.z}`;
+    const stateArg = options?.states
+      ? '[' + Object.entries(options.states).map(([key, value]) => `"${key}"=${JSON.stringify(value)}`).join(',') + ']'
+      : '[]';
+
+    const res = await this.runCommand(
+      `setblock ${locationArg} ${blockId} ${stateArg} ${options?.mode ?? ''}`,
+      { version: "1.21.50" }
+    );
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+  }
+
+  /**
+   * @returns The number of blocks filled.
+   */
+  public async fillBlocks(from: Vector3, to: Vector3, blockId: string, options?: FillBlocksOptions): Promise<number>;
+  public async fillBlocks(volume: IBlockVolume, blockId: string, options?: FillBlocksOptions): Promise<number>;
+  public async fillBlocks(
+    arg0: Vector3 | IBlockVolume,
+    arg1: Vector3 | string,
+    arg2?: string | FillBlocksOptions,
+    arg3?: FillBlocksOptions
+  ): Promise<number> {
+    let from: Vector3;
+    let to: Vector3;
+    let blockId: string;
+    let options: FillBlocksOptions;
+    if ('x' in arg0) {
+      from = arg0;
+      to = arg1 as Vector3;
+      blockId = arg2 as string;
+      options = arg3;
+    } else {
+      from = arg0.from;
+      to = arg0.to;
+      blockId = arg1 as string;
+      options = arg2 as FillBlocksOptions;
+    }
+
+    const fromArg = `${from.x} ${from.y} ${from.z}`;
+    const toArg = `${to.x} ${to.y} ${to.z}`;
+    const stateArg = options.states
+      ? '[' + Object.entries(options.states).map(([key, value]) => `"${key}"=${JSON.stringify(value)}`).join(',') + ']'
+      : '[]';
+
+    const res = await this.runCommand<{ fillCount: number }>(
+      `fill ${fromArg} ${toArg} ${blockId} ${stateArg} ${options.mode ?? ''}`,
+      { version: "1.21.50" }
+    );
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+    return res.fillCount;
+  }
+
   /**
    * Disconnects this world.
    */

@@ -70,7 +70,7 @@ export class Server extends ExtendedEmitter<ServerEvents> {
   public async disconnectAll() {
     return await Promise.all(
       this.getWorlds().map(w => w.disconnect())
-    )
+    );
   }
 
   public async stop() {
