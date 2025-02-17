@@ -54,6 +54,10 @@ export class Player {
     return this._xuid;
   }
 
+  public get isLocalPlayer() {
+    return this.world.localPlayer === this;
+  }
+
   public async sendMessage(message: string | RawMessage | (string | RawMessage)[]): Promise<void> {
     await this.world.sendMessage(message, this);
   }
