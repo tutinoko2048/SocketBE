@@ -1,12 +1,15 @@
 import { PlayerLoadSignal } from '../events';
 import { CommandStatusCode, GameMode, type AbilityType } from '../enums';
 import { EntityQueryUtil } from './query';
+import { ScreenDisplay } from './screen-display';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
 import type { EntityQueryOptions, GiveItemOptions, PlayerDetail, QueryTargetResult } from '../types';
 
 export class Player {
   public readonly world: World;
+
+  public readonly onScreenDisplay: ScreenDisplay;
 
   public readonly name: string;
 
@@ -23,6 +26,7 @@ export class Player {
   private _isLoaded = false;
 
   public constructor(world: World, rawName: string) {
+    this.onScreenDisplay = new ScreenDisplay(this);
     this.world = world;
     this.rawName = rawName;
 

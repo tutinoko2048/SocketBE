@@ -80,7 +80,7 @@ server.on(ServerEvent.PlayerMessage, event => {
 })
 
 server.on(ServerEvent.PlayerTitle, event => {
-  console.dir(event, { depth: 1 });
+  // console.dir(event, { depth: 1 });
 })
 
 server.on(ServerEvent.PlayerJoin, event => {
