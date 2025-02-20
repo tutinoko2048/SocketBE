@@ -1,6 +1,7 @@
 export * from './ability-type';
 export * from './command-status-code';
 export * from './display-slot-id';
+export * from './encryption-mode';
 export * from './equipment-slot';
 export * from './fill-blocks-mode';
 export * from './game-mode';

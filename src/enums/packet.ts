@@ -6,6 +6,8 @@ export enum Packet {
   CommandError = 'error',
   EventSubscribe = 'subscribe',
   EventUnsubscribe = 'unsubscribe',
+  EncryptionRequest = 'ws:encryptionRequest',
+  EncryptionResponse = 'ws:encryptionResponse',
   PlayerMessage = 'PlayerMessage',
   // PlayerTravelled = 'PlayerTravelled',
 }

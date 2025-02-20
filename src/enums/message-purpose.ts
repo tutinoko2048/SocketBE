@@ -5,4 +5,5 @@ export enum MessagePurpose {
   Error = 'error',
   CommandRequest = 'commandRequest',
   CommandResponse = 'commandResponse',
+  Encrypt = 'ws:encrypt',
 }

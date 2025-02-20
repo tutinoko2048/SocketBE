@@ -72,16 +72,18 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     this.server.emit(ServerEvent.Open);
   }
 
-  public onConnection(ws: WebSocket) {
+  public async onConnection(ws: WebSocket) {
     const connection = new Connection(this, ws);
     this.connections.add(connection);
 
     ws.on('message', this.onConnectionMessage.bind(this, connection));
     ws.on('close', this.onConnectionClose.bind(this, connection));
-    
-    console.log('New connection', connection.identifier);
 
     const world = new World(this.server, connection);
+
+    if (!this.server.options.disableEncryption) {
+      await world.enableEncryption(this.server.options.encryptionMode);
+    }
 
     new events.WorldAddSignal(world).emit();
     
@@ -106,17 +108,23 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       packet.eventName = registered;
 
       this.send(connection, packet);
-      console.log('subscribe', registered);
-      
     }
 
     world.onConnect();
   }
   
-  public onConnectionMessage(connection: Connection, data: string) {
+  public onConnectionMessage(connection: Connection, data: Buffer) {
+    let decryptedData: string;
+
+    if (connection.encryption.enabled) {
+      decryptedData = connection.encryption.decrypt(data);
+    } else {
+      decryptedData = data.toString('utf-8');
+    }
+
     let rawPacket: IPacket;
     try {
-      rawPacket = JSON.parse(data);
+      rawPacket = JSON.parse(decryptedData);
 
       if (!(
         typeof rawPacket === 'object' &&
@@ -130,14 +138,17 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       return;
     }
 
-    const { messagePurpose } = rawPacket.header;    
+    const { messagePurpose } = rawPacket.header;
     switch (messagePurpose) {
       case MessagePurpose.CommandResponse:
+      case MessagePurpose.Encrypt:
       case MessagePurpose.Error:
       case MessagePurpose.Event: {
         let packetId: Packet;
         if (messagePurpose === MessagePurpose.CommandResponse) {
           packetId = Packet.CommandResponse;
+        } else if (messagePurpose === MessagePurpose.Encrypt) {
+          packetId = Packet.EncryptionResponse;
         } else if (messagePurpose === MessagePurpose.Error) {
           packetId = Packet.CommandError;
         } else if (messagePurpose === MessagePurpose.Event) {
@@ -178,15 +189,23 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
             }
           }
           if (!handled) {
-            // console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
+            console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
           }
         } catch (error) {
           console.error('[Network] Failed to deserialize packet', error);
         }
         break;
       }
+
+      case MessagePurpose.Subscribe:
+      case MessagePurpose.Unsubscribe:
+      case MessagePurpose.CommandRequest:
+        console.error('[Network] Invalid message purpose', messagePurpose);
+        break;
+
       default:
         console.error('[Network] Invalid message purpose:', messagePurpose);
+        messagePurpose satisfies never;
     }
   }
 

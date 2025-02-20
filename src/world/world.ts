@@ -1,8 +1,8 @@
 import { Scoreboard } from './scoreboard';
-import { CommandRequestPacket, CommandResponsePacket } from '../network';
-import { PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
+import { CommandRequestPacket, CommandResponsePacket, EncryptionRequestPacket } from '../network';
+import { EnableEncryptionSignal, PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { EntityQueryUtil, Player } from '../entity';
-import { CommandStatusCode, WeatherType } from '../enums';
+import { CommandStatusCode, EncryptionMode, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
@@ -10,7 +10,7 @@ import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOpti
 import type { BasePacket, Connection } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { InvalidConnectionError, CommandTimeoutError, CommandError } from '../errors';
+import type { InvalidConnectionError, RequestTimeoutError, CommandError } from '../errors';
 
 
 export class World {
@@ -38,8 +38,6 @@ export class World {
     this.server = server;
     this.connection = connection;
     this.scoreboard = new Scoreboard(this);
-
-    this.startInterval();
   }
 
   public get name() {
@@ -79,7 +77,7 @@ export class World {
    * 
    * @throws This function can throw errors.
    * - {@link InvalidConnectionError}  
-   * - {@link CommandTimeoutError}  
+   * - {@link RequestTimeoutError}  
    * - {@link CommandError}  
    */
   public async runCommand<R extends Record<string, any> = Record<string, any>>(
@@ -296,6 +294,25 @@ export class World {
   public async disconnect() {
     await this.runCommand('closewebsocket', { noResponse: true });
   }
+
+  public async enableEncryption(mode?: EncryptionMode) {
+    if (this.connection.encryption.enabled) throw new Error('Encryption is already enabled');
+    
+    const exchanging = this.connection.encryption.beginKeyExchange();
+
+    const packet = new EncryptionRequestPacket();
+    packet.mode = mode ?? EncryptionMode.Aes256cfb8;
+    packet.publicKey = exchanging.publicKey;
+    packet.salt = exchanging.salt;
+
+    this.send(packet);
+
+    const response = await this.connection.awaitEncryptionResponse();
+
+    exchanging.complete(packet.mode, response.publicKey);
+
+    new EnableEncryptionSignal(this).emit();
+  }
   
   private async updatePlayerList(isFirst = false) {
     try {
@@ -332,6 +349,7 @@ export class World {
   }
 
   public onConnect() {
+    this.startInterval();
     this.getLocalPlayer().then(player => {
       this._localPlayer = player;
 
@@ -341,7 +359,7 @@ export class World {
 
   public onDisconnect() {
     this.stopInterval();
-    this.connection.clearAwaitingResponses();
+    this.connection.clearPendingResponses();
     this._isValid = false;
   }
 

@@ -1,9 +1,9 @@
 /**
- * Thrown when the command takes too long to respond.
+ * Thrown when the request takes too long to respond.
  */
-export class CommandTimeoutError extends Error {
+export class RequestTimeoutError extends Error {
   constructor(
-    public readonly command: string
+    public readonly command?: string
   ) {
     super('Response timeout');
     this.name = this.constructor.name;

@@ -2,8 +2,11 @@ import type { NetworkEvent, RawNetworkEvent } from './packet-event';
 import type { Packet } from '../../enums';
 import type {
   BasePacket,
+  CommandErrorPacket,
   CommandRequestPacket,
   CommandResponsePacket,
+  EncryptionRequestPacket,
+  EncryptionResponsePacket,
   EventSubscribePacket,
   EventUnsubscribePacket,
   PlayerMessagePacket
@@ -17,7 +20,10 @@ export interface NetworkEvents {
   raw: [RawNetworkEvent];
   [Packet.CommandRequest]: [NetworkEvent<CommandRequestPacket>];
   [Packet.CommandResponse]: [NetworkEvent<CommandResponsePacket>];
+  [Packet.CommandError]: [NetworkEvent<CommandErrorPacket>];
   [Packet.PlayerMessage]: [NetworkEvent<PlayerMessagePacket>];
   [Packet.EventSubscribe]: [NetworkEvent<EventSubscribePacket>];
   [Packet.EventUnsubscribe]: [NetworkEvent<EventUnsubscribePacket>];
+  [Packet.EncryptionRequest]: [NetworkEvent<EncryptionRequestPacket>];
+  [Packet.EncryptionResponse]: [NetworkEvent<EncryptionResponsePacket>];
 }

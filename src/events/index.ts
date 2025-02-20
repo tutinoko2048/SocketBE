@@ -1,3 +1,4 @@
+export * from './enable-encryption';
 export * from './event-signal';
 export * from './player-chat';
 export * from './player-join';

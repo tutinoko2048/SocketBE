@@ -1,4 +1,5 @@
 import type { ServerOptions as WebSocketOptions } from 'ws';
+import type { EncryptionMode } from '../enums';
 
 export interface ServerOptions {
   port: number;
@@ -16,6 +17,9 @@ export interface ServerOptions {
   formatter?: Formatter;
 
   webSocketOptions?: WebSocketOptions;
+
+  disableEncryption?: boolean;
+  encryptionMode?: EncryptionMode;
 }
 
 export type VersionResolvable = string | number | [number, number, number];

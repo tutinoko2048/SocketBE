@@ -6,6 +6,8 @@ import { CommandErrorPacket } from './command-error';
 import { EventSubscribePacket } from './event-subscribe';
 import { EventUnsubscribePacket } from './event-unsubscribe';
 import { PlayerMessagePacket } from './player-message';
+import { EncryptionRequestPacket } from './encryption-request';
+import { EncryptionResponsePacket } from './encryption-response';
 
 
 export const Packets = {
@@ -15,4 +17,6 @@ export const Packets = {
   [Packet.PlayerMessage]: PlayerMessagePacket,
   [Packet.EventSubscribe]: EventSubscribePacket,
   [Packet.EventUnsubscribe]: EventUnsubscribePacket,
+  [Packet.EncryptionRequest]: EncryptionRequestPacket,
+  [Packet.EncryptionResponse]: EncryptionResponsePacket,
 };

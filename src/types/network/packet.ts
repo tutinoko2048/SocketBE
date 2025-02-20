@@ -1,6 +1,6 @@
 import type { MessagePurpose, Packet } from '../../enums';
 
-export type IHeader = EventHeader | CommandHeader | ErrorHeader;
+export type IHeader = EventHeader | CommandHeader | ErrorHeader | EncryptHeader;
 
 interface EventHeader extends BaseHeader {
   messagePurpose: MessagePurpose.Subscribe | MessagePurpose.Unsubscribe | MessagePurpose.Event;
@@ -13,6 +13,10 @@ interface CommandHeader extends BaseHeader {
 
 interface ErrorHeader extends BaseHeader {
   messagePurpose: MessagePurpose.Error;
+}
+
+interface EncryptHeader extends BaseHeader {
+  messagePurpose: MessagePurpose.Encrypt;
 }
 
 interface BaseHeader {
