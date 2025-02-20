@@ -1,7 +1,7 @@
 import { ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
-import type { Player, World } from '../world';
-
+import type { World } from '../world';
+import type { Player } from '../entity';
 
 export class PlayerLeaveSignal extends WorldEventSignal {
   public static readonly identifier: ServerEvent = ServerEvent.PlayerLeave;

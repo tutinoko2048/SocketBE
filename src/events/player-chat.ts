@@ -1,6 +1,7 @@
 import { Packet, ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
-import type { Player, World } from '../world';
+import type { World } from '../world';
+import type { Player } from '../entity';
 
 
 export class PlayerChatSignal extends WorldEventSignal {

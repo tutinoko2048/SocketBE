@@ -2,7 +2,8 @@ import { PlayerChatSignal } from './player-chat';
 import { ServerEvent, type PlayerMessageType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawText } from '@minecraft/server';
-import type { Player, World } from '../world';
+import type { World } from '../world';
+import type { Player } from '../entity';
 import type { RawTextResolvable } from '../types';
 
 
