@@ -139,73 +139,65 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
 
     const { messagePurpose } = rawPacket.header;
+
+    const deserializablePurposes: MessagePurpose[] = [
+      MessagePurpose.CommandResponse,
+      MessagePurpose.Encrypt,
+      MessagePurpose.Error,
+      MessagePurpose.Event,
+    ];
+
+    if (!deserializablePurposes.includes(messagePurpose)) {
+      console.error('[Network] Invalid message purpose:', messagePurpose);
+      return
+    }
+
+    let packetId: Packet;
     switch (messagePurpose) {
-      case MessagePurpose.CommandResponse:
-      case MessagePurpose.Encrypt:
-      case MessagePurpose.Error:
-      case MessagePurpose.Event: {
-        let packetId: Packet;
-        if (messagePurpose === MessagePurpose.CommandResponse) {
-          packetId = Packet.CommandResponse;
-        } else if (messagePurpose === MessagePurpose.Encrypt) {
-          packetId = Packet.EncryptionResponse;
-        } else if (messagePurpose === MessagePurpose.Error) {
-          packetId = Packet.CommandError;
-        } else if (messagePurpose === MessagePurpose.Event) {
-          packetId = rawPacket.header.eventName;
-        }
-        
-        const PacketType = Packets[packetId];
-        if (!PacketType) {
-          console.error('[Network] Unknown packet for packetId', packetId);
-          return;
-        }
+      case MessagePurpose.CommandResponse: packetId = Packet.CommandResponse; break;
+      case MessagePurpose.Encrypt: packetId = Packet.EncryptionResponse; break;
+      case MessagePurpose.Error: packetId = Packet.CommandError; break;
+      case MessagePurpose.Event: packetId = rawPacket.header.eventName; break;
+    }
 
-        try {
-          const packet = PacketType.deserialize(rawPacket.body);
-          
-          const event: NetworkEvent<BasePacket> = {
-            connection,
-            packet,
-            bound: PacketBound.Server,
-            header: rawPacket.header,
-          }
+    const PacketType = Packets[packetId];
+    if (!PacketType) {
+      console.error('[Network] Unknown packet for packetId', packetId);
+      return;
+    }
 
-          const network = this.emit(packetId as keyof NetworkEvents, event);
-          const all = this.emit('all', event);
-
-          // cancel the packet if receive event is cancelled
-          if (!network || !all) return;
-
-          let handled = false;
-          for (const handler of this.handlers) {
-            if (handler.packet !== packetId) continue;
-            try {
-              const instance = new handler(this.server);
-              instance.handle(packet, connection, rawPacket.header);
-              handled = true;
-            } catch (error) {
-              console.error(`[Network] Error while handling packet ${Packet[packetId]}\n`, error);
-            }
-          }
-          if (!handled) {
-            console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
-          }
-        } catch (error) {
-          console.error('[Network] Failed to deserialize packet', error);
-        }
-        break;
+    try {
+      const packet = PacketType.deserialize(rawPacket.body);
+      
+      const event: NetworkEvent<BasePacket> = {
+        connection,
+        packet,
+        bound: PacketBound.Server,
+        header: rawPacket.header,
       }
 
-      case MessagePurpose.Subscribe:
-      case MessagePurpose.Unsubscribe:
-      case MessagePurpose.CommandRequest:
-        console.error('[Network] Invalid message purpose', messagePurpose);
-        break;
+      const network = this.emit(packetId as keyof NetworkEvents, event);
+      const all = this.emit('all', event);
 
-      default:
-        console.error('[Network] Invalid message purpose:', messagePurpose);
-        messagePurpose satisfies never;
+      // cancel the packet if receive event is cancelled
+      if (!network || !all) return;
+
+      let handled = false;
+      for (const handler of this.handlers) {
+        if (handler.packet !== packetId) continue;
+        try {
+          const instance = new handler(this.server);
+          instance.handle(packet, connection, rawPacket.header);
+          handled = true;
+        } catch (error) {
+          console.error(`[Network] Error while handling packet ${Packet[packetId]}\n`, error);
+        }
+      }
+      if (!handled) {
+        console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
+      }
+    } catch (error) {
+      console.error('[Network] Failed to deserialize packet', error);
     }
   }
 
