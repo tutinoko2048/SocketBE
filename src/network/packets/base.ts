@@ -11,7 +11,7 @@ export class BasePacket {
     throw Error('BasePacket.serialize() is not implemented');
   }
 
-  public static deserialize(_data: RawData): BasePacket {
+  public static deserialize(_data: any, _header?: RawData): BasePacket {
     throw Error('BasePacket.deserialize() is not implemented');
   }
   

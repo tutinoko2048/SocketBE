@@ -1,5 +1,6 @@
-import { Packet, PacketBound, Server, ServerEvent } from 'socket-be';
+import { BasePacket, DataRequestPacket, EventSubscribePacket, MessagePurpose, Packet, PacketBound, Server, ServerEvent } from 'socket-be';
 import { createInterface } from 'readline';
+import { writeFileSync } from 'fs';
 
 const rl = createInterface({
   input: process.stdin,
@@ -48,18 +49,23 @@ server.network.on('all', event => {
 });
 
 server.on(ServerEvent.PlayerChat, async event => {
+  const { message, world } = event;
   console.dir(event, { depth: 0 });
-  const [command, ...args] = event.message.trim().split(' ');
+  const [command, ...args] = message.trim().split(' ');
   if (command === '.set') {
     const [block, _radius] = args;
     const radius = parseInt(_radius) || 5;
     for (let x = 0; x < radius; x++) {
       for (let y = 0; y < radius; y++) {
         for (let z = 0; z < radius; z++) {
-          event.world.runCommand(`setblock ${x} ${y} ${z} ${block}`).catch(console.error);
+          world.runCommand(`setblock ${x} ${y} ${z} ${block}`).catch(console.error);
         }
       }
     }
+  } else if (command === '.data') {
+    world.sendMessage((await world.queryData('block')).length.toString());
+    world.sendMessage((await world.queryData('item')).length.toString());
+    world.sendMessage((await world.queryData('mob')).length.toString());
   }
 })
 

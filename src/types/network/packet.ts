@@ -1,22 +1,32 @@
 import type { MessagePurpose, Packet } from '../../enums';
 
-export type IHeader = EventHeader | CommandHeader | ErrorHeader | EncryptHeader;
+export type IHeader = EventHeader | CommandHeader | ErrorHeader | EncryptHeader | DataResponseHeader;
 
-interface EventHeader extends BaseHeader {
+export interface EventHeader extends BaseHeader {
   messagePurpose: MessagePurpose.Subscribe | MessagePurpose.Unsubscribe | MessagePurpose.Event;
   eventName: Packet;
 }
 
-interface CommandHeader extends BaseHeader {
+export interface CommandHeader extends BaseHeader {
   messagePurpose: MessagePurpose.CommandRequest | MessagePurpose.CommandResponse;
 }
 
-interface ErrorHeader extends BaseHeader {
+export interface ErrorHeader extends BaseHeader {
   messagePurpose: MessagePurpose.Error;
 }
 
-interface EncryptHeader extends BaseHeader {
+export interface EncryptHeader extends BaseHeader {
   messagePurpose: MessagePurpose.Encrypt;
+}
+
+export interface DataRequestHeader extends BaseHeader {
+  messagePurpose: MessagePurpose.BlockDataRequest | MessagePurpose.ItemDataRequest | MessagePurpose.MobDataRequest;
+}
+
+export interface DataResponseHeader extends BaseHeader {
+  messagePurpose: MessagePurpose.DataResponse;
+  dataType: string;
+  type: number;
 }
 
 interface BaseHeader {

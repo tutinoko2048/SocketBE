@@ -1,8 +1,8 @@
-import { Packet, type PlayerMessageType } from '../../enums';
+import { MessagePurpose, Packet, type PlayerMessageType } from '../../enums';
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
 
-@PacketClass(Packet.PlayerMessage)
+@PacketClass(Packet.PlayerMessage, MessagePurpose.Event)
 export class PlayerMessagePacket extends BasePacket {  
   public type: PlayerMessageType;
 

@@ -5,6 +5,8 @@ import type {
   CommandErrorPacket,
   CommandRequestPacket,
   CommandResponsePacket,
+  DataRequestPacket,
+  DataResponsePacket,
   EncryptionRequestPacket,
   EncryptionResponsePacket,
   EventSubscribePacket,
@@ -18,6 +20,7 @@ export interface NetworkEvents {
    * Fired for any sevrer-bound packet.
    */
   raw: [RawNetworkEvent];
+  
   [Packet.CommandRequest]: [NetworkEvent<CommandRequestPacket>];
   [Packet.CommandResponse]: [NetworkEvent<CommandResponsePacket>];
   [Packet.CommandError]: [NetworkEvent<CommandErrorPacket>];
@@ -26,4 +29,6 @@ export interface NetworkEvents {
   [Packet.EventUnsubscribe]: [NetworkEvent<EventUnsubscribePacket>];
   [Packet.EncryptionRequest]: [NetworkEvent<EncryptionRequestPacket>];
   [Packet.EncryptionResponse]: [NetworkEvent<EncryptionResponsePacket>];
+  [Packet.DataRequest]: [NetworkEvent<DataRequestPacket>];
+  [Packet.DataResponse]: [NetworkEvent<DataResponsePacket>];
 }

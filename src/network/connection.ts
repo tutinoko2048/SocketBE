@@ -2,10 +2,10 @@ import { randomUUID } from 'crypto';
 import { Encryption } from './encryption';
 import { CommandError, RequestTimeoutError, InvalidConnectionError } from '../errors';
 import { CommandStatusCode } from '../enums';
-import { CommandErrorPacket, type EncryptionResponsePacket, type CommandRequestPacket, type CommandResponsePacket } from './packets';
+import { CommandErrorPacket, type EncryptionResponsePacket, type CommandResponsePacket, type DataResponsePacket } from './packets';
 import type { WebSocket } from 'ws';
 import type { Network } from './network';
-import type { PendingResponseData } from '../types';
+import type { PendingResponse } from '../types';
 
 
 export class Connection {
@@ -17,12 +17,7 @@ export class Connection {
 
   public readonly identifier: string = randomUUID();
 
-  public readonly pendingCommandResponses = new Map<
-    string,
-    PendingResponseData<CommandResponsePacket, CommandError>
-  >();
-
-  public pendingEncryptionResponse: PendingResponseData<EncryptionResponsePacket, Error>;
+  public readonly pendingResponses = new Map<string, PendingResponse>();
   
   public readonly responseTimes: number[] = [];
 
@@ -48,10 +43,10 @@ export class Connection {
   }
 
   public onCommandResponse(requestId: string, packet: CommandResponsePacket | CommandErrorPacket): void {
-    const data = this.pendingCommandResponses.get(requestId);
+    const data = this.pendingResponses.get(requestId);
     if (!data) return; //console.error('[Network] Received invalid command response', packet.data);
 
-    this.pendingCommandResponses.delete(requestId);
+    this.pendingResponses.delete(requestId);
     clearTimeout(data.timeout);
     
     if (packet instanceof CommandErrorPacket) {
@@ -66,56 +61,44 @@ export class Connection {
     this.responseTimes.push(Date.now() - data.sentAt);
   }
 
-  public awaitCommandResponse(requestId: string, packet: CommandRequestPacket, timeoutDuration = 10_000): Promise<CommandResponsePacket> {  
-    const sentAt = Date.now();
-
-    return new Promise((resolve, reject) => {
-      if (!this.isOpen) return reject(new InvalidConnectionError(this.identifier));
-
-      const timeout = setTimeout(() => {
-        reject(new RequestTimeoutError(packet.commandLine));
-      }, timeoutDuration);
-
-      this.pendingCommandResponses.set(requestId, { resolve, reject, timeout, sentAt });
-    });
-  }
-
-  public onEncryptionResponse(packet: EncryptionResponsePacket): void {
-    const data = this.pendingEncryptionResponse;
+  public onEncryptionResponse(requestId: string, packet: EncryptionResponsePacket): void {
+    const data = this.pendingResponses.get(requestId);
     if (!data) return console.error('[Network] Received unexpected encryption response', packet);
 
+    this.pendingResponses.delete(requestId);
     clearTimeout(data.timeout);
 
     data.resolve(packet);
-
-    this.pendingEncryptionResponse = undefined;
   }
 
-  public awaitEncryptionResponse(timeoutDuration = 5_000): Promise<EncryptionResponsePacket> {
+  public onDataResponse(requestId: string, packet: DataResponsePacket): void {
+    const data = this.pendingResponses.get(requestId);
+    if (!data) return console.error('[Network] Received unexpected data response', packet);
+
+    this.pendingResponses.delete(requestId);
+    clearTimeout(data.timeout);
+
+    data.resolve(packet);
+  }
+
+  public awaitResponse<R>(requestId: string, timeoutDuration = 10_000): Promise<R> {
     const sentAt = Date.now();
-    
-    return new Promise((resolve, reject) => {
+
+    return new Promise<R>((resolve, reject) => {
       if (!this.isOpen) return reject(new InvalidConnectionError(this.identifier));
 
       const timeout = setTimeout(() => {
         reject(new RequestTimeoutError());
       }, timeoutDuration);
 
-      this.pendingEncryptionResponse = { resolve, reject, timeout, sentAt };
+      this.pendingResponses.set(requestId, { resolve, reject, timeout, sentAt });
     });
   }
 
   public clearPendingResponses() {
-    for (const { timeout, reject } of this.pendingCommandResponses.values()) {
+    for (const { timeout, reject } of this.pendingResponses.values()) {
       clearTimeout(timeout);
       reject(
-        new CommandError('Aborted', 'Connection closed before response was received.')
-      );
-    }
-
-    if (this.pendingEncryptionResponse) {
-      clearTimeout(this.pendingEncryptionResponse.timeout);
-      this.pendingEncryptionResponse.reject(
         new Error(`[Aborted] Connection closed before response was received.`)
       );
     }

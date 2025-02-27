@@ -1,13 +1,17 @@
 export enum Packet {
-  // BlockBroken = 'BlockBroken',
-  // BlockPlaced = 'BlockPlaced',
   CommandRequest = 'commandRequest',
   CommandResponse = 'commandResponse',
   CommandError = 'error',
+  DataRequest = 'data:request',
+  DataResponse = 'data:response',
   EventSubscribe = 'subscribe',
   EventUnsubscribe = 'unsubscribe',
   EncryptionRequest = 'ws:encryptionRequest',
   EncryptionResponse = 'ws:encryptionResponse',
+
+  // --- mc event packets ---
+  // BlockBroken = 'BlockBroken',
+  // BlockPlaced = 'BlockPlaced',
   PlayerMessage = 'PlayerMessage',
   // PlayerTravelled = 'PlayerTravelled',
 }

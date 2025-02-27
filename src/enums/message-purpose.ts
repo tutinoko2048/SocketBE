@@ -6,4 +6,8 @@ export enum MessagePurpose {
   CommandRequest = 'commandRequest',
   CommandResponse = 'commandResponse',
   Encrypt = 'ws:encrypt',
+  DataResponse = 'data',
+  BlockDataRequest = 'data:block',
+  ItemDataRequest = 'data:item',
+  MobDataRequest = 'data:mob',
 }

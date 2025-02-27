@@ -35,3 +35,9 @@ export interface IBlockVolume {
   from: Vector3;
   to: Vector3;
 }
+
+export interface BlockData {
+  aux: number;
+  id: string;
+  name: string;
+}

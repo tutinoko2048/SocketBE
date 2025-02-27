@@ -1,13 +1,27 @@
 import { Scoreboard } from './scoreboard';
-import { CommandRequestPacket, CommandResponsePacket, EncryptionRequestPacket } from '../network';
+import { CommandRequestPacket, CommandResponsePacket, DataRequestPacket, EncryptionRequestPacket, type DataResponsePacket } from '../network';
 import { EnableEncryptionSignal, PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { EntityQueryUtil, Player } from '../entity';
-import { CommandStatusCode, EncryptionMode, WeatherType } from '../enums';
+import { CommandStatusCode, EncryptionMode, MessagePurpose, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
-import type { PlayerList, PlayerDetail, PlayerListDetail, BlockInfo, CommandOptions, EntityQueryOptions, SetBlockOptions, IBlockVolume, FillBlocksOptions } from '../types';
-import type { BasePacket, Connection } from '../network';
+import type {
+  PlayerList,
+  PlayerDetail,
+  PlayerListDetail,
+  BlockInfo,
+  CommandOptions,
+  EntityQueryOptions,
+  SetBlockOptions,
+  IBlockVolume,
+  FillBlocksOptions,
+  NetworkSendOptions,
+  BlockData,
+  ItemData,
+  MobData,
+} from '../types';
+import type { BasePacket, Connection, EncryptionResponsePacket } from '../network';
 import type { CommandResult, IHeader } from '../types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { InvalidConnectionError, RequestTimeoutError, CommandError } from '../errors';
@@ -66,8 +80,8 @@ export class World {
     return this._isValid;
   }
 
-  public send(packet: BasePacket): IHeader {
-    return this.server.network.send(this.connection, packet);
+  public send(packet: BasePacket, options?: NetworkSendOptions): IHeader {
+    return this.server.network.send(this.connection, packet, options);
   }
   
   /**
@@ -92,7 +106,7 @@ export class World {
 
     if (options?.noResponse) return CommandResponsePacket.createEmptyResult<R>();
 
-    const response = await this.connection.awaitCommandResponse(header.requestId, packet, options?.timeout);
+    const response = await this.connection.awaitResponse<CommandResponsePacket>(header.requestId, options?.timeout);
     return response.toCommandResult<R>();
   }
   
@@ -298,20 +312,39 @@ export class World {
   public async enableEncryption(mode?: EncryptionMode) {
     if (this.connection.encryption.enabled) throw new Error('Encryption is already enabled');
     
-    const exchanging = this.connection.encryption.beginKeyExchange();
+    const exchange = this.connection.encryption.beginKeyExchange();
 
     const packet = new EncryptionRequestPacket();
     packet.mode = mode ?? EncryptionMode.Aes256cfb8;
-    packet.publicKey = exchanging.publicKey;
-    packet.salt = exchanging.salt;
+    packet.publicKey = exchange.publicKey;
+    packet.salt = exchange.salt;
 
-    this.send(packet);
+    const header = this.send(packet);
 
-    const response = await this.connection.awaitEncryptionResponse();
-
-    exchanging.complete(packet.mode, response.publicKey);
+    const response = await this.connection.awaitResponse<EncryptionResponsePacket>(header.requestId);
+    exchange.complete(packet.mode, response.publicKey);
 
     new EnableEncryptionSignal(this).emit();
+  }
+
+  public async queryData(type: 'block'): Promise<BlockData[]>;
+  public async queryData(type: 'item'): Promise<ItemData[]>;
+  public async queryData(type: 'mob'): Promise<MobData[]>;
+  public async queryData(type: 'block' | 'item' | 'mob'): Promise<BlockData[] | ItemData[] | MobData[]> {
+    const packet = new DataRequestPacket();
+
+    let purpose: MessagePurpose;
+    switch (type) {
+      case 'block': purpose = MessagePurpose.BlockDataRequest; break;
+      case 'item': purpose = MessagePurpose.ItemDataRequest; break;
+      case 'mob': purpose = MessagePurpose.MobDataRequest; break;
+      default: throw new Error('Invalid data type');
+    }
+
+    const header = this.send(packet, { overrideMessagePurpose: purpose });
+
+    const res = await this.connection.awaitResponse<DataResponsePacket>(header.requestId);
+    return res.data;
   }
   
   private async updatePlayerList(isFirst = false) {

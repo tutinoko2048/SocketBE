@@ -8,7 +8,7 @@ import { EventSubscribePacket, Packets, type BasePacket } from './packets';
 import * as events from '../events';
 import type { WebSocket } from 'ws';
 import type { Server } from '../server';
-import type { IHeader, IPacket, NetworkEvent, NetworkEvents } from '../types';
+import type { IHeader, IPacket, NetworkEvent, NetworkEvents, NetworkSendOptions } from '../types';
 import type { NetworkHandler } from './handler';
 
 
@@ -38,11 +38,11 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     this.wss.close();
   }
 
-  public send(connection: Connection, packet: BasePacket): IHeader {
+  public send(connection: Connection, packet: BasePacket, options?: NetworkSendOptions): IHeader {
     const header = {
       version: 1,
       requestId: randomUUID(),
-      messagePurpose: packet.getPurpose(),
+      messagePurpose: options?.overrideMessagePurpose ?? packet.getPurpose(),
     } as IHeader;
 
     const event: NetworkEvent<BasePacket> = {
@@ -145,6 +145,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       MessagePurpose.Encrypt,
       MessagePurpose.Error,
       MessagePurpose.Event,
+      MessagePurpose.DataResponse,
     ];
 
     if (!deserializablePurposes.includes(messagePurpose)) {
@@ -157,6 +158,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       case MessagePurpose.CommandResponse: packetId = Packet.CommandResponse; break;
       case MessagePurpose.Encrypt: packetId = Packet.EncryptionResponse; break;
       case MessagePurpose.Error: packetId = Packet.CommandError; break;
+      case MessagePurpose.DataResponse: packetId = Packet.DataResponse; break;
       case MessagePurpose.Event: packetId = rawPacket.header.eventName; break;
     }
 
@@ -167,7 +169,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
 
     try {
-      const packet = PacketType.deserialize(rawPacket.body);
+      const packet: BasePacket = PacketType.deserialize(rawPacket.body, rawPacket.header);
       
       const event: NetworkEvent<BasePacket> = {
         connection,
