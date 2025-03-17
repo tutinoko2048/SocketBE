@@ -9,6 +9,7 @@ import type {
   WorldAddSignal,
   WorldInitializeSignal,
   WorldRemoveSignal,
+  PlayerTravelledSignal,
 } from '../../events';
 
 export interface ServerEvents {
@@ -23,4 +24,5 @@ export interface ServerEvents {
   [ServerEvent.PlayerChat]: [PlayerChatSignal];
   [ServerEvent.PlayerMessage]: [PlayerMessageSignal];
   [ServerEvent.PlayerTitle]: [PlayerTitleSignal];
+  [ServerEvent.PlayerTravelled]: [PlayerTravelledSignal];
 }

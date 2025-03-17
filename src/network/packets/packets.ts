@@ -11,6 +11,7 @@ import { EncryptionRequestPacket } from './encryption-request';
 import { EncryptionResponsePacket } from './encryption-response';
 import { DataRequestPacket } from './data-request';
 import { DataResponsePacket } from './data-response';
+import { PlayerTravelledPacket } from './player-travelled';
 
 
 export const Packets = {
@@ -19,9 +20,12 @@ export const Packets = {
   [Packet.CommandError]: CommandErrorPacket,
   [Packet.DataRequest]: DataRequestPacket,
   [Packet.DataResponse]: DataResponsePacket,
-  [Packet.PlayerMessage]: PlayerMessagePacket,
   [Packet.EventSubscribe]: EventSubscribePacket,
   [Packet.EventUnsubscribe]: EventUnsubscribePacket,
   [Packet.EncryptionRequest]: EncryptionRequestPacket,
   [Packet.EncryptionResponse]: EncryptionResponsePacket,
+
+  // --- mc event packets ---
+  [Packet.PlayerMessage]: PlayerMessagePacket,
+  [Packet.PlayerTravelled]: PlayerTravelledPacket,
 } satisfies Record<Packet, typeof BasePacket>;

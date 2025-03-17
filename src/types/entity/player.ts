@@ -1,6 +1,17 @@
 import type { Vector3 } from '@minecraft/server';
 import type { ItemLockMode } from '../../enums';
 
+export interface WorldPlayer {
+  color: string;
+  dimension: number;
+  id: number;
+  name: string;
+  position: Vector3;
+  type: string;
+  variant: number;
+  yRot: number;
+}
+
 export interface PlayerList {
   current: number;
   max: number;

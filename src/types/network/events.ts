@@ -11,7 +11,8 @@ import type {
   EncryptionResponsePacket,
   EventSubscribePacket,
   EventUnsubscribePacket,
-  PlayerMessagePacket
+  PlayerMessagePacket,
+  PlayerTravelledPacket
 } from '../../network';
 
 export interface NetworkEvents {
@@ -24,11 +25,14 @@ export interface NetworkEvents {
   [Packet.CommandRequest]: [NetworkEvent<CommandRequestPacket>];
   [Packet.CommandResponse]: [NetworkEvent<CommandResponsePacket>];
   [Packet.CommandError]: [NetworkEvent<CommandErrorPacket>];
-  [Packet.PlayerMessage]: [NetworkEvent<PlayerMessagePacket>];
   [Packet.EventSubscribe]: [NetworkEvent<EventSubscribePacket>];
   [Packet.EventUnsubscribe]: [NetworkEvent<EventUnsubscribePacket>];
   [Packet.EncryptionRequest]: [NetworkEvent<EncryptionRequestPacket>];
   [Packet.EncryptionResponse]: [NetworkEvent<EncryptionResponsePacket>];
   [Packet.DataRequest]: [NetworkEvent<DataRequestPacket>];
   [Packet.DataResponse]: [NetworkEvent<DataResponsePacket>];
+
+  // --- mc event packets ---
+  [Packet.PlayerMessage]: [NetworkEvent<PlayerMessagePacket>];
+  [Packet.PlayerTravelled]: [NetworkEvent<PlayerTravelledPacket>];
 }

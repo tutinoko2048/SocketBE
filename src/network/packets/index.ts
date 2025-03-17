@@ -10,3 +10,4 @@ export * from './event-subscribe';
 export * from './event-unsubscribe';
 export * from './packets';
 export * from './player-message';
+export * from './player-travelled';

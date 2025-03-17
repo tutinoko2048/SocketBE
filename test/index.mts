@@ -96,3 +96,7 @@ server.on(ServerEvent.PlayerJoin, event => {
 server.on(ServerEvent.PlayerLeave, event => {
   console.log('Player left', event.player.name);
 })
+
+server.on(ServerEvent.PlayerTravelled, ev => {
+  console.dir(ev, { depth: 0 });
+})

@@ -6,6 +6,7 @@ export * from './player-leave';
 export * from './player-load';
 export * from './player-message';
 export * from './player-title';
+export * from './player-travelled';
 export * from './world-add';
 export * from './world-event-signal';
 export * from './world-initialize';

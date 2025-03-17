@@ -15,4 +15,5 @@ export * from './player-message-type';
 export * from './server-event';
 export * from './set-block-mode';
 export * from './time-of-day';
+export * from './travel-method';
 export * from './weather-type';
