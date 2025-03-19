@@ -3,7 +3,7 @@ import { CommandRequestPacket, CommandResponsePacket, DataRequestPacket, Encrypt
 import { EnableEncryptionSignal, PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Agent, EntityQueryUtil, Player } from '../entity';
 import { CommandStatusCode, EncryptionMode, MessagePurpose, WeatherType } from '../enums';
-import { RawTextUtil } from '../world';
+import { jsonParseFixed, RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type {
@@ -179,7 +179,7 @@ export class World {
   public async getPlayerDetail(): Promise<PlayerListDetail> {
     const res = await this.runCommand('listd stats');
     const status = res.statusCode >= CommandStatusCode.Success;
-    const details: PlayerDetail[] = JSON.parse(res.details.match(/\{.*\}/g)[0]).result;
+    const details: PlayerDetail[] = jsonParseFixed(res.details.match(/\{.*\}/g)[0]).result;
     const players: string[] = status ? res.players.split(', ') : [];
     const formattedPlayers = players.map(name => this.formatPlayerName(name));
     
