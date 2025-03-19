@@ -150,7 +150,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
 
     if (!deserializablePurposes.includes(messagePurpose)) {
       console.error('[Network] Invalid message purpose:', messagePurpose);
-      return
+      return;
     }
 
     let packetId: Packet;

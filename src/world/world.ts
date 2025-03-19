@@ -1,7 +1,7 @@
 import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket, CommandResponsePacket, DataRequestPacket, EncryptionRequestPacket, type DataResponsePacket } from '../network';
 import { EnableEncryptionSignal, PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
-import { EntityQueryUtil, Player } from '../entity';
+import { Agent, EntityQueryUtil, Player } from '../entity';
 import { CommandStatusCode, EncryptionMode, MessagePurpose, WeatherType } from '../enums';
 import { RawTextUtil } from '../world';
 import type { RawMessage, Vector3 } from '@minecraft/server';
@@ -43,9 +43,11 @@ export class World {
   private _maxPlayers: number = -1;
   
   private _isValid = true;
+
+  private agent: Agent | null = null;
   
   private countInterval: NodeJS.Timeout | null = null;
-  
+
   private readonly index = World.index++;
 
   constructor(server: Server, connection: Connection) {
@@ -194,12 +196,11 @@ export class World {
    * @param location If not specified, the location of the local player is used.
    */
   public async getTopSolidBlock(location?: Vector3): Promise<BlockInfo> {
-    const positionArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
-    const res = await this.runCommand<BlockInfo>(`gettopsolidblock ${positionArg}`);
+    const locationArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
+    const res = await this.runCommand<{ blockName: string, position: Vector3 }>(`gettopsolidblock ${locationArg}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
-    const block: BlockInfo = { blockName: res.blockName, position: res.position };
-    return block;
+    return { blockName: res.blockName, location: res.position };
   }
 
   public async getCurrentTick(): Promise<number> {
@@ -345,6 +346,13 @@ export class World {
 
     const res = await this.connection.awaitResponse<DataResponsePacket>(header.requestId);
     return res.data;
+  }
+
+  public async getOrCreateAgent(): Promise<Agent> {
+    if (this.agent) return this.agent;
+    const res = await this.runCommand('agent create');
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+    return new Agent(this);
   }
   
   private async updatePlayerList(isFirst = false) {

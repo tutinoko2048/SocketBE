@@ -1,4 +1,5 @@
 export * from './ability-type';
+export * from './agent-direction';
 export * from './command-status-code';
 export * from './display-slot-id';
 export * from './encryption-mode';

@@ -1,4 +1,4 @@
-import { BasePacket, DataRequestPacket, EventSubscribePacket, MessagePurpose, Packet, PacketBound, Server, ServerEvent } from 'socket-be';
+import { BasePacket, DataRequestPacket, EventSubscribePacket, MessagePurpose, Packet, PacketBound, Server, ServerEvent, TravelMethod } from 'socket-be';
 import { createInterface } from 'readline';
 import { writeFileSync } from 'fs';
 
@@ -97,6 +97,6 @@ server.on(ServerEvent.PlayerLeave, event => {
   console.log('Player left', event.player.name);
 })
 
-server.on(ServerEvent.PlayerTravelled, ev => {
-  console.dir(ev, { depth: 0 });
-})
+// server.on(ServerEvent.PlayerTravelled, ev => {
+//   console.log(TravelMethod[ev.travelMethod]);
+// })

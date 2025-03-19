@@ -11,7 +11,7 @@ export interface BlockInfo {
    * Identifier of the block without the namespace.
    */
   blockName: string;
-  position: Vector3;
+  location: Vector3;
 }
 
 export interface SetBlockOptions {
