@@ -11,5 +11,6 @@ export enum ServerEvent {
   PlayerTitle,
   PlayerMessage,
   EnableEncryption,
+  PlayerTransform,
   PlayerTravelled,
 }

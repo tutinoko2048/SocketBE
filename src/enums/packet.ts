@@ -13,6 +13,7 @@ export enum Packet {
   // BlockBroken = 'BlockBroken',
   // BlockPlaced = 'BlockPlaced',
   PlayerMessage = 'PlayerMessage',
+  PlayerTransform = 'PlayerTransform',
   PlayerTravelled = 'PlayerTravelled',
 }
 

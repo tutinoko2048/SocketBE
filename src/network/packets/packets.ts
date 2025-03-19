@@ -12,6 +12,7 @@ import { EncryptionResponsePacket } from './encryption-response';
 import { DataRequestPacket } from './data-request';
 import { DataResponsePacket } from './data-response';
 import { PlayerTravelledPacket } from './player-travelled';
+import { PlayerTransformPacket } from './player-transform';
 
 
 export const Packets = {
@@ -27,5 +28,6 @@ export const Packets = {
 
   // --- mc event packets ---
   [Packet.PlayerMessage]: PlayerMessagePacket,
+  [Packet.PlayerTransform]: PlayerTransformPacket,
   [Packet.PlayerTravelled]: PlayerTravelledPacket,
 } satisfies Record<Packet, typeof BasePacket>;
