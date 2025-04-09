@@ -10,6 +10,20 @@ import type {
   WorldInitializeSignal,
   WorldRemoveSignal,
   PlayerTravelledSignal,
+  EnableEncryptionSignal,
+  BlockBrokenSignal,
+  BlockPlacedSignal,
+  ItemAcquiredSignal,
+  ItemCraftedSignal,
+  ItemEquippedSignal,
+  ItemInteractedSignal,
+  ItemSmeltedSignal,
+  ItemTradedSignal,
+  MobInteractedSignal,
+  PlayerBouncedSignal,
+  PlayerTeleportedSignal,
+  PlayerTransformSignal,
+  TargetBlockHitSignal,
 } from '../../events';
 
 export interface ServerEvents {
@@ -22,7 +36,21 @@ export interface ServerEvents {
   [ServerEvent.PlayerLeave]: [PlayerLeaveSignal];
   [ServerEvent.PlayerLoad]: [PlayerLoadSignal];
   [ServerEvent.PlayerChat]: [PlayerChatSignal];
-  [ServerEvent.PlayerMessage]: [PlayerMessageSignal];
   [ServerEvent.PlayerTitle]: [PlayerTitleSignal];
+  [ServerEvent.PlayerMessage]: [PlayerMessageSignal];
+  [ServerEvent.EnableEncryption]: [EnableEncryptionSignal];
+  [ServerEvent.BlockBroken]: [BlockBrokenSignal];
+  [ServerEvent.BlockPlaced]: [BlockPlacedSignal];
+  [ServerEvent.ItemAcquired]: [ItemAcquiredSignal];
+  [ServerEvent.ItemCrafted]: [ItemCraftedSignal];
+  [ServerEvent.ItemEquipped]: [ItemEquippedSignal];
+  [ServerEvent.ItemInteracted]: [ItemInteractedSignal];
+  [ServerEvent.ItemSmelted]: [ItemSmeltedSignal];
+  [ServerEvent.ItemTraded]: [ItemTradedSignal];
+  [ServerEvent.MobInteracted]: [MobInteractedSignal];
+  [ServerEvent.PlayerBounced]: [PlayerBouncedSignal];
+  [ServerEvent.PlayerTeleported]: [PlayerTeleportedSignal];
+  [ServerEvent.PlayerTransform]: [PlayerTransformSignal];
   [ServerEvent.PlayerTravelled]: [PlayerTravelledSignal];
+  [ServerEvent.TargetBlockHit]: [TargetBlockHitSignal];
 }

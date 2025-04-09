@@ -1,15 +1,11 @@
 import type { Vector3 } from '@minecraft/server';
 import type { ItemLockMode } from '../../enums';
+import type { WorldEntity } from './entity';
 
-export interface WorldPlayer {
+export interface WorldPlayer extends WorldEntity {
+  /** map marker color */
   color: string;
-  dimension: number;
-  id: number;
   name: string;
-  position: Vector3;
-  type: string;
-  variant: number;
-  yRot: number;
 }
 
 export interface PlayerList {

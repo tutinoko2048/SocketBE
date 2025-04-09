@@ -45,6 +45,8 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       messagePurpose: options?.overrideMessagePurpose ?? packet.getPurpose(),
     } as IHeader;
 
+    if (!header.messagePurpose) throw new Error('MessagePurpose cannot be undefined');
+
     const event: NetworkEvent<BasePacket> = {
       connection,
       packet,

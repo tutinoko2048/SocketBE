@@ -13,13 +13,6 @@ export class ScreenDisplay {
     return this.player.isValid;
   }
 
-  /**
-    '- /titleraw <player: target> <titleLocation: TitleRawSet> <raw json titleText: json>\n' +
-    '- /titleraw <player: target> clear\n' +
-    '- /titleraw <player: target> reset\n' +
-    '- /titleraw <player: target> times <fadeIn: int> <stay: int> <fadeOut: int>'
-   */
-
   public async setTitle(
     title: string | RawMessage | (string | RawMessage)[],
     options?: TitleDisplayOptions,

@@ -42,6 +42,10 @@ server.on(ServerEvent.Open, () => {
 server.network.on('all', event => {
   if (event.packet.getId() === Packet.CommandResponse || event.packet.getId() === Packet.CommandRequest) return;
   if (event.bound === PacketBound.Server) {
+    if (
+      [Packet.PlayerMessage, Packet.PlayerTravelled, Packet.PlayerTransform].includes(event.packet.getId())
+    ) return;
+
     console.log(`[C->S] ${event.packet.getId()}`);
   } else {
     console.log(`[S->C] ${event.packet.getId()}`);
@@ -62,12 +66,9 @@ server.on(ServerEvent.PlayerChat, async event => {
         }
       }
     }
-  } else if (command === '.data') {
-    world.sendMessage((await world.queryData('block')).length.toString());
-    world.sendMessage((await world.queryData('item')).length.toString());
-    world.sendMessage((await world.queryData('mob')).length.toString());
-  }
+  } else if (command === '.data') {}
 })
+
 
 server.on(ServerEvent.WorldAdd, event => {
   console.log('World added', event.world.connection.identifier);
@@ -75,6 +76,12 @@ server.on(ServerEvent.WorldAdd, event => {
 
 server.on(ServerEvent.WorldInitialize, event => {
   console.log('World initialized', event.localPlayer.name);
+
+  // for (const packetId of getPacketIds()) {
+  //   const packet = new EventSubscribePacket();
+  //   packet.eventName = packetId as any;
+  //   event.world.send(packet);
+  // }
 })
 
 server.on(ServerEvent.WorldRemove, event => {
@@ -98,5 +105,166 @@ server.on(ServerEvent.PlayerLeave, event => {
 })
 
 // server.on(ServerEvent.PlayerTravelled, ev => {
-//   console.log(TravelMethod[ev.travelMethod]);
+//   ev.player.onScreenDisplay.setActionBar(`TravelMethod: ${TravelMethod[ev.travelMethod]}`);
 // })
+
+function getPacketIds(): string[] {
+  return `AgentCommand
+AgentCreated
+AndroidHelpRequest
+ApiInit
+AppPaused
+AppResumed
+AppSuspended
+AppUnpaused
+ArmorStandItemEquipped
+ArmorStandPosed
+AssertFailed
+AvatarsListed
+AvatarUpdated
+BehaviorErrored
+BehaviorFailed
+BlockBroken
+BlockChecksumMismatchLevelFailedToLoad
+BlockFound
+BlockPlaced
+BlockUsageAttempt
+BlockUsed
+BookCopied
+BookEdited
+BookExported
+BookImageImported
+BossKilled
+BundleSubOfferClicked
+ButtonPressed
+CameraUsed
+CaravanChanged
+CauldronUsed
+ChunkChanged
+ChunkLoaded
+ClassroomSettingUpdated
+ClientIdCreated
+ClubsEngagement
+CommandBlockEdited
+ConfigurationChanged
+ConnectionFailed
+ContentShared
+ControlRemappedByPlayer
+CraftingSessionCompleted
+CrashDumpStatus
+CustomContentRegistered
+DBStorageError
+DevConsoleOpen
+DeviceAccountFailure
+DeviceAccountSuccess
+DeviceIdManagerFailOnIdentityGained
+DeviceLost
+DifficultySet
+DiskStatus
+DwellerDied
+DwellerRemoved
+EDUDemoConversion
+EduOptionSet
+EmotePlayed
+GameRulesUpdated
+GameSessionStart
+GameTipShown
+HardwareInfo
+HowToPlayTopicChanged
+IDESelected
+IncognitoFailure
+InputModeChanged
+ItemAcquired
+ItemCrafted
+ItemDropped
+ItemEquipped
+ItemInteracted
+ItemNamed
+ItemSmelted
+ItemTraded
+JoinCanceled
+JukeboxUsed
+LockedItemGiven
+MobEffectChanged
+MobInteracted
+NpcInteracted
+OfferRated
+OnAppResume
+OnAppStart
+OnAppSuspend
+OnDeviceLost
+OptionsUpdated
+PackHashChanged
+PackPlayed
+PackRecovery
+PackSettings
+PatternAdded
+PerformanceContext
+PerformanceMetrics
+PermissionsSet
+PetDied
+PlayerBanned
+PlayerBounced
+PlayerGameModeSet
+PlayerMessage
+PlayerSaved
+PlayerTeleported
+PlayerTransform
+PlayerTravelled
+PopupClosed
+PopupFiredEdu
+PortalUsed
+PortfolioExported
+PotionBrewed
+Progressions
+PurchaseFailedDetailed
+PushNotificationPermission
+PushNotificationReceived
+QueryOfferResult
+RaidUpdated
+RealmShared
+RealmsSubscriptionPurchaseFailed
+RealmsSubscriptionPurchaseStarted
+RealmsSubscriptionPurchaseSucceeded
+RenderingSizeChanged
+RespondedToAcceptContent
+ScreenChanged
+ScreenLoaded
+ScreenLoadTime
+ScriptRan
+ServerConnection
+ServerConnectionAttempt
+ServerDrivenLayoutImageLoad
+ServerDrivenLayoutPageLoad
+SessionCrashed
+SignedBookOpened
+SignIn
+SignInToEdu
+SignOut
+SignOutOfXboxLive
+SlashCommandExecuted
+StartClient
+StartWorld
+StorageCreated
+storageReport
+StoreDiscoveryServiceResponse
+StoreOfferClicked
+StorePlayFabResponse
+StorePromoNotification
+StorePromoNotificationClicked
+StoreSearch
+StoreSessionStartResponse
+StructureBlockAction
+TargetBlockHit
+TextToSpeechToggled
+TreatmentPackApplied
+TreatmentPackRemoved
+Treatments
+TrialDeviceIdCorrelation
+UgcDownloadCompleted
+WaxedOnOrOff
+WorldGenerated
+WorldLoadedClassroomCustomization
+WorldLoadTimes
+XForgeCatalogSearch`.split('\n').map(x => x.trim());
+}

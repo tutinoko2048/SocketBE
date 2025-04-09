@@ -1,4 +1,4 @@
-export enum EquipmentSlot {
+export enum EntityEquipmentSlot {
   Armor = 'slot.armor', 
   ArmorBody = 'slot.armor.body',
   ArmorChest = 'slot.armor.chest',

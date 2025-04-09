@@ -1,7 +1,7 @@
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
 import { MessagePurpose, Packet } from '../../enums';
-import type { BlockData, ItemData, MobData } from '../../types';
+import type { BlockQueryResult, ItemQueryResult, MobQueryResult } from '../../types';
 
 @PacketClass(Packet.DataResponse, MessagePurpose.DataResponse)
 export class DataResponsePacket extends BasePacket {
@@ -9,7 +9,7 @@ export class DataResponsePacket extends BasePacket {
 
   public type: number;
 
-  public data: BlockData[] | ItemData[] | MobData[];
+  public data: BlockQueryResult[] | ItemQueryResult[] | MobQueryResult[];
 
   public static deserialize(data: any, header: Record<string, any>): DataResponsePacket {
     const packet = new DataResponsePacket();

@@ -1,6 +1,14 @@
 import { Packet, PlayerMessageType } from '../enums';
-import { PlayerChatSignal, PlayerMessageSignal, PlayerTitleSignal } from '../events';
-import { NetworkHandler, type PlayerMessagePacket, type Connection } from '../network';
+import {
+  PlayerChatSignal,
+  PlayerMessageSignal,
+  PlayerTitleSignal,
+} from '../events';
+import {
+  NetworkHandler,
+  type PlayerMessagePacket,
+  type Connection,
+} from '../network';
 
 export class PlayerMessageHandler extends NetworkHandler {
   public static readonly packet = Packet.PlayerMessage;
@@ -10,8 +18,9 @@ export class PlayerMessageHandler extends NetworkHandler {
     const { sender: senderName, message, receiver: receiverName } = packet;
 
     const sender = world.resolvePlayer(senderName);
-    const receiver = receiverName === '' ? undefined : world.resolvePlayer(receiverName);
-    
+    const receiver =
+      receiverName === '' ? undefined : world.resolvePlayer(receiverName);
+
     switch (packet.type) {
       case PlayerMessageType.Chat: {
         new PlayerChatSignal(world, sender, message).emit();
@@ -21,7 +30,13 @@ export class PlayerMessageHandler extends NetworkHandler {
       case PlayerMessageType.Tell:
       case PlayerMessageType.Say:
       case PlayerMessageType.Me: {
-        new PlayerMessageSignal(world, sender, message, packet.type, receiver).emit();
+        new PlayerMessageSignal(
+          world,
+          sender,
+          message,
+          packet.type,
+          receiver
+        ).emit();
         break;
       }
 
@@ -29,7 +44,7 @@ export class PlayerMessageHandler extends NetworkHandler {
         new PlayerTitleSignal(world, sender, message, receiver).emit();
         break;
       }
-      
+
       default:
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unknown player message type: ${packet.type}`);

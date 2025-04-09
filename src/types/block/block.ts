@@ -1,12 +1,18 @@
 import type { Vector3 } from '@minecraft/server';
 import type { FillBlocksMode, SetBlockMode } from '../../enums';
 
+export interface WorldBlock {
+  aux: number;
+  id: string;
+  namespace: string;
+}
+
 export interface IBlock {
   type: string;
   states?: Record<string, string | number | boolean>;
 }
 
-export interface BlockInfo {
+export interface TopSolidBlockResult {
   /**
    * Identifier of the block without the namespace.
    */
@@ -36,7 +42,7 @@ export interface IBlockVolume {
   to: Vector3;
 }
 
-export interface BlockData {
+export interface BlockQueryResult {
   aux: number;
   id: string;
   name: string;

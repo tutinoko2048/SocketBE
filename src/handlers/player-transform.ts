@@ -1,6 +1,10 @@
 import { Packet } from '../enums';
 import { PlayerTransformSignal } from '../events';
-import { NetworkHandler, type PlayerTransformPacket, type Connection } from '../network';
+import {
+  NetworkHandler,
+  type PlayerTransformPacket,
+  type Connection,
+} from '../network';
 
 export class PlayerTransformHandler extends NetworkHandler {
   public static readonly packet = Packet.PlayerTransform;
@@ -10,10 +14,6 @@ export class PlayerTransformHandler extends NetworkHandler {
     const { player: rawPlayer } = packet;
     const player = world.resolvePlayer(rawPlayer.name);
 
-    new PlayerTransformSignal(
-      world,
-      player,
-      rawPlayer,
-    ).emit();
+    new PlayerTransformSignal(world, player, rawPlayer).emit();
   }
 }

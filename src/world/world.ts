@@ -10,16 +10,16 @@ import type {
   PlayerList,
   PlayerDetail,
   PlayerListDetail,
-  BlockInfo,
+  TopSolidBlockResult,
   CommandOptions,
   EntityQueryOptions,
   SetBlockOptions,
   IBlockVolume,
   FillBlocksOptions,
   NetworkSendOptions,
-  BlockData,
-  ItemData,
-  MobData,
+  BlockQueryResult,
+  ItemQueryResult,
+  MobQueryResult,
 } from '../types';
 import type { BasePacket, Connection, EncryptionResponsePacket } from '../network';
 import type { CommandResult, IHeader } from '../types';
@@ -195,7 +195,7 @@ export class World {
    * Returns the top solid block at a particular location.
    * @param location If not specified, the location of the local player is used.
    */
-  public async getTopSolidBlock(location?: Vector3): Promise<BlockInfo> {
+  public async getTopSolidBlock(location?: Vector3): Promise<TopSolidBlockResult> {
     const locationArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
     const res = await this.runCommand<{ blockName: string, position: Vector3 }>(`gettopsolidblock ${locationArg}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
@@ -328,10 +328,10 @@ export class World {
     new EnableEncryptionSignal(this).emit();
   }
 
-  public async queryData(type: 'block'): Promise<BlockData[]>;
-  public async queryData(type: 'item'): Promise<ItemData[]>;
-  public async queryData(type: 'mob'): Promise<MobData[]>;
-  public async queryData(type: 'block' | 'item' | 'mob'): Promise<BlockData[] | ItemData[] | MobData[]> {
+  public async queryData(type: 'block'): Promise<BlockQueryResult[]>;
+  public async queryData(type: 'item'): Promise<ItemQueryResult[]>;
+  public async queryData(type: 'mob'): Promise<MobQueryResult[]>;
+  public async queryData(type: 'block' | 'item' | 'mob'): Promise<BlockQueryResult[] | ItemQueryResult[] | MobQueryResult[]> {
     const packet = new DataRequestPacket();
 
     let purpose: MessagePurpose;

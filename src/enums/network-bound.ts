@@ -1,4 +1,10 @@
 export enum PacketBound {
-  Server,
-  Client
+  /**
+   * websocket-server bound packet.
+   */
+  Server = 'Server',
+  /**
+   * minecraft-client bound packet.
+   */
+  Client = 'Client',
 }

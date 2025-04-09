@@ -10,11 +10,21 @@ export enum Packet {
   EncryptionResponse = 'ws:encryptionResponse',
 
   // --- mc event packets ---
-  // BlockBroken = 'BlockBroken',
-  // BlockPlaced = 'BlockPlaced',
+  BlockBroken = 'BlockBroken',
+  BlockPlaced = 'BlockPlaced',
+  ItemAcquired = 'ItemAcquired',
+  ItemCrafted = 'ItemCrafted',
+  ItemEquipped = 'ItemEquipped',
+  ItemInteracted = 'ItemInteracted',
+  ItemSmelted = 'ItemSmelted',
+  ItemTraded = 'ItemTraded',
+  MobInteracted = 'MobInteracted',
+  PlayerBounced = 'PlayerBounced',
   PlayerMessage = 'PlayerMessage',
+  PlayerTeleported = 'PlayerTeleported',
   PlayerTransform = 'PlayerTransform',
   PlayerTravelled = 'PlayerTravelled',
+  TargetBlockHit = 'TargetBlockHit',
 }
 
 /*

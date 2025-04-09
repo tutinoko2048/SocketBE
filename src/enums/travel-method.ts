@@ -2,7 +2,6 @@
  * Reference: {@link https://github.com/LiteLDev/LeviLamina/blob/main/src/mc/events/player_travelled_event/TravelMethod.h}.
  */
 export enum TravelMethod {
-  /** Note: this value is not used even if player is walking. Use {@link TravelMethod.Fall} instead. */
   Walk = 0,
   SwimWater = 1,
   Fall = 2,
