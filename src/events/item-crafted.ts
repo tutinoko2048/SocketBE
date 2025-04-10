@@ -18,7 +18,7 @@ export class ItemCraftedSignal extends WorldEventSignal {
 
   public readonly hasCraftableFilterOn: boolean;
 
-  public readonly item: ItemStack;
+  public readonly craftedItemStack: ItemStack;
 
   public readonly numberOfTabsChanged: number;
 
@@ -40,7 +40,7 @@ export class ItemCraftedSignal extends WorldEventSignal {
     craftedAutomatically: boolean,
     endingTabId: number,
     hasCraftableFilterOn: boolean,
-    item: ItemStack,
+    craftedItemStack: ItemStack,
     numberOfTabsChanged: number,
     player: Player,
     rawPlayer: WorldPlayer,
@@ -54,7 +54,7 @@ export class ItemCraftedSignal extends WorldEventSignal {
     this.craftedAutomatically = craftedAutomatically;
     this.endingTabId = endingTabId;
     this.hasCraftableFilterOn = hasCraftableFilterOn;
-    this.item = item;
+    this.craftedItemStack = craftedItemStack;
     this.numberOfTabsChanged = numberOfTabsChanged;
     this.player = player;
     this.rawPlayer = rawPlayer;

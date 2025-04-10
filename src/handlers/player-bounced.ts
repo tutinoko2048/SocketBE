@@ -1,3 +1,4 @@
+import { BlockType } from '../block';
 import { Packet } from '../enums';
 import { PlayerBouncedSignal } from '../events';
 import {
@@ -12,7 +13,8 @@ export class PlayerBouncedHandler extends NetworkHandler {
   public handle(packet: PlayerBouncedPacket, connection: Connection): void {
     const world = this.server.getWorldByConnection(connection);
 
-    const { block, bounceHeight, player: rawPlayer } = packet;
+    const { block: rawBlock, bounceHeight, player: rawPlayer } = packet;
+    const block = new BlockType(rawBlock);
     const player = world.resolvePlayer(rawPlayer.name);
 
     new PlayerBouncedSignal(

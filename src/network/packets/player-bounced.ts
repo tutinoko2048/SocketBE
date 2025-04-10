@@ -1,11 +1,11 @@
 import { MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
-import type { WorldBlock, WorldPlayer } from '../../types';
+import type { WorldBlockType, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.PlayerBounced, MessagePurpose.Event)
 export class PlayerBouncedPacket extends BasePacket {
-  public block: WorldBlock;
+  public block: WorldBlockType;
 
   public bounceHeight: number;
 

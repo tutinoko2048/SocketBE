@@ -29,4 +29,8 @@ export class ItemStack {
   public get data() {
     return this.type.data;
   }
+
+  public get [Symbol.toStringTag]() {
+    return this.typeId;
+  }
 }

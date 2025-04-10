@@ -1,11 +1,11 @@
 import { MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
-import type { WorldBlock, WorldItemStack, WorldPlayer } from '../../types';
+import type { WorldBlockType, WorldItemStack, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.BlockPlaced, MessagePurpose.Event)
 export class BlockPlacedPacket extends BasePacket {  
-  public block: WorldBlock;
+  public block: WorldBlockType;
 
   public count: number;
 

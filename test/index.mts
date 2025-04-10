@@ -107,164 +107,26 @@ server.on(ServerEvent.PlayerLeave, event => {
 // server.on(ServerEvent.PlayerTravelled, ev => {
 //   ev.player.onScreenDisplay.setActionBar(`TravelMethod: ${TravelMethod[ev.travelMethod]}`);
 // })
-
-function getPacketIds(): string[] {
-  return `AgentCommand
-AgentCreated
-AndroidHelpRequest
-ApiInit
-AppPaused
-AppResumed
-AppSuspended
-AppUnpaused
-ArmorStandItemEquipped
-ArmorStandPosed
-AssertFailed
-AvatarsListed
-AvatarUpdated
-BehaviorErrored
-BehaviorFailed
-BlockBroken
-BlockChecksumMismatchLevelFailedToLoad
-BlockFound
-BlockPlaced
-BlockUsageAttempt
-BlockUsed
-BookCopied
-BookEdited
-BookExported
-BookImageImported
-BossKilled
-BundleSubOfferClicked
-ButtonPressed
-CameraUsed
-CaravanChanged
-CauldronUsed
-ChunkChanged
-ChunkLoaded
-ClassroomSettingUpdated
-ClientIdCreated
-ClubsEngagement
-CommandBlockEdited
-ConfigurationChanged
-ConnectionFailed
-ContentShared
-ControlRemappedByPlayer
-CraftingSessionCompleted
-CrashDumpStatus
-CustomContentRegistered
-DBStorageError
-DevConsoleOpen
-DeviceAccountFailure
-DeviceAccountSuccess
-DeviceIdManagerFailOnIdentityGained
-DeviceLost
-DifficultySet
-DiskStatus
-DwellerDied
-DwellerRemoved
-EDUDemoConversion
-EduOptionSet
-EmotePlayed
-GameRulesUpdated
-GameSessionStart
-GameTipShown
-HardwareInfo
-HowToPlayTopicChanged
-IDESelected
-IncognitoFailure
-InputModeChanged
-ItemAcquired
-ItemCrafted
-ItemDropped
-ItemEquipped
-ItemInteracted
-ItemNamed
-ItemSmelted
-ItemTraded
-JoinCanceled
-JukeboxUsed
-LockedItemGiven
-MobEffectChanged
-MobInteracted
-NpcInteracted
-OfferRated
-OnAppResume
-OnAppStart
-OnAppSuspend
-OnDeviceLost
-OptionsUpdated
-PackHashChanged
-PackPlayed
-PackRecovery
-PackSettings
-PatternAdded
-PerformanceContext
-PerformanceMetrics
-PermissionsSet
-PetDied
-PlayerBanned
-PlayerBounced
-PlayerGameModeSet
-PlayerMessage
-PlayerSaved
-PlayerTeleported
-PlayerTransform
-PlayerTravelled
-PopupClosed
-PopupFiredEdu
-PortalUsed
-PortfolioExported
-PotionBrewed
-Progressions
-PurchaseFailedDetailed
-PushNotificationPermission
-PushNotificationReceived
-QueryOfferResult
-RaidUpdated
-RealmShared
-RealmsSubscriptionPurchaseFailed
-RealmsSubscriptionPurchaseStarted
-RealmsSubscriptionPurchaseSucceeded
-RenderingSizeChanged
-RespondedToAcceptContent
-ScreenChanged
-ScreenLoaded
-ScreenLoadTime
-ScriptRan
-ServerConnection
-ServerConnectionAttempt
-ServerDrivenLayoutImageLoad
-ServerDrivenLayoutPageLoad
-SessionCrashed
-SignedBookOpened
-SignIn
-SignInToEdu
-SignOut
-SignOutOfXboxLive
-SlashCommandExecuted
-StartClient
-StartWorld
-StorageCreated
-storageReport
-StoreDiscoveryServiceResponse
-StoreOfferClicked
-StorePlayFabResponse
-StorePromoNotification
-StorePromoNotificationClicked
-StoreSearch
-StoreSessionStartResponse
-StructureBlockAction
-TargetBlockHit
-TextToSpeechToggled
-TreatmentPackApplied
-TreatmentPackRemoved
-Treatments
-TrialDeviceIdCorrelation
-UgcDownloadCompleted
-WaxedOnOrOff
-WorldGenerated
-WorldLoadedClassroomCustomization
-WorldLoadTimes
-XForgeCatalogSearch`.split('\n').map(x => x.trim());
-}
+const events = [
+  ServerEvent.BlockBroken,
+  ServerEvent.BlockPlaced,
+  ServerEvent.EnableEncryption,
+  ServerEvent.ItemAcquired,
+  ServerEvent.ItemCrafted,
+  ServerEvent.ItemEquipped,
+  ServerEvent.ItemInteracted,
+  ServerEvent.ItemSmelted,
+  ServerEvent.ItemTraded,
+  ServerEvent.MobInteracted,
+  ServerEvent.PlayerBounced,
+  ServerEvent.PlayerLoad,
+  ServerEvent.PlayerTeleported,
+  ServerEvent.PlayerTransform,
+  ServerEvent.PlayerTravelled,
+  ServerEvent.TargetBlockHit,
+]
+events.forEach(event => {
+  server.on(event, ev => {
+    console.dir(ev, { depth: 1 });
+  })
+})

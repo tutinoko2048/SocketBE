@@ -19,10 +19,10 @@ export class ItemInteractedHandler extends NetworkHandler {
 
     new ItemInteractedSignal(
       world,
-      itemStack,
       method,
       player,
-      rawPlayer
+      rawPlayer,
+      itemStack.isAir ? undefined : itemStack,
     ).emit();
   }
 }

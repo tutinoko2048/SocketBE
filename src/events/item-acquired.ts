@@ -12,7 +12,7 @@ export class ItemAcquiredSignal extends WorldEventSignal {
 
   public readonly acquisitionMethod: ItemAcquisitionMethod;
 
-  public readonly count: number;
+  public readonly acquiredAmount: number;
 
   public readonly itemType: ItemType;
 
@@ -23,7 +23,7 @@ export class ItemAcquiredSignal extends WorldEventSignal {
   public constructor(
     world: World,
     acquisitionMethod: ItemAcquisitionMethod,
-    count: number,
+    acquiredAmount: number,
     itemType: ItemType,
     player: Player,
     rawPlayer: WorldPlayer,
@@ -31,7 +31,7 @@ export class ItemAcquiredSignal extends WorldEventSignal {
     super(world);
 
     this.acquisitionMethod = acquisitionMethod;
-    this.count = count;
+    this.acquiredAmount = acquiredAmount;
     this.itemType = itemType;
     this.player = player;
     this.rawPlayer = rawPlayer;

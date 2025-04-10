@@ -10,9 +10,9 @@ export class ItemTradedSignal extends WorldEventSignal {
 
   public static readonly packets: Packet[] = [Packet.ItemTraded];
 
-  public readonly itemA: ItemType;
+  public readonly itemTypeA: ItemType;
   
-  public readonly itemB?: ItemType;
+  public readonly itemTypeB?: ItemType;
 
   public readonly player: Player;
 
@@ -20,7 +20,7 @@ export class ItemTradedSignal extends WorldEventSignal {
 
   public readonly playerEmeraldCount: number;
 
-  public readonly result: ItemStack;
+  public readonly receivedItemStack: ItemStack;
 
   public readonly trader: WorldVillager;
 
@@ -33,9 +33,9 @@ export class ItemTradedSignal extends WorldEventSignal {
     playerEmeraldCount: number,
     trader: WorldVillager,
     traderEmeraldCount: number,
-    result: ItemStack,
-    itemA: ItemType,
-    itemB?: ItemType,
+    receivedItemStack: ItemStack,
+    itemTypeA: ItemType,
+    itemTypeB?: ItemType,
   ) {
     super(world);
 
@@ -44,8 +44,8 @@ export class ItemTradedSignal extends WorldEventSignal {
     this.playerEmeraldCount = playerEmeraldCount;
     this.trader = trader;
     this.traderEmeraldCount = traderEmeraldCount;
-    this.result = result;
-    this.itemA = itemA;
-    this.itemB = itemB;
+    this.receivedItemStack = receivedItemStack;
+    this.itemTypeA = itemTypeA;
+    this.itemTypeB = itemTypeB;
   }
 }

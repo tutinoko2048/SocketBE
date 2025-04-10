@@ -1,7 +1,7 @@
 import type { Vector3 } from '@minecraft/server';
 import type { FillBlocksMode, SetBlockMode } from '../../enums';
 
-export interface WorldBlock {
+export interface WorldBlockType {
   aux: number;
   id: string;
   namespace: string;

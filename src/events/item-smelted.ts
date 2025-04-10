@@ -10,9 +10,10 @@ export class ItemSmeltedSignal extends WorldEventSignal {
 
   public static readonly packets: Packet[] = [Packet.ItemSmelted];
 
-  public readonly fuelSource: ItemType;
+  public readonly fueledItemType: ItemType;
 
-  public readonly itemType: ItemType;
+  /** The result of furnace */
+  public readonly smeltedItemType: ItemType;
 
   public readonly player: Player;
 
@@ -20,15 +21,15 @@ export class ItemSmeltedSignal extends WorldEventSignal {
 
   public constructor(
     world: World,
-    fuelSource: ItemType,
-    itemType: ItemType,
+    fueledItemType: ItemType,
+    smeltedItemType: ItemType,
     player: Player,
     rawPlayer: WorldPlayer,
   ) {
     super(world);
 
-    this.fuelSource = fuelSource;
-    this.itemType = itemType;
+    this.fueledItemType = fueledItemType;
+    this.smeltedItemType = smeltedItemType;
     this.player = player;
     this.rawPlayer = rawPlayer;
   }

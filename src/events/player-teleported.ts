@@ -11,7 +11,7 @@ export class PlayerTeleportedSignal extends WorldEventSignal {
 
   public readonly cause: TeleportationCause;
 
-  public readonly itemType: number;
+  public readonly rawItemId: number;
 
   public readonly metersTravelled: number;
 
@@ -22,7 +22,7 @@ export class PlayerTeleportedSignal extends WorldEventSignal {
   public constructor(
     world: World,
     cause: TeleportationCause,
-    itemType: number,
+    rawItemId: number,
     metersTravelled: number,
     player: Player,
     rawPlayer: WorldPlayer,
@@ -30,7 +30,7 @@ export class PlayerTeleportedSignal extends WorldEventSignal {
     super(world);
 
     this.cause = cause;
-    this.itemType = itemType;
+    this.rawItemId = rawItemId;
     this.metersTravelled = metersTravelled;
     this.player = player;
     this.rawPlayer = rawPlayer;

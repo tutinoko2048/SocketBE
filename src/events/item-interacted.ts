@@ -10,7 +10,7 @@ export class ItemInteractedSignal extends WorldEventSignal {
 
   public static readonly packets: Packet[] = [Packet.ItemInteracted];
 
-  public readonly item: ItemStack;
+  public readonly itemStack?: ItemStack;
 
   public readonly method: ItemInteractMethod;
 
@@ -20,16 +20,16 @@ export class ItemInteractedSignal extends WorldEventSignal {
 
   public constructor(
     world: World,
-    item: ItemStack,
     method: ItemInteractMethod,
     player: Player,
     rawPlayer: WorldPlayer,
+    itemStack?: ItemStack,
   ) {
     super(world);
 
-    this.item = item;
     this.method = method;
     this.player = player;
     this.rawPlayer = rawPlayer;
+    this.itemStack = itemStack;
   }
 }
