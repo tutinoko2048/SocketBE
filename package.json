@@ -1,6 +1,6 @@
 {
   "name": "socket-be",
-  "version": "1.2.4",
+  "version": "2.0.0",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
   "types": "dist/index.d.ts",
   "exports": {
@@ -36,7 +36,7 @@
     "bedrock"
   ],
   "author": "tutinoko2048",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/tutinoko2048/SocketBE/issues"
   },
