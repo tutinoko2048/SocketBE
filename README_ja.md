@@ -1,39 +1,27 @@
+[English](./README.md) | **日本語**
+
 # SocketBE
-MinecraftBEで使えるWebSocketのライブラリです。  
+Minecraft統合版のWebSocketプロトコルと通信するためのライブラリです。  
   
-<img src="https://raw.githubusercontent.com/tutinoko2048/SocketBE/main/docs/image.jpeg" alt="image" width="80%"/>  
+<img src="./docs/image.png" alt="image" width="80%"/>  
 
 ## 特徴
-- 複数クライアントの接続
-- コマンドの実行+レスポンスの受け取り
-- イベントの登録
-- プレイヤーの参加/退出イベント
-- プレイヤーのスコア/タグの管理
-
-## Discord
-サポートサーバー: https://discord.gg/XGR8FcCeFc  
-機能の提案、バグの報告などもお待ちしています！  
+- マイクラ側のイベントを簡単に登録できる(型はすべて定義済み)
+- コマンドの実行とそのレスポンスの受け取り
+- 複数接続のサポート
+- World, Player, Scoreboardなどを包んだAPI
+- 暗号化された接続のサポート
 
 ## インストール:
-NodeJS v16以上が必要なのでインストールしてください。  
-  
-- cloneして使う場合  
-このリポジトリをCloneした後  
-`npm i`  
-で依存パッケージをインストールしてください。  
-`node test.js`  
-でサンプルを動かすことができます。  
-
-- npmのライブラリとして使う場合  
-`npm i socket-be`  
-でインストールしてください  
+Node.js v18以上が必要です。  
+```bash
+npm i socket-be
+```
   
 ## 繋いでみよう
 同じPC内で接続する場合はループバック接続を許可してください
 `CheckNetIsolation.exe LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"`  
-  
-マイクラの設定で暗号化したWebSocket接続をオフにしてください  
-  
+   
 マイクラとの接続には `/wsserver` または `/connect` コマンドを使用します  
 EX: `/wsserver <IPアドレス>:<ポート>`  
 繋がらない時はファイアウォールの設定も確認してみてください。  
@@ -41,29 +29,26 @@ EX: `/wsserver <IPアドレス>:<ポート>`
 ## 使用例
 - 送られたメッセージをコンソールに出力、そのまま送り返す  
 ```js
-const { Server } = require('socket-be');
-const server = new Server({
-  port: 8000,
-  timezone: 'Asia/Tokyo',
+import { Server, ServerEvent } from 'socket-be';
+
+const server = new Server({ port: 8000 })
+
+server.on(ServerEvent.Open, () => {
+  console.log('Server started')
 });
 
-server.events.on('serverOpen', () => {
-  console.log('open!');
-});
+server.on(ServerEvent.PlayerChat, async ev => {
+  const { sender, message, world } = ev;
 
-server.events.on('playerChat', async (event) => {
-  if (event.sender === '外部') return; // スパムの無限ループを防ぐ
-  
-  server.logger.info(`<${event.sender}> ${event.message}`);
-  
-  if (event.message === 'ping') {
-    await event.world.sendMessage('Pong!');
+  if (sender.name === '外部') return; // prevents spam loop
+
+  console.log(`<${sender.name}> ${message}`);
+
+  if (message === 'ping') {
+    await world.sendMessage('Pong!');
   }
 });
 ```
-  
-## SocketBE Wiki
-https://github.com/tutinoko2048/SocketBE/wiki
 
 ## License
-MITライセンスです。
+このプロジェクトはGPL-3.0の下でライセンスされています。
