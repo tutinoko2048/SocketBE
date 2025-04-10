@@ -1,5 +1,6 @@
 import type { ServerOptions as WebSocketOptions } from 'ws';
 import type { EncryptionMode } from '../enums';
+import type { MinecraftCommandVersion } from '../enums';
 
 export interface ServerOptions {
   port: number;
@@ -22,7 +23,7 @@ export interface ServerOptions {
   encryptionMode?: EncryptionMode;
 }
 
-export type VersionResolvable = string | number | [number, number, number];
+export type VersionResolvable = string | number | [number, number, number] | MinecraftCommandVersion;
 
 export interface Formatter {
   /**

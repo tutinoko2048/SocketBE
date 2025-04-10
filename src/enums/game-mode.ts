@@ -47,6 +47,4 @@ export enum GameMode {
    *
    */
   survival = 'survival',
-
-  default = 'default',
 }

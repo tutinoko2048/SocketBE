@@ -125,8 +125,8 @@ const events = [
   ServerEvent.PlayerTravelled,
   ServerEvent.TargetBlockHit,
 ]
-events.forEach(event => {
-  server.on(event, ev => {
-    console.dir(ev, { depth: 1 });
-  })
-})
+// events.forEach(event => {
+//   server.on(event, ev => {
+//     console.dir(ev, { depth: 1 });
+//   })
+// })

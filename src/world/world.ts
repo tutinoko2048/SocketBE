@@ -2,8 +2,9 @@ import { Scoreboard } from './scoreboard';
 import { CommandRequestPacket, CommandResponsePacket, DataRequestPacket, EncryptionRequestPacket, type DataResponsePacket } from '../network';
 import { EnableEncryptionSignal, PlayerJoinSignal, PlayerLeaveSignal, WorldInitializeSignal } from '../events';
 import { Agent, EntityQueryUtil, Player } from '../entity';
-import { CommandStatusCode, EncryptionMode, MessagePurpose, WeatherType } from '../enums';
+import { CommandStatusCode, EncryptionMode, FillBlocksMode, MessagePurpose, MinecraftCommandVersion, WeatherType } from '../enums';
 import { jsonParseFixed, RawTextUtil } from '../world';
+import { serializeStates } from '../block';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type {
@@ -251,13 +252,11 @@ export class World {
 
   public async setBlock(location: Vector3, blockId: string, options?: SetBlockOptions) {
     const locationArg = `${location.x} ${location.y} ${location.z}`;
-    const stateArg = options?.states
-      ? '[' + Object.entries(options.states).map(([key, value]) => `"${key}"=${JSON.stringify(value)}`).join(',') + ']'
-      : '[]';
+    const stateArg = options?.states ? serializeStates(options.states) : '';
 
     const res = await this.runCommand(
       `setblock ${locationArg} ${blockId} ${stateArg} ${options?.mode ?? ''}`,
-      { version: "1.21.50" }
+      { version: MinecraftCommandVersion.LocateStructureOutput }
     );
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
@@ -271,7 +270,7 @@ export class World {
     arg0: Vector3 | IBlockVolume,
     arg1: Vector3 | string,
     arg2?: string | FillBlocksOptions,
-    arg3?: FillBlocksOptions
+    arg3: FillBlocksOptions = {}
   ): Promise<number> {
     let from: Vector3;
     let to: Vector3;
@@ -291,13 +290,19 @@ export class World {
 
     const fromArg = `${from.x} ${from.y} ${from.z}`;
     const toArg = `${to.x} ${to.y} ${to.z}`;
-    const stateArg = options.states
-      ? '[' + Object.entries(options.states).map(([key, value]) => `"${key}"=${JSON.stringify(value)}`).join(',') + ']'
-      : '[]';
+    const stateArg = options.states ? serializeStates(options.states) : '';
+    let modeArg: string;
+    if (options.mode === FillBlocksMode.Replace) {
+      const { replaceBlock } = options;
+      if (!replaceBlock?.type) throw new Error('replaceBlock.type is required in replace mode');
+      modeArg = `replace ${replaceBlock.type} ${replaceBlock.states ? serializeStates(replaceBlock.states) : ''}`;
+    } else {
+      modeArg = options.mode ?? '';
+    }
 
     const res = await this.runCommand<{ fillCount: number }>(
-      `fill ${fromArg} ${toArg} ${blockId} ${stateArg} ${options.mode ?? ''}`,
-      { version: "1.21.50" }
+      `fill ${fromArg} ${toArg} ${blockId} ${stateArg} ${modeArg}`,
+      { version: MinecraftCommandVersion.LocateStructureOutput }
     );
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
     return res.fillCount;

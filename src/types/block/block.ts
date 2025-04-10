@@ -29,10 +29,11 @@ export type FillBlocksOptions = FillBlocksOptionsDefault | FillBlocksOptionsWith
 
 export interface FillBlocksOptionsDefault {
   states?: Record<string, string | number | boolean>;
-  mode?: FillBlocksMode;
+  mode?: FillBlocksMode.Destroy | FillBlocksMode.Hollow | FillBlocksMode.Keep | FillBlocksMode.Outline;
 }
 
-export interface FillBlocksOptionsWithReplace extends FillBlocksOptionsDefault {
+export interface FillBlocksOptionsWithReplace {
+  states?: Record<string, string | number | boolean>;
   mode: FillBlocksMode.Replace;
   replaceBlock: IBlock;
 }

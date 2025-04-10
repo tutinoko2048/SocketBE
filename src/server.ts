@@ -4,12 +4,13 @@ import { ExtendedEmitter } from './emitter';
 import type { RawMessage } from '@minecraft/server';
 import type { World } from './world';
 import type { CommandResult, EntityQueryOptions, ServerEvents, ServerOptions } from './types';
+import { MinecraftCommandVersion } from './enums';
 
 const defaultOption: ServerOptions = {
   port: 8000,
   packetTimeout: 10_000,
   debug: false,
-  commandVersion: 31,
+  commandVersion: MinecraftCommandVersion.LocateStructureOutput,
   formatter: {},
   listUpdateInterval: 1000
 }

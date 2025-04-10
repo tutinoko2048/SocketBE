@@ -1,5 +1,5 @@
 import { PlayerLoadSignal } from '../events';
-import { CommandStatusCode, GameMode, type AbilityType } from '../enums';
+import { CommandStatusCode, GameMode, MinecraftCommandVersion, type AbilityType } from '../enums';
 import { EntityQueryUtil } from './query';
 import { ScreenDisplay } from './screen-display';
 import type { RawMessage, Vector3 } from '@minecraft/server';
@@ -137,8 +137,8 @@ export class Player {
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
-  public async setGameMode(mode: GameMode): Promise<void> {
-    const res = await this.world.runCommand(`gamemode ${mode} "${this.rawName}"`);
+  public async setGameMode(mode?: GameMode): Promise<void> {
+    const res = await this.world.runCommand(`gamemode ${mode ?? 'default'} "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
@@ -150,6 +150,7 @@ export class Player {
       GameMode.spectator
     ];
 
+    // Query all gamemodes in parallel
     const promises = modes.map(gameMode =>
       new Promise<GameMode>((resolve, reject) => {
         this.matches({ gameMode })
@@ -196,7 +197,10 @@ export class Player {
     let commandString = `give "${this.rawName}" ${itemId} ${amount} ${options?.data ?? 0}`;
     if (Object.keys(components).length) commandString += ` ${JSON.stringify(components)}`;
 
-    const res = await this.world.runCommand(commandString);
+    const res = await this.world.runCommand(
+      commandString,
+      { version: MinecraftCommandVersion.LocateStructureOutput }
+    );
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
