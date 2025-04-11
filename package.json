@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@serenityjs/emitter": "^0.5.2",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "@minecraft/server": "1.18.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
-    "@minecraft/server": "1.18.0",
     "@types/eslint": "^9.6.1",
     "@types/ws": "^8.5.13",
     "eslint": "^9.14.0",
