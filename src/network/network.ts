@@ -19,7 +19,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
 
   public readonly connections: Set<Connection> = new Set();
 
-  public readonly handlers: Set<typeof NetworkHandler> = new Set();
+  public readonly handlers: Set<NetworkHandler> = new Set();
 
   constructor(server: Server, handlers?: typeof NetworkHandler[]) {
     super();
@@ -190,8 +190,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       for (const handler of this.handlers) {
         if (handler.packet !== packetId) continue;
         try {
-          const instance = new handler(this.server);
-          instance.handle(packet, connection, rawPacket.header);
+          handler.handle(packet, connection, rawPacket.header);
           handled = true;
         } catch (error) {
           console.error(`[Network] Error while handling packet ${Packet[packetId]}\n`, error);
@@ -206,23 +205,29 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   public onConnectionClose(connection: Connection, code: number) {
-    console.log('Connection closed with code', code, connection.identifier);
     const world = this.server.worlds.get(connection);
     world.onDisconnect();
     this.server.worlds.delete(connection);
     this.connections.delete(connection);
+
+    new events.WorldRemoveSignal(world, code).emit();
   }
     
   public onClose() {
     this.connections.clear();
-    console.log('Server closed');
+    this.server.emit(ServerEvent.Close);
   }
 
   public registerHandler(handler: typeof NetworkHandler) {
-    this.handlers.add(handler);
+    this.handlers.add(new handler(this.server));
   }
 
   public unregisterHandler(handler: typeof NetworkHandler) {
-    this.handlers.delete(handler);
+    for (const h of this.handlers) {
+      if (h.constructor.name === handler.name) {
+        this.handlers.delete(h);
+        break;
+      }
+    }
   }
 }

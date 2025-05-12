@@ -12,6 +12,8 @@ export class NetworkHandler {
   
   public readonly network: Network;
 
+  public readonly packet: Packet = (this.constructor as typeof NetworkHandler).packet;
+  
   public handle(_packet: BasePacket, _connection: Connection, _header: IHeader): void {
     throw Error('NetworkHandler.handle() is not implemented');
   };
