@@ -1,6 +1,6 @@
 {
   "name": "socket-be",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
   "types": "dist/index.d.ts",
   "exports": {
