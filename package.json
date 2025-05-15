@@ -10,7 +10,8 @@
   "scripts": {
     "test": "tsup --config test/tsup.config.ts && node --enable-source-maps test/dist/index.js",
     "lint": "eslint ./src & tsc",
-    "build": "tsup"
+    "build": "tsup",
+    "prepublishOnly": "npm run lint && npm run build"
   },
   "dependencies": {
     "@serenityjs/emitter": "^0.5.2",
