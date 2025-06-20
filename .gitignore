@@ -3,3 +3,4 @@ package-lock.json
 .codesandbox/
 dist/
 yarn.lock
+pnpm-lock.yaml

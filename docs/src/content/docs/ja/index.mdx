@@ -1,0 +1,39 @@
+---
+title: SocketBE ドキュメント
+description: Minecraft 統合版のWebSocketプロトコルと通信するための強力なライブラリ
+template: splash
+hero:
+  tagline: WebSocketを使ってNode.jsアプリケーションとMinecraft統合版を簡単に接続
+  actions:
+    - text: はじめる
+      link: /ja/getting-started/
+      icon: right-arrow
+    - text: GitHubで見る
+      link: https://github.com/tutinoko2048/SocketBE
+      icon: github
+      variant: minimal
+editUrl: true
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## SocketBEとは
+
+SocketBEは、WebSocketを通じてMinecraft統合版（Bedrock Edition）と対話できる強力なNode.jsライブラリです。カスタムアプリケーション、自動化ツール、ボット、ゲーム拡張機能などを完全なTypeScriptサポートで簡単に構築できます。
+
+## 主な機能
+
+<CardGrid stagger>
+	<Card title="型付きイベント処理" icon="seti:typescript">
+		ゲーム内イベントを完全に型付けされたイベントハンドラーでリッスンし応答します。すべてのMinecraftイベントに対する自動補完と型チェックを利用できます。
+	</Card>
+	<Card title="コマンド実行" icon="seti:powershell">
+		Minecraftコマンドをプログラムで実行し、その応答を処理します。Minecraftワールドを簡単に制御・自動化できます。
+	</Card>
+	<Card title="プレイヤーとワールド管理" icon="puzzle">
+		包括的なAPIを使用して、プレイヤーの管理、ブロックの操作、環境の制御などを行えます。
+	</Card>
+	<Card title="複数接続のサポート" icon="seti:xml">
+		複数のMinecraftインスタンスに同時に接続できます。サーバーネットワークや高度なアプリケーションに最適です。
+	</Card>
+</CardGrid>

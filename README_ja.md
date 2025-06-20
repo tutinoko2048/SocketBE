@@ -3,7 +3,7 @@
 # SocketBE
 Minecraft統合版のWebSocketプロトコルと通信するためのライブラリです。  
   
-<img src="./docs/image.png" alt="image" width="80%"/>  
+<img src="./docs/_image.png" alt="image" width="80%"/>  
 
 ## 特徴
 - マイクラ側のイベントを簡単に登録できる(型はすべて定義済み)
@@ -17,7 +17,9 @@ Node.js v18以上が必要です。
 ```bash
 npm i socket-be
 ```
-  
+
+> **注意**: 暗号化処理の問題により、Bunは完全には互換性がありません。サーバーオプションで暗号化を無効にする（`{ encryption: false }`）と、Bunでも動作する場合がありますが、全ての機能の動作は保証されません。
+
 ## 繋いでみよう
 同じPC内で接続する場合はループバック接続を許可してください
 `CheckNetIsolation.exe LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"`  
@@ -25,6 +27,8 @@ npm i socket-be
 マイクラとの接続には `/wsserver` または `/connect` コマンドを使用します  
 EX: `/wsserver <IPアドレス>:<ポート>`  
 繋がらない時はファイアウォールの設定も確認してみてください。  
+
+> **注意**: Bedrock Dedicated Server (BDS)はWebSocketプロトコルをサポートしていないため、SocketBEをBDSで使用することはできません。  
   
 ## 使用例
 - 送られたメッセージをコンソールに出力、そのまま送り返す  
