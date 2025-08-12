@@ -45,7 +45,7 @@ export default tseslint.config(
         { ignoredMethodNames: ['constructor'] }
       ],
       'prefer-promise-reject-errors': 'off',
-      '@typescript-eslint/prefer-promise-reject-errors': 'off'
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
     }
   },
 );

@@ -1,6 +1,7 @@
 {
   "include": ["src", "tsup.config.ts"],
   "compilerOptions": {
+    "strict": true,
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,

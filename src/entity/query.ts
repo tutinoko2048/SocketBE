@@ -26,13 +26,14 @@ export class EntityQueryUtil {
     const args: string[] = [];
     
     for (const [name, value] of getEntries(options)) {
+      if (value === undefined || value === null) continue;
       switch (name) {
         case 'excludeFamilies':
           args.push(...value.map(f => `family=!${f}`));
           break;
 
         case 'excludeGameModes':
-          args.push(...value.map(gm => `m=!${gm}`));
+          args.push(...value.map(gm => `m=!${gm.toLowerCase()}`));
           break;
 
         case 'excludeNames':
@@ -48,7 +49,7 @@ export class EntityQueryUtil {
           break;
 
         case 'gameMode':
-          args.push(`m=${value}`);
+          args.push(`m=${value.toLowerCase()}`);
           break;
 
         case 'maxHorizontalRotation':

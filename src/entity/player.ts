@@ -73,7 +73,7 @@ export class Player {
     const res = await this.world.runCommand(`tag "${this.rawName}" list`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
-    const tags = res.statusMessage.match(/§a.*?§r/g)
+    const tags = res.statusMessage.match(/§a.*?§r/g)!
       .map(str => str.replace(/§a|§r/g, ''));
     return tags;
   }
@@ -138,16 +138,16 @@ export class Player {
   }
 
   public async setGameMode(mode?: GameMode): Promise<void> {
-    const res = await this.world.runCommand(`gamemode ${mode ?? 'default'} "${this.rawName}"`);
+    const res = await this.world.runCommand(`gamemode ${mode?.toLowerCase() ?? 'default'} "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
   public async getGameMode(): Promise<GameMode> {
     const modes: GameMode[] = [
-      GameMode.adventure,
-      GameMode.survival,
-      GameMode.creative,
-      GameMode.spectator
+      GameMode.Adventure,
+      GameMode.Survival,
+      GameMode.Creative,
+      GameMode.Spectator
     ];
 
     // Query all gamemodes in parallel

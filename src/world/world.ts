@@ -102,7 +102,7 @@ export class World {
     options?: CommandOptions,
   ): Promise<CommandResult<R>> {
     const packet = new CommandRequestPacket();
-    packet.version = options?.version ?? this.server.options.commandVersion;
+    packet.version = options?.version ?? this.server.options.commandVersion!;
     packet.commandLine = command;
 
     const header = this.send(packet);
@@ -423,6 +423,6 @@ export class World {
   }
 
   public formatPlayerName(playerName: string) {
-    return this.server.options.formatter.playerName?.(playerName) ?? playerName;
+    return this.server.options.formatter!.playerName?.(playerName) ?? playerName;
   }
 }
