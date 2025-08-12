@@ -26,8 +26,8 @@ export class Server extends ExtendedEmitter<ServerEvents> {
   
   constructor(options?: ServerOptions) {
     super();
-    const mergedPptions = { ...defaultOption, ...options };
-    this.options = mergedPptions;
+    const mergedOptions = { ...defaultOption, ...options };
+    this.options = mergedOptions;
 
     this.network = new Network(this, Handlers);
   }
