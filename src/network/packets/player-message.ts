@@ -4,13 +4,13 @@ import { BasePacket } from './base';
 
 @PacketClass(Packet.PlayerMessage, MessagePurpose.Event)
 export class PlayerMessagePacket extends BasePacket {  
-  public type: PlayerMessageType;
+  public type!: PlayerMessageType;
 
-  public message: string;
+  public message!: string;
   
-  public sender: string;
+  public sender!: string;
 
-  public receiver: string;
+  public receiver!: string;
 
   public static deserialize(data: Record<string, any>): PlayerMessagePacket {
     const packet = new PlayerMessagePacket();

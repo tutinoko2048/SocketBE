@@ -10,7 +10,7 @@ export class PlayerTravelledHandler extends NetworkHandler {
   public static readonly packet = Packet.PlayerTravelled;
 
   public handle(packet: PlayerTravelledPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
     const {
       player: rawPlayer,
       metersTravelled,

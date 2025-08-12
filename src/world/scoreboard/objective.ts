@@ -23,7 +23,7 @@ export class ScoreboardObjective {
   /**
    * Returns a specific score for a player.
    */
-  public async getScore(player: Player | string): Promise<number> {
+  public async getScore(player: Player | string): Promise<number | null> {
     return await this.scoreboard.getScore(player, this);
   }
   

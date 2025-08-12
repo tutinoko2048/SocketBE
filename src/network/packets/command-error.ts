@@ -5,7 +5,7 @@ import type { CommandResult } from '../../types';
 
 @PacketClass(Packet.CommandError, MessagePurpose.Error)
 export class CommandErrorPacket extends BasePacket {
-  public data: Record<string, any>;
+  public data!: Record<string, any>;
 
   public get statusCode(): CommandStatusCode {
     return this.data.statusCode as CommandStatusCode;

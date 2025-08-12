@@ -5,17 +5,17 @@ import type { WorldBlockType, WorldItemStack, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.BlockPlaced, MessagePurpose.Event)
 export class BlockPlacedPacket extends BasePacket {  
-  public block: WorldBlockType;
+  public block!: WorldBlockType;
 
-  public count: number;
+  public count!: number;
 
-  public placedUnderWater: boolean;
+  public placedUnderWater!: boolean;
   
-  public placementMethod: number;
+  public placementMethod!: number;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public tool: WorldItemStack;
+  public tool!: WorldItemStack;
 
   public static deserialize(data: Record<string, any>): BlockPlacedPacket {
     const packet = new BlockPlacedPacket();

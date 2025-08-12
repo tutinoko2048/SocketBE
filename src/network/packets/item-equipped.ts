@@ -5,11 +5,11 @@ import type { WorldItemStack, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.ItemEquipped, MessagePurpose.Event)
 export class ItemEquippedPacket extends BasePacket {
-  public item: WorldItemStack;
+  public item!: WorldItemStack;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public slot: PlayerEquipmentSlot;
+  public slot!: PlayerEquipmentSlot;
 
   public static deserialize(data: Record<string, any>): ItemEquippedPacket {
     const packet = new ItemEquippedPacket();

@@ -4,11 +4,11 @@ import { MessagePurpose, Packet, type EncryptionMode } from '../../enums';
 
 @PacketClass(Packet.EncryptionRequest, MessagePurpose.Encrypt)
 export class EncryptionRequestPacket extends BasePacket {
-  public mode: EncryptionMode;
+  public mode!: EncryptionMode;
 
-  public publicKey: string;
+  public publicKey!: string;
 
-  public salt: string;
+  public salt!: string;
   
   public serialize() {
     return {

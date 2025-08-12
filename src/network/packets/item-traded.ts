@@ -5,19 +5,19 @@ import type { WorldItemStack, WorldItemType, WorldPlayer, WorldVillager } from '
 
 @PacketClass(Packet.ItemTraded, MessagePurpose.Event)
 export class ItemTradedPacket extends BasePacket {
-  public itemA: WorldItemType;
+  public itemA!: WorldItemType;
 
-  public itemB: WorldItemType;
+  public itemB!: WorldItemType;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public playerEmeraldCount: number;
+  public playerEmeraldCount!: number;
 
-  public result: WorldItemStack;
+  public result!: WorldItemStack;
 
-  public trader: WorldVillager;
+  public trader!: WorldVillager;
 
-  public traderEmeraldCount: number;
+  public traderEmeraldCount!: number;
 
   public static deserialize(data: Record<string, any>): ItemTradedPacket {
     const packet = new ItemTradedPacket();

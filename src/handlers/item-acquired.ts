@@ -7,7 +7,7 @@ export class ItemAcquiredHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemAcquired;
 
   public handle(packet: ItemAcquiredPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { acquisitionMethodId, count, item, player: rawPlayer } = packet;
     const player = world.resolvePlayer(rawPlayer.name);

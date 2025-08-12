@@ -5,13 +5,13 @@ import type { WorldItemType, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.ItemAcquired, MessagePurpose.Event)
 export class ItemAcquiredPacket extends BasePacket {  
-  public acquisitionMethodId: ItemAcquisitionMethod;
+  public acquisitionMethodId!: ItemAcquisitionMethod;
 
-  public count: number;
+  public count!: number;
 
-  public item: WorldItemType;
+  public item!: WorldItemType;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): ItemAcquiredPacket {
     const packet = new ItemAcquiredPacket();

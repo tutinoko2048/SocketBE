@@ -10,6 +10,6 @@ export class WorldInitializeSignal extends WorldEventSignal {
 
   public constructor(world: World) {
     super(world);
-    this.localPlayer = world.localPlayer;
+    this.localPlayer = world.localPlayer!;
   }
 }

@@ -5,11 +5,11 @@ import type { WorldBlockType, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.PlayerBounced, MessagePurpose.Event)
 export class PlayerBouncedPacket extends BasePacket {
-  public block: WorldBlockType;
+  public block!: WorldBlockType;
 
-  public bounceHeight: number;
+  public bounceHeight!: number;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): PlayerBouncedPacket {
     const packet = new PlayerBouncedPacket();

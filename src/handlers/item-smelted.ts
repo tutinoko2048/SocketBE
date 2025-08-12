@@ -11,7 +11,7 @@ export class ItemSmeltedHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemSmelted;
 
   public handle(packet: ItemSmeltedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { fuelSource, item, player: rawPlayer } = packet;
     const fuelItemType = new ItemType(fuelSource);

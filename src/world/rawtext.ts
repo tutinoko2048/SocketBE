@@ -25,13 +25,13 @@ export class RawTextUtil {
     const rawtext: RawText = { rawtext: [] };
 
     if (typeof message === 'string') {
-      rawtext.rawtext.push({ text: message });
+      rawtext.rawtext!.push({ text: message });
 
     } else if (Array.isArray(message)) {
       rawtext.rawtext = message.map(msg => typeof msg === 'string' ? { text: msg } : msg);
 
     } else {
-      rawtext.rawtext.push(message);
+      rawtext.rawtext!.push(message);
     }
 
     return rawtext;

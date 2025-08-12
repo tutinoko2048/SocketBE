@@ -5,11 +5,11 @@ import type { BlockQueryResult, ItemQueryResult, MobQueryResult } from '../../ty
 
 @PacketClass(Packet.DataResponse, MessagePurpose.DataResponse)
 export class DataResponsePacket extends BasePacket {
-  public dataType: 'block' | 'item' | 'mob';
+  public dataType!: 'block' | 'item' | 'mob';
 
-  public type: number;
+  public type!: number;
 
-  public data: BlockQueryResult[] | ItemQueryResult[] | MobQueryResult[];
+  public data!: BlockQueryResult[] | ItemQueryResult[] | MobQueryResult[];
 
   public static deserialize(data: any, header: Record<string, any>): DataResponsePacket {
     const packet = new DataResponsePacket();

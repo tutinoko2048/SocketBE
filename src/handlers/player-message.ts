@@ -14,7 +14,7 @@ export class PlayerMessageHandler extends NetworkHandler {
   public static readonly packet = Packet.PlayerMessage;
 
   public handle(packet: PlayerMessagePacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
     const { sender: senderName, message, receiver: receiverName } = packet;
 
     const sender = world.resolvePlayer(senderName);
@@ -41,7 +41,7 @@ export class PlayerMessageHandler extends NetworkHandler {
       }
 
       case PlayerMessageType.Title: {
-        new PlayerTitleSignal(world, sender, message, receiver).emit();
+        new PlayerTitleSignal(world, sender, message, receiver!).emit();
         break;
       }
 

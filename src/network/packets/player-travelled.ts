@@ -5,15 +5,15 @@ import type { WorldPlayer } from '../../types';
 
 @PacketClass(Packet.PlayerTravelled, MessagePurpose.Event)
 export class PlayerTravelledPacket extends BasePacket {  
-  public isUnderwater: boolean;
+  public isUnderwater!: boolean;
 
-  public metersTravelled: number;
+  public metersTravelled!: number;
 
-  public newBiome: number;
+  public newBiome!: number;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public travelMethod: TravelMethod;
+  public travelMethod!: TravelMethod;
 
   public static deserialize(data: Record<string, any>): PlayerTravelledPacket {
     const packet = new PlayerTravelledPacket();

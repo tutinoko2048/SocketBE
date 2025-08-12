@@ -12,7 +12,7 @@ export class BlockPlacedHandler extends NetworkHandler {
   public static readonly packet = Packet.BlockPlaced;
 
   public handle(packet: BlockPlacedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const {
       block: rawBlock,

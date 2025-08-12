@@ -11,7 +11,7 @@ export class ItemCraftedHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemCrafted;
 
   public handle(packet: ItemCraftedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const {
       craftedAutomatically,

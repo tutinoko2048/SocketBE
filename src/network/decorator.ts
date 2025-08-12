@@ -10,7 +10,7 @@ import type { BasePacket } from './packets';
 export function PacketClass(packetId: Packet, purpose?: MessagePurpose) {
   return (packet: typeof BasePacket) => {
     packet.id = packetId;
-    packet.purpose = purpose;
+    packet.purpose = purpose!;
 
     packet.prototype.getId = function () {
       return packet.id;

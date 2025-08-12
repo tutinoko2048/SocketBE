@@ -11,7 +11,7 @@ export class ItemTradedHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemTraded;
 
   public handle(packet: ItemTradedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
     const {
       itemA,
       itemB,

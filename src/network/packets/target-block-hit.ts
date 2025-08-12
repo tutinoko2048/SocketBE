@@ -5,9 +5,9 @@ import type { WorldPlayer } from '../../types';
 
 @PacketClass(Packet.TargetBlockHit, MessagePurpose.Event)
 export class TargetBlockHitPacket extends BasePacket {
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public redstoneLevel: number;
+  public redstoneLevel!: number;
 
   public static deserialize(data: Record<string, any>): TargetBlockHitPacket {
     const packet = new TargetBlockHitPacket();

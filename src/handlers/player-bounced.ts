@@ -11,7 +11,7 @@ export class PlayerBouncedHandler extends NetworkHandler {
   public static readonly packet = Packet.PlayerBounced;
 
   public handle(packet: PlayerBouncedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { block: rawBlock, bounceHeight, player: rawPlayer } = packet;
     const block = new BlockType(rawBlock);

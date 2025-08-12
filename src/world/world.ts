@@ -83,7 +83,7 @@ export class World {
     return this._isValid;
   }
 
-  public send(packet: BasePacket, options?: NetworkSendOptions): IHeader {
+  public send(packet: BasePacket, options?: NetworkSendOptions): IHeader | undefined {
     return this.server.network.send(this.connection, packet, options);
   }
   
@@ -106,6 +106,7 @@ export class World {
     packet.commandLine = command;
 
     const header = this.send(packet);
+    if (!header) throw new Error('Packet transmission canceled');
 
     if (options?.noResponse) return CommandResponsePacket.createEmptyResult<R>();
 
@@ -326,6 +327,7 @@ export class World {
     packet.salt = exchange.salt;
 
     const header = this.send(packet);
+    if (!header) throw new Error('Packet transmission canceled');
 
     const response = await this.connection.awaitResponse<EncryptionResponsePacket>(header.requestId);
     exchange.complete(packet.mode, response.publicKey);
@@ -348,6 +350,7 @@ export class World {
     }
 
     const header = this.send(packet, { overrideMessagePurpose: purpose });
+    if (!header) throw new Error('Packet transmission canceled');
 
     const res = await this.connection.awaitResponse<DataResponsePacket>(header.requestId);
     return res.data;
@@ -384,6 +387,7 @@ export class World {
   private startInterval() {
     if (this.countInterval) return;
     void this.updatePlayerList(true);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.countInterval = setInterval(this.updatePlayerList.bind(this), this.server.options.listUpdateInterval);
   }
   

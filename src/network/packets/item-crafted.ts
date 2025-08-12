@@ -5,30 +5,30 @@ import type { WorldItemStack, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.ItemCrafted, MessagePurpose.Event)
 export class ItemCraftedPacket extends BasePacket {
-  public count: number;
+  public count!: number;
 
   /** Whether the item was crafted with crafting tab */
-  public craftedAutomatically: boolean;
+  public craftedAutomatically!: boolean;
 
   /** Current crafting tab index */
-  public endingTabId: number;
+  public endingTabId!: number;
 
-  public hasCraftableFilterOn: boolean;
+  public hasCraftableFilterOn!: boolean;
 
-  public item: WorldItemStack;
+  public item!: WorldItemStack;
 
-  public numberOfTabsChanged: number;
+  public numberOfTabsChanged!: number;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
-  public recipeBookShown: boolean;
+  public recipeBookShown!: boolean;
 
   /** Previous crafting tab index */
-  public startingTabId: number;
+  public startingTabId!: number;
 
-  public usedCraftingTable: boolean;
+  public usedCraftingTable!: boolean;
 
-  public usedSearchBar: boolean;
+  public usedSearchBar!: boolean;
 
   public static deserialize(data: Record<string, any>): ItemCraftedPacket {
     const packet = new ItemCraftedPacket();

@@ -5,13 +5,13 @@ import type { WorldPlayer } from '../../types';
 
 @PacketClass(Packet.PlayerTeleported, MessagePurpose.Event)
 export class PlayerTeleportedPacket extends BasePacket {
-  public cause: TeleportationCause;
+  public cause!: TeleportationCause;
 
-  public itemType: number;
+  public itemType!: number;
 
-  public metersTravelled: number;
+  public metersTravelled!: number;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): PlayerTeleportedPacket {
     const packet = new PlayerTeleportedPacket();

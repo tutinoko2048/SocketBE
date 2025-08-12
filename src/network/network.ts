@@ -26,6 +26,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     this.server = server;
     this.wss = new WebSocketServer({ ...server.options.webSocketOptions, port: server.options.port });
     this.wss.on('listening', this.onListening.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.wss.on('connection', this.onConnection.bind(this));
     this.wss.on('close', this.onClose.bind(this));
 
@@ -38,7 +39,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     this.wss.close();
   }
 
-  public send(connection: Connection, packet: BasePacket, options?: NetworkSendOptions): IHeader {
+  public send(connection: Connection, packet: BasePacket, options?: NetworkSendOptions): IHeader | undefined {
     const header = {
       version: 1,
       requestId: randomUUID(),
@@ -162,6 +163,9 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       case MessagePurpose.Error: packetId = Packet.CommandError; break;
       case MessagePurpose.DataResponse: packetId = Packet.DataResponse; break;
       case MessagePurpose.Event: packetId = rawPacket.header.eventName; break;
+      default:
+        packetId = undefined!;
+        break;
     }
 
     const PacketType = Packets[packetId];
@@ -193,10 +197,12 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
           handler.handle(packet, connection, rawPacket.header);
           handled = true;
         } catch (error) {
+          // @ts-expect-error commandRequest should be exist
           console.error(`[Network] Error while handling packet ${Packet[packetId]}\n`, error);
         }
       }
       if (!handled) {
+        // @ts-expect-error commandRequest should be exist
         console.warn(`[Network] No handler found for packet ${Packet[packetId]}`);
       }
     } catch (error) {
@@ -205,7 +211,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   public onConnectionClose(connection: Connection, code: number) {
-    const world = this.server.worlds.get(connection);
+    const world = this.server.worlds.get(connection)!;
     world.onDisconnect();
     this.server.worlds.delete(connection);
     this.connections.delete(connection);

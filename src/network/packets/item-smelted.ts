@@ -5,11 +5,11 @@ import type { WorldItemType, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.ItemSmelted, MessagePurpose.Event)
 export class ItemSmeltedPacket extends BasePacket {
-  public fuelSource: WorldItemType;
+  public fuelSource!: WorldItemType;
 
-  public item: WorldItemType;
+  public item!: WorldItemType;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): ItemSmeltedPacket {
     const packet = new ItemSmeltedPacket();

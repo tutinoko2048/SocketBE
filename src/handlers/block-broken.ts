@@ -12,7 +12,7 @@ export class BlockBrokenHandler extends NetworkHandler {
   public static readonly packet = Packet.BlockBroken;
 
   public handle(packet: BlockBrokenPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const {
       block: rawBlock,

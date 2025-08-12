@@ -11,7 +11,7 @@ export class ItemInteractedHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemInteracted;
 
   public handle(packet: ItemInteractedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { item, method, player: rawPlayer } = packet;
     const itemStack = new ItemStack(item);

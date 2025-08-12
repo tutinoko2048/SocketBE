@@ -5,9 +5,9 @@ import type { VersionResolvable } from '../../types';
 
 @PacketClass(Packet.CommandRequest, MessagePurpose.CommandRequest)
 export class CommandRequestPacket extends BasePacket {
-  public commandLine: string;
+  public commandLine!: string;
 
-  public version: VersionResolvable;
+  public version!: VersionResolvable;
 
   public serialize() {
     return {

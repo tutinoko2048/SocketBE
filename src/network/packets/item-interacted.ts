@@ -5,13 +5,13 @@ import type { WorldItemStack, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.ItemInteracted, MessagePurpose.Event)
 export class ItemInteractedPacket extends BasePacket {
-  public count: number;
+  public count!: number;
 
-  public item: WorldItemStack;
+  public item!: WorldItemStack;
 
-  public method: ItemInteractMethod;
+  public method!: ItemInteractMethod;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): ItemInteractedPacket {
     const packet = new ItemInteractedPacket();

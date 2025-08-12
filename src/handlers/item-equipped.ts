@@ -11,7 +11,7 @@ export class ItemEquippedHandler extends NetworkHandler {
   public static readonly packet = Packet.ItemEquipped;
 
   public handle(packet: ItemEquippedPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { item, player: rawPlayer, slot } = packet;
     const itemStack = new ItemStack(item);

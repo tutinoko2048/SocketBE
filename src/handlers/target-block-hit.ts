@@ -10,7 +10,7 @@ export class TargetBlockHitHandler extends NetworkHandler {
   public static readonly packet = Packet.TargetBlockHit;
 
   public handle(packet: TargetBlockHitPacket, connection: Connection): void {
-    const world = this.server.getWorldByConnection(connection);
+    const world = this.server.getWorldByConnection(connection)!;
 
     const { player: rawPlayer, redstoneLevel } = packet;
     const player = world.resolvePlayer(rawPlayer.name);

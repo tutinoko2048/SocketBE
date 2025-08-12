@@ -5,11 +5,11 @@ import type { WorldMob, WorldPlayer } from '../../types';
 
 @PacketClass(Packet.MobInteracted, MessagePurpose.Event)
 export class MobInteractedPacket extends BasePacket {
-  public interactionType: MobInteractionType;
+  public interactionType!: MobInteractionType;
 
-  public mob: WorldMob;
+  public mob!: WorldMob;
 
-  public player: WorldPlayer;
+  public player!: WorldPlayer;
 
   public static deserialize(data: Record<string, any>): MobInteractedPacket {
     const packet = new MobInteractedPacket();
