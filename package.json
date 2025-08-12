@@ -16,7 +16,7 @@
   "dependencies": {
     "@serenityjs/emitter": "^0.5.2",
     "ws": "^8.18.0",
-    "@minecraft/server": "1.18.0"
+    "@minecraft/server": "2.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

@@ -8,6 +8,7 @@
     "moduleResolution": "Node",
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   }
 }

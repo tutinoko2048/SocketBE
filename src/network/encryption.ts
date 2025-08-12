@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { EncryptionMode } from '../enums';
-import type { Cipher, Decipher, ECDH } from 'crypto';
+import type { ECDH } from 'crypto';
 
 
 const algorithmMap: Record<EncryptionMode, string> = {
@@ -18,9 +18,9 @@ export class Encryption {
   public readonly ecdh: ECDH = crypto.createECDH('secp384r1');
   public readonly publicKey: Buffer = this.ecdh.generateKeys();
 
-  public cipher: Cipher | null = null;
-  public decipher: Decipher | null = null;
-  
+  public cipher: crypto.Cipheriv | null = null;
+  public decipher: crypto.Decipheriv | null = null;
+
   private _enabled: boolean = false;
 
   public get enabled(): boolean {
