@@ -1,4 +1,4 @@
-import Emitter from '@serenityjs/emitter';
+import { Emitter } from '@serenityjs/emitter';
 
 export class ExtendedEmitter<T> extends Emitter<T> {    
   constructor() {
