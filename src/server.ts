@@ -7,7 +7,6 @@ import type { CommandResult, EntityQueryOptions, ServerEvents, ServerOptions } f
 import { MinecraftCommandVersion } from './enums';
 
 const defaultOption: ServerOptions = {
-  port: 8000,
   packetTimeout: 10_000,
   debug: false,
   commandVersion: MinecraftCommandVersion.LocateStructureOutput,

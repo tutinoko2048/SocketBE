@@ -24,7 +24,11 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   constructor(server: Server, handlers?: typeof NetworkHandler[]) {
     super();
     this.server = server;
-    this.wss = new WebSocketServer({ ...server.options.webSocketOptions, port: server.options.port });
+
+    server.options.webSocketOptions ??= {};
+    if (server.options.port !== undefined) server.options.webSocketOptions.port = server.options.port;
+
+    this.wss = new WebSocketServer(server.options.webSocketOptions);
     this.wss.on('listening', this.onListening.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.wss.on('connection', this.onConnection.bind(this));

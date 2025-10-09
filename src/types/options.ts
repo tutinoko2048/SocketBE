@@ -3,7 +3,7 @@ import type { EncryptionMode } from '../enums';
 import type { MinecraftCommandVersion } from '../enums';
 
 export interface ServerOptions {
-  port: number;
+  port?: number;
   debug?: boolean;
   packetTimeout?: number;
   listUpdateInterval?: number;
