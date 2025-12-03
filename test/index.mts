@@ -34,7 +34,7 @@ rl.on('line', async line => {
   }
 });
 
-const server = new Server();
+const server = new Server({ port: 8000 });
 server.on(ServerEvent.Open, () => {
   console.log('Server is now open!', server.options.port);
 });

@@ -1,4 +1,5 @@
 export enum CommandStatusCode {
+  FailedToParseCommand = -2147483648,
   CommandNotFound = -2147483647,
   NotEnoughPermissions = -2147483646,
   CommandVersionMismatch = -2147483645,
