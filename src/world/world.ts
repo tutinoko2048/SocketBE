@@ -316,13 +316,17 @@ export class World {
     await this.runCommand('closewebsocket', { noResponse: true });
   }
 
-  public async enableEncryption(mode?: EncryptionMode) {
+  public async enableEncryption(): Promise<void>;
+  /** @deprecated Encryption mode will be always `Aes256cfb8` */
+  public async enableEncryption(_mode?: EncryptionMode): Promise<void>;
+  public async enableEncryption(_mode?: EncryptionMode): Promise<void> {
     if (this.connection.encryption.enabled) throw new Error('Encryption is already enabled');
     
     const exchange = this.connection.encryption.beginKeyExchange();
 
     const packet = new EncryptionRequestPacket();
-    packet.mode = mode ?? EncryptionMode.Aes256cfb8;
+    // always use Aes256cfb8
+    packet.mode = EncryptionMode.Aes256cfb8;
     packet.publicKey = exchange.publicKey;
     packet.salt = exchange.salt;
 
