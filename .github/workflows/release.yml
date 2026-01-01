@@ -47,4 +47,11 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [[ "$PACKAGE_VERSION" =~ -([0-9A-Za-z]+)\. ]]; then
+            npm publish --provenance --access public --tag "${BASH_REMATCH[1]}"
+          else
+            npm publish --provenance --access public
+          fi
+
