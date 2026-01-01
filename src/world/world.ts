@@ -177,13 +177,15 @@ export class World {
   
   /**
    * @deprecated
-   * ⚠️ Temporarily disabled.  
-   * Calling this function may crash Minecraft due to a bug.
+   * ⚠️ Temporarily disabled due to a known Minecraft bug.  
+   * Calling this in multiplayer may crash the world.
    *
    * Returns information about players with more details in the world.
    */
-  public getPlayerDetail(): never {
-    throw new Error('World.getPlayerDetail is temporarily disabled because it may crash Minecraft.');
+  public async getPlayerDetail(): Promise<never> {
+    return Promise.reject(
+      new Error('World.getPlayerDetail is temporarily disabled because it may crash Minecraft world in multiplayer.')
+    );
     // const res = await this.runCommand('listd stats');
     // const status = res.statusCode >= CommandStatusCode.Success;
     // const details: PlayerDetail[] = jsonParseFixed(res.details.match(/\{.*\}/g)[0]).result;

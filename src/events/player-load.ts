@@ -4,7 +4,7 @@ import type { World } from '../world';
 import type { Player } from '../entity';
 
 /**
- * @deprecated Disabled due to a known Minecraft crash bug.
+ * @deprecated ⚠️ Temporarily disabled due to a known Minecraft bug.
  */
 export class PlayerLoadSignal extends PlayerJoinSignal {
   public static readonly identifier: ServerEvent = ServerEvent.PlayerLoad;
