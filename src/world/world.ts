@@ -178,7 +178,7 @@ export class World {
   /**
    * @deprecated
    * ⚠️ Temporarily disabled.  
-   * Calling this function may crash the Minecraft due to a bug.
+   * Calling this function may crash Minecraft due to a bug.
    *
    * Returns information about players with more details in the world.
    */
