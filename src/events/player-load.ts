@@ -3,6 +3,9 @@ import { ServerEvent } from '../enums';
 import type { World } from '../world';
 import type { Player } from '../entity';
 
+/**
+ * @deprecated ⚠️ Temporarily disabled due to a known Minecraft bug.
+ */
 export class PlayerLoadSignal extends PlayerJoinSignal {
   public static readonly identifier: ServerEvent = ServerEvent.PlayerLoad;
 

@@ -6,6 +6,7 @@ export enum ServerEvent {
   WorldInitialize,
   PlayerJoin,
   PlayerLeave,
+  /** @deprecated Disabled due to a known Minecraft crash bug. */
   PlayerLoad,
   PlayerChat,
   PlayerTitle,
