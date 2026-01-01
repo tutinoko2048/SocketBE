@@ -44,5 +44,12 @@
   "homepage": "https://github.com/tutinoko2048/SocketBE#readme",
   "files": [
     "dist"
-  ]
+  ],
+  "packageManager": "pnpm@10.26.2",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.26.2"
+    }
+  }
 }
