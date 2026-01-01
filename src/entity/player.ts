@@ -99,17 +99,33 @@ export class Player {
     return detail;
   }
 
-  public async getPing(): Promise<number> {
-    const detail = await this.getDetails();
-    return detail.avgping;
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled.  
+   * Calling this function may crash the Minecraft due to a bug.
+   *
+   * Returns the average ping of the player.
+   */
+  public getPing(): never {
+    throw new Error('Player.getPing is temporarily disabled because it may crash Minecraft.');
+    // const detail = await this.getDetails();
+    // return detail.avgping;
   }
 
-  public async getDetails(): Promise<PlayerDetail> {
-    const { details } = await this.world.getPlayerDetail();
-    const detail = details.find(d => d.name === this.rawName);
-    if (!detail) throw new Error('Failed to get player detail');
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled.  
+   * Calling this function may crash the Minecraft due to a bug.
+   *
+   * Returns detailed information about the player.
+   */
+  public getDetails(): never {
+    throw new Error('Player.getDetails is temporarily disabled because it may crash Minecraft.');
+    // const { details } = await this.world.getPlayerDetail();
+    // const detail = details.find(d => d.name === this.rawName);
+    // if (!detail) throw new Error('Failed to get player detail');
 
-    return detail;
+    // return detail;
   }
 
   public async getAbilities(): Promise<Record<AbilityType, boolean>> {
@@ -204,16 +220,24 @@ export class Player {
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
-  public async load(): Promise<void> {
-    const detail = await this.getDetails();
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled.  
+   * Calling this function may crash the Minecraft due to a bug.
+   *
+   * Loads detailed information about the player.
+   */
+  public load(): never {
+    throw new Error('Player.load is temporarily disabled because it may crash Minecraft.');
+    // const detail = await this.getDetails();
 
-    this._uuid = detail.uuid;
-    this._deviceId = detail.deviceSessionId;
-    this._uniqueId = detail.id;
-    this._xuid = detail.xuid;
+    // this._uuid = detail.uuid;
+    // this._deviceId = detail.deviceSessionId;
+    // this._uniqueId = detail.id;
+    // this._xuid = detail.xuid;
     
-    this._isLoaded = true;
+    // this._isLoaded = true;
     
-    new PlayerLoadSignal(this.world, this).emit();
+    // new PlayerLoadSignal(this.world, this).emit();
   }
 }
