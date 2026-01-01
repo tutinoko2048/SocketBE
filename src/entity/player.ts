@@ -223,7 +223,7 @@ export class Player {
   /**
    * @deprecated
    * ⚠️ Temporarily disabled.  
-   * Calling this function may crash the Minecraft due to a bug.
+   * Calling this function may crash Minecraft due to a bug.
    *
    * Loads detailed information about the player.
    */
