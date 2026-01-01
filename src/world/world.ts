@@ -176,21 +176,28 @@ export class World {
   }
   
   /**
+   * @deprecated
+   * ⚠️ Temporarily disabled due to a known Minecraft bug.  
+   * Calling this in multiplayer may crash the world.
+   *
    * Returns information about players with more details in the world.
    */
-  public async getPlayerDetail(): Promise<PlayerListDetail> {
-    const res = await this.runCommand('listd stats');
-    const status = res.statusCode >= CommandStatusCode.Success;
-    const details: PlayerDetail[] = jsonParseFixed(res.details.match(/\{.*\}/g)[0]).result;
-    const players: string[] = status ? res.players.split(', ') : [];
-    const formattedPlayers = players.map(name => this.formatPlayerName(name));
+  public async getPlayerDetail(): Promise<never> {
+    return Promise.reject(
+      new Error('World.getPlayerDetail is temporarily disabled because it may crash Minecraft world in multiplayer.')
+    );
+    // const res = await this.runCommand('listd stats');
+    // const status = res.statusCode >= CommandStatusCode.Success;
+    // const details: PlayerDetail[] = jsonParseFixed(res.details.match(/\{.*\}/g)[0]).result;
+    // const players: string[] = status ? res.players.split(', ') : [];
+    // const formattedPlayers = players.map(name => this.formatPlayerName(name));
     
-    return {
-      details,
-      current: status ? res.currentPlayerCount : 0,
-      max: status ? res.maxPlayerCount : 0,
-      players: formattedPlayers
-    }
+    // return {
+    //   details,
+    //   current: status ? res.currentPlayerCount : 0,
+    //   max: status ? res.maxPlayerCount : 0,
+    //   players: formattedPlayers
+    // }
   }
 
   /**
@@ -421,7 +428,7 @@ export class World {
     player ??= new Player(this, rawName);
     if (initialize) {
       this.players.set(rawName, player);
-      player.load().catch(console.error);
+      // player.load().catch(console.error);
     }
     return player;
   }

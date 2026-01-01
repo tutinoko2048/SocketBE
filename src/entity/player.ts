@@ -99,17 +99,37 @@ export class Player {
     return detail;
   }
 
-  public async getPing(): Promise<number> {
-    const detail = await this.getDetails();
-    return detail.avgping;
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled due to a known Minecraft bug.  
+   * Calling this in multiplayer may crash the world.
+   *
+   * Returns the average ping of the player.
+   */
+  public async getPing(): Promise<never> {
+    return Promise.reject(
+      new Error('Player.getPing is temporarily disabled because it may crash Minecraft world in multiplayer.')
+    );
+    // const detail = await this.getDetails();
+    // return detail.avgping;
   }
 
-  public async getDetails(): Promise<PlayerDetail> {
-    const { details } = await this.world.getPlayerDetail();
-    const detail = details.find(d => d.name === this.rawName);
-    if (!detail) throw new Error('Failed to get player detail');
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled due to a known Minecraft bug.  
+   * Calling this in multiplayer may crash the world.
+   *
+   * Returns detailed information about the player.
+   */
+  public async getDetails(): Promise<never> {
+    return Promise.reject(
+      new Error('Player.getDetails is temporarily disabled because it may crash Minecraft world in multiplayer.')
+    );
+    // const { details } = await this.world.getPlayerDetail();
+    // const detail = details.find(d => d.name === this.rawName);
+    // if (!detail) throw new Error('Failed to get player detail');
 
-    return detail;
+    // return detail;
   }
 
   public async getAbilities(): Promise<Record<AbilityType, boolean>> {
@@ -204,16 +224,26 @@ export class Player {
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
-  public async load(): Promise<void> {
-    const detail = await this.getDetails();
+  /**
+   * @deprecated
+   * ⚠️ Temporarily disabled due to a known Minecraft bug.  
+   * Calling this in multiplayer may crash the world.
+   *
+   * Loads detailed information about the player.
+   */
+  public async load(): Promise<never> {
+    return Promise.reject(
+      new Error('Player.load is temporarily disabled because it may crash Minecraft world in multiplayer.')
+    );
+    // const detail = await this.getDetails();
 
-    this._uuid = detail.uuid;
-    this._deviceId = detail.deviceSessionId;
-    this._uniqueId = detail.id;
-    this._xuid = detail.xuid;
+    // this._uuid = detail.uuid;
+    // this._deviceId = detail.deviceSessionId;
+    // this._uniqueId = detail.id;
+    // this._xuid = detail.xuid;
     
-    this._isLoaded = true;
+    // this._isLoaded = true;
     
-    new PlayerLoadSignal(this.world, this).emit();
+    // new PlayerLoadSignal(this.world, this).emit();
   }
 }
