@@ -30,6 +30,9 @@ importers:
       eslint:
         specifier: ^9.14.0
         version: 9.29.0
+      globals:
+        specifier: ^17.0.0
+        version: 17.0.0
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(typescript@5.8.3)
@@ -716,6 +719,10 @@ packages:
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
+
+  globals@17.0.0:
+    resolution: {integrity: sha512-gv5BeD2EssA793rlFWVPMMCqefTlpusw6/2TbAVMy0FzcG8wKJn4O+NqJ4+XWmmwrayJgw5TzrmWjFgmz1XPqw==}
     engines: {node: '>=18'}
 
   graphemer@1.4.0:
@@ -1743,6 +1750,8 @@ snapshots:
       path-scurry: 1.11.1
 
   globals@14.0.0: {}
+
+  globals@17.0.0: {}
 
   graphemer@1.4.0: {}
 
