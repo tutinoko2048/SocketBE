@@ -48,8 +48,8 @@ jobs:
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           if [[ "$PACKAGE_VERSION" =~ -([0-9A-Za-z]+)\. ]]; then
-            pnpm publish --tag "${BASH_REMATCH[1]}"
+            pnpm publish --no-git-checks --tag "${BASH_REMATCH[1]}"
           else
-            pnpm publish
+            pnpm publish --no-git-checks
           fi
 
