@@ -11,7 +11,7 @@
     "test": "tsup --config test/tsup.config.ts && node --enable-source-maps test/dist/index.js",
     "lint": "eslint ./src & tsc",
     "build": "tsup",
-    "prepublishOnly": "npm run lint && npm run build"
+    "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "dependencies": {
     "@serenityjs/emitter": "^0.5.2",
@@ -37,7 +37,7 @@
     "bedrock"
   ],
   "author": "tutinoko2048",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tutinoko2048/SocketBE/issues"
   },
