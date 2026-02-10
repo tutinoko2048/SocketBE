@@ -141,8 +141,33 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
       
       this.emit('raw', { ...rawPacket, connection });
     } catch {
-      console.error('[Network] Failed to parse packet from', connection.identifier);
-      return;
+      if (connection.encryption.enabled) {
+        // If decryption failed, try to parse as plain text
+        // This is a workaround for Bun where the encryption response packet is received twice
+        try {
+          const plainText = data.toString('utf-8');
+          rawPacket = JSON.parse(plainText);
+          
+          // If successful, restore the decipher state because the previous decrypt() call was invalid
+          connection.encryption.restoreDecipherState();
+          
+          // console.log('[Network] Successfully parsed packet as plain text after decryption failure. Restored decipher state.');
+          
+          if (!(
+            typeof rawPacket === 'object' &&
+            typeof rawPacket.header === 'object' &&
+            typeof rawPacket.body === 'object'
+          )) return;
+
+          this.emit('raw', { ...rawPacket, connection });
+        } catch {
+          console.error('[Network] Failed to parse packet from', connection.identifier);
+          return;
+        }
+      } else {
+        console.error('[Network] Failed to parse packet from', connection.identifier);
+        return;
+      }
     }
 
     const { messagePurpose } = rawPacket.header;

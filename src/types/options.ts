@@ -20,6 +20,7 @@ export interface ServerOptions {
   webSocketOptions?: WebSocketOptions;
 
   disableEncryption?: boolean;
+  /** @deprecated no longer used. Encryption mode will be always `Aes256cfb8` */
   encryptionMode?: EncryptionMode;
 }
 
