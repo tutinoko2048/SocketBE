@@ -13,9 +13,8 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "tsdown --config test/tsdown.config.ts && node --enable-source-maps test/dist/index.js",
-    "lint": "eslint ./src && pnpm run typecheck",
-    "typecheck": "tsc --noEmit",
+    "test": "tsdown -c ./test/tsdown.config.mts && node --enable-source-maps test/dist/index.mjs",
+    "lint": "oxlint --type-aware --type-check",
     "build": "tsdown",
     "prepublishOnly": "pnpm run lint && pnpm run build"
   },
@@ -25,14 +24,11 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@types/eslint": "^9.6.1",
     "@types/ws": "^8.18.1",
-    "eslint": "^9.39.4",
-    "globals": "^17.4.0",
+    "oxlint": "^1.54.0",
+    "oxlint-tsgolint": "^0.16.0",
     "tsdown": "^0.21.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",

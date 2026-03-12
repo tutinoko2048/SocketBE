@@ -1,4 +1,5 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "paths": {
       "socket-be": ["../src/index.ts"]

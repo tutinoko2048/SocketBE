@@ -25,6 +25,7 @@ export enum EnchantmentType {
   Power = 19,
   Punch = 20,
   Flame = 21,
+  // oxlint-disable-next-line no-shadow-restricted-names
   Infinity = 22,
   LuckOfTheSea = 23,
   Lure = 24,
