@@ -1,10 +1,9 @@
 **English** | [日本語](./README_ja.md)
 
 # SocketBE
-A powerful websocket library to interact with MCBE WebSocket Protocol  
-  
-  
-<img src="./docs/image.png" alt="image" width="80%"/>  
+A powerful websocket library for interacting with the MCBE WebSocket Protocol
+
+<img src="./docs/image.png" alt="image" width="80%"/>
 
 ## Features
 - Fully typed vanilla event handler
@@ -18,37 +17,63 @@ Requires Node.js v18 or later.
 ```bash
 npm install socket-be
 ```
-  
-## Running:
-If you use this inside same device, allow the loopback connection.  
-`CheckNetIsolation.exe LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"`  
-    
-You can use `/wsserver` or `/connect` command to connect with websocket server.  
-EX: `/wsserver <IP Address>:<PORT>`  
-  
+```bash
+pnpm add socket-be
+```
+```bash
+bun add socket-be
+```
+
+## Connecting from Minecraft:
+You can use either the `/wsserver` or `/connect` command to connect to the WebSocket server.
+
+**Command Usage:** `/wsserver <HOST>:<PORT>`
+
+**Example:** `/wsserver localhost:8000`
+
 ## Usage
-- Outputs received messages in console, and send back to mc  
 ```js
 import { Server, ServerEvent } from 'socket-be';
 
-const server = new Server({ port: 8000 })
+const server = new Server({ port: 8000 });
 
 server.on(ServerEvent.Open, () => {
-  console.log('Server started')
+  console.log('Server started');
 });
 
-server.on(ServerEvent.PlayerChat, async ev => {
+// Outputs received messages to the console and sends them back to Minecraft
+server.on(ServerEvent.PlayerChat, async (ev) => {
   const { sender, message, world } = ev;
-
-  if (sender.name === 'External') return; // prevents spam loop
 
   console.log(`<${sender.name}> ${message}`);
 
-  if (message === 'ping') {
-    await world.sendMessage('Pong!');
+  await world.sendMessage(`You said: ${message}`);
+});
+```
+
+```js
+// Log player joins and leaves
+server.on(ServerEvent.PlayerJoin, (ev) => {
+  console.log(`${ev.player.name} joined the game`);
+});
+
+server.on(ServerEvent.PlayerLeave, (ev) => {
+  console.log(`${ev.player.name} left the game`);
+});
+```
+
+```js
+// Execute a command
+server.on(ServerEvent.PlayerChat, async (ev) => {
+  const { message, world } = ev;
+
+  if (message === '!diamond') {
+    await world.runCommand('give @a diamond');
   }
 });
 ```
 
+Also DeepWiki is available at: https://deepwiki.com/tutinoko2048/SocketBE
+
 ## License
-This project is licensed under the GPL-3.0 License.
+This project is licensed under the MIT License.
