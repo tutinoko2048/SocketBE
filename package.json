@@ -2,16 +2,21 @@
   "name": "socket-be",
   "version": "2.6.0-beta.0",
   "description": "This is a tool to connect with MinecraftBE via websocket easier.",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "exports": {
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.js"
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "tsup --config test/tsup.config.ts && node --enable-source-maps test/dist/index.js",
+    "test": "tsdown --config test/tsdown.config.ts && node --enable-source-maps test/dist/index.js",
     "lint": "eslint ./src && pnpm run typecheck",
     "typecheck": "tsc --noEmit",
-    "build": "tsup",
+    "build": "tsdown",
     "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "dependencies": {
@@ -25,7 +30,7 @@
     "@types/ws": "^8.18.1",
     "eslint": "^9.39.4",
     "globals": "^17.4.0",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.21.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0"
   },

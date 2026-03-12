@@ -1,5 +1,5 @@
 {
-  "include": ["src", "tsup.config.ts"],
+  "include": ["src", "tsdown.config.mts"],
   "compilerOptions": {
     "strict": true,
     "allowJs": true,
