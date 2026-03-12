@@ -9,24 +9,25 @@
   },
   "scripts": {
     "test": "tsup --config test/tsup.config.ts && node --enable-source-maps test/dist/index.js",
-    "lint": "eslint ./src && tsc",
+    "lint": "eslint ./src && pnpm run typecheck",
+    "typecheck": "tsc --noEmit",
     "build": "tsup",
     "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "dependencies": {
-    "@minecraft/server": "2.1.0",
+    "@minecraft/server": "2.5.0",
     "@serenityjs/emitter": "^0.5.2",
-    "ws": "^8.18.0"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.14.0",
+    "@eslint/js": "^9.39.4",
     "@types/eslint": "^9.6.1",
-    "@types/ws": "^8.5.13",
-    "eslint": "^9.14.0",
-    "globals": "^17.0.0",
-    "tsup": "^8.3.5",
-    "typescript": "^5.6.3",
-    "typescript-eslint": "^8.14.0"
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.39.4",
+    "globals": "^17.4.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0"
   },
   "repository": {
     "type": "git",

@@ -1,9 +1,10 @@
 // @ts-check
+import { defineConfig } from 'eslint/config';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import globals from 'globals';
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked.map(c => ({
     ...c,
@@ -25,7 +26,6 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
         ecmaVersion: 2022,
         sourceType: 'module',
-        project: true,
       },
     },
     rules: {
