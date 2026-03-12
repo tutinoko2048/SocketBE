@@ -1,4 +1,4 @@
-import { Server, ServerEvent } from 'socket-be';
+import { Server, ServerEvent } from '../src';
 
 const server = new Server({
   port: 8000,
