@@ -1,6 +1,5 @@
-import { BasePacket, DataRequestPacket, EventSubscribePacket, MessagePurpose, Packet, PacketBound, Server, ServerEvent, TravelMethod } from 'socket-be';
+import { Packet, PacketBound, Server, ServerEvent } from '../src';
 import { createInterface } from 'readline';
-import { writeFileSync } from 'fs';
 
 const rl = createInterface({
   input: process.stdin,
