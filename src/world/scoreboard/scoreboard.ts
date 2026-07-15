@@ -19,8 +19,11 @@ export class Scoreboard {
     const res = await this.world.runCommand('scoreboard objectives list');
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
-    const objectives = res.statusMessage.split('\n').slice(1).map(entry => {
-      const [ id, displayName ] = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0].slice(1,3);
+    const objectives = res.statusMessage.split('\n').slice(1).flatMap(entry => {
+      // Skip lines that don't match the expected format instead of crashing on [0] being undefined
+      const matched = [...entry.matchAll(/- (.*):.*?'(.*?)'.*/g)][0];
+      if (!matched) return [];
+      const [ id, displayName ] = matched.slice(1,3);
       let objective = this.objectives.get(id);
       if (objective) {
         // @ts-expect-error overwrite displayName internally
@@ -86,7 +89,9 @@ export class Scoreboard {
     try {
       return Object.fromEntries(
         [...res.statusMessage.matchAll(/: (-*\d*) \((.*?)\)/g)]
-          .map(data => [data[2], data ? Number(data[1]) : null])
+          // data is the match array (always truthy) — check the captured value instead,
+          // so a missing score becomes null rather than Number('') === 0
+          .map(data => [data[2], data[1] ? Number(data[1]) : null])
       );
     } catch {
       return {};
