@@ -73,7 +73,8 @@ export class Player {
     const res = await this.world.runCommand(`tag "${this.rawName}" list`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
-    const tags = res.statusMessage.match(/§a.*?§r/g)!
+    // When the player has no tags, the response contains no §a...§r segments and match() returns null
+    const tags = (res.statusMessage.match(/§a.*?§r/g) ?? [])
       .map(str => str.replace(/§a|§r/g, ''));
     return tags;
   }
