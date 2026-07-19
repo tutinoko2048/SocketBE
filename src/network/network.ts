@@ -248,10 +248,10 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   /**
-   * Send EventSubscribePacket for all registered events to all worlds.
-   * This can be also used to resubscribe events after a world is connected.
+   * Send EventSubscribePacket for all registered events to all connected worlds.
+   * This can also be used to resubscribe events after a world is connected.
    */
-  public refleshEventSubscriptions() {
+  public refreshEventSubscriptions() {
     const events = new Set<Packet>();
     for (const registered of this.server.getRegisteredEvents()) {
       for (const packetId of Network.getPacketIdsByEvent(registered)) {
