@@ -24,11 +24,13 @@ import type {
   PlayerTeleportedSignal,
   PlayerTransformSignal,
   TargetBlockHitSignal,
+  ServerOpenSignal,
+  ServerCloseSignal,
 } from '../../events';
 
 export interface ServerEvents {
-  [ServerEvent.Open]: [];
-  [ServerEvent.Close]: [];
+  [ServerEvent.Open]: [ServerOpenSignal];
+  [ServerEvent.Close]: [ServerCloseSignal];
   [ServerEvent.WorldAdd]: [WorldAddSignal];
   [ServerEvent.WorldRemove]: [WorldRemoveSignal];
   [ServerEvent.WorldInitialize]: [WorldInitializeSignal];

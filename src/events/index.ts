@@ -19,6 +19,8 @@ export * from './player-teleported';
 export * from './player-title';
 export * from './player-transform';
 export * from './player-travelled';
+export * from './server-close';
+export * from './server-open';
 export * from './target-block-hit';
 export * from './world-add';
 export * from './world-event-signal';

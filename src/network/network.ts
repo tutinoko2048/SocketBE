@@ -76,7 +76,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   public onListening() {
-    this.server.emit(ServerEvent.Open);
+    new events.ServerOpenSignal(this.server).emit();
   }
 
   public async onConnection(ws: WebSocket) {
@@ -250,7 +250,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     
   public onClose() {
     this.connections.clear();
-    this.server.emit(ServerEvent.Close);
+    new events.ServerCloseSignal(this.server).emit();
   }
 
   public registerHandler(handler: typeof NetworkHandler) {
