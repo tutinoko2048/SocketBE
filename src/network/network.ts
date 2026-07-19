@@ -93,29 +93,10 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
 
     new events.WorldAddSignal(world).emit();
-    
+
     this.server.worlds.set(connection, world);
 
-    // send all registered events
-    const registeredEvents: Set<Packet | 'all' | 'raw'> = this.getRegisteredEvents();
-
-    for (const registered of this.server.getRegisteredEvents()) {
-      // get subscribed EventSignal class
-      const Signal = Object.values(events).find(Signal => Signal.identifier === registered);
-      if (!Signal) continue;
-      for (const packetId of Signal.packets) {
-        registeredEvents.add(packetId);
-      }
-    }
-
-    for (const registered of registeredEvents) {
-      if (registered === 'all' || registered === 'raw') continue;
-
-      const packet = new EventSubscribePacket();
-      packet.eventName = registered;
-
-      this.send(connection, packet);
-    }
+    this.refleshEventSubscriptions();
 
     world.onConnect();
   }
@@ -264,5 +245,37 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
         break;
       }
     }
+  }
+
+  /**
+   * Send EventSubscribePacket for all registered events to all worlds.
+   * This can be also used to resubscribe events after a world is connected.
+   */
+  public refleshEventSubscriptions() {
+    const events = new Set<Packet>();
+    for (const registered of this.server.getRegisteredEvents()) {
+      for (const packetId of Network.getPacketIdsByEvent(registered)) {
+        events.add(packetId);
+      }
+    }
+
+    for (const packetId of this.getRegisteredEvents()) {
+      if (packetId === 'all' || packetId === 'raw') continue;
+      events.add(packetId);
+    }
+
+    for (const eventName of events) {
+      const packet = new EventSubscribePacket();
+      packet.eventName = eventName;
+      for (const connection of this.connections) {
+        this.send(connection, packet);
+      }
+    }
+  }
+
+  public static getPacketIdsByEvent(event: ServerEvent) {
+    const Signal = Object.values(events).find(Signal => Signal.identifier === event);
+    if (!Signal) throw new Error(`No Event class found for event ${ServerEvent[event]}`);
+    return Signal.packets;
   }
 }
