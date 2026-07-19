@@ -96,7 +96,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
 
     this.server.worlds.set(connection, world);
 
-    this.refleshEventSubscriptions();
+    this.refreshEventSubscriptions();
 
     world.onConnect();
   }
