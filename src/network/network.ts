@@ -96,7 +96,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
 
     this.server.worlds.set(connection, world);
 
-    this.refreshEventSubscriptions();
+    this.sendEventSubscriptions(connection);
 
     world.onConnect();
   }
@@ -247,29 +247,40 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
   }
 
-  /**
-   * Send EventSubscribePacket for all registered events to all connected worlds.
-   * This can also be used to resubscribe events after a world is connected.
-   */
-  public refreshEventSubscriptions() {
-    const events = new Set<Packet>();
+  private getSubscribedPacketIds(): Set<Packet> {
+    const subscribedPacketIds = new Set<Packet>();
     for (const registered of this.server.getRegisteredEvents()) {
       for (const packetId of Network.getPacketIdsByEvent(registered)) {
-        events.add(packetId);
+        subscribedPacketIds.add(packetId);
       }
     }
 
     for (const packetId of this.getRegisteredEvents()) {
       if (packetId === 'all' || packetId === 'raw') continue;
-      events.add(packetId);
+      subscribedPacketIds.add(packetId);
     }
 
-    for (const eventName of events) {
+    return subscribedPacketIds;
+  }
+
+  /**
+   * Send EventSubscribePacket for all registered events to a single connection.
+   */
+  public sendEventSubscriptions(connection: Connection) {
+    for (const packetId of this.getSubscribedPacketIds()) {
       const packet = new EventSubscribePacket();
-      packet.eventName = eventName;
-      for (const connection of this.connections) {
-        this.send(connection, packet);
-      }
+      packet.eventName = packetId;
+      this.send(connection, packet);
+    }
+  }
+
+  /**
+   * Send EventSubscribePacket for all registered events to all connected worlds.
+   * Can be used to resubscribe when new events are registered.
+   */
+  public refreshEventSubscriptions() {
+    for (const connection of this.connections) {
+      this.sendEventSubscriptions(connection);
     }
   }
 
