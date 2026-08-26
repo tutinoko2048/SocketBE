@@ -22,7 +22,10 @@ export class BlockPlacedHandler extends NetworkHandler {
       tool,
     } = packet;
     const block = new BlockType(rawBlock);
-    const player = world.resolvePlayer(rawPlayer.name);
+    // A command-driven placement carries no player, so this cannot be resolved
+    // unconditionally: reading `rawPlayer.name` threw for every `setblock`, and the
+    // network layer caught that and dropped the event without emitting a signal.
+    const player = rawPlayer ? world.resolvePlayer(rawPlayer.name) : undefined;
     const itemStack = new ItemStack(tool);
 
     new BlockPlacedSignal(
