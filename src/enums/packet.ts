@@ -25,6 +25,19 @@ export enum Packet {
   PlayerTransform = 'PlayerTransform',
   PlayerTravelled = 'PlayerTravelled',
   TargetBlockHit = 'TargetBlockHit',
+
+  // --- mc event packets confirmed by measurement against a live 1.21 client ---
+  // Only ItemDropped appears in the name list below. Names from that list were also tried
+  // and did not arrive (BlockUsed, ButtonPressed, PlayerGameModeSet,
+  // CraftingSessionCompleted, SlashCommandExecuted), with a control proving the socket was
+  // live at the time, so the list describes neither what a client sends nor what it does
+  // not.
+  EndOfDay = 'EndOfDay',
+  ItemUsed = 'ItemUsed',
+  MobKilled = 'MobKilled',
+  PlayerDied = 'PlayerDied',
+  ItemDropped = 'ItemDropped',
+  EntitySpawned = 'EntitySpawned',
 }
 
 /*
