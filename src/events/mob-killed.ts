@@ -41,7 +41,7 @@ export class MobKilledSignal extends WorldEventSignal {
   /** `false` for a passive mob such as a sheep. */
   public readonly isMonster: boolean;
 
-  /** A plain number: only `2`, from a melee sword hit, has been confirmed. */
+  /** Shares the numbering of `PlayerDied.cause`. Compare against {@link DamageCause}. */
   public readonly killMethodType: number;
 
   public readonly playerIsHiddenFrom: boolean;

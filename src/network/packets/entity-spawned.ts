@@ -9,8 +9,10 @@ export class EntitySpawnedPacket extends BasePacket {
    * What was spawned.
    *
    * @remarks
-   * Carries a numeric `type` and nothing else - no position, no runtime id. If you need
-   * to know where the entity is, run `querytarget` after this fires.
+   * Carries a numeric `type` and nothing else - no position, no runtime id. Compare it
+   * against {@link EntityTypeId}; run `querytarget` after this fires if you need a
+   * position. Only mobs raise this event: summoning an arrow, a snowball, TNT, a boat or
+   * a minecart all succeeded without producing a frame.
    */
   public mob!: WorldMobType;
 

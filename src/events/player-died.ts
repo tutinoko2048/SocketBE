@@ -18,7 +18,7 @@ export class PlayerDiedSignal extends WorldEventSignal {
 
   public static readonly packets: Packet[] = [Packet.PlayerDied];
 
-  /** Compare against {@link PlayerDeathCause}, which lists the 19 measured values. */
+  /** Compare against {@link DamageCause}, which lists the 33 measured values. */
   public readonly cause: number;
 
   public readonly inRaid: boolean;

@@ -30,7 +30,9 @@ export class MobKilledPacket extends BasePacket {
    * How the mob was killed.
    *
    * @remarks
-   * A plain number: only `2`, from a melee sword hit, has been observed.
+   * The same numbering as `PlayerDied.cause` - see {@link DamageCause}. Ten keywords were
+   * driven through both events and matched on every one. Left as a plain number for the
+   * same reason the other field is.
    */
   public killMethodType!: number;
 

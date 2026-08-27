@@ -30,6 +30,8 @@ export interface WorldMob {
  * and there is no position. An environmental death still fills the field in rather than
  * omitting it - `{ color: 0, id: 1, type: 1, variant: -1 }` was observed for both a lava
  * death and a fall, so treat that shape as "nobody killed them" rather than as an entity.
+ *
+ * Compare `type` against {@link EntityTypeId}.
  */
 export interface WorldKiller extends WorldMob {
   /** Runtime entity id. `1` when there is no killer. */

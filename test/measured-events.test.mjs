@@ -14,7 +14,7 @@ import assert from 'node:assert/strict';
 import {
   ItemUseMethod,
   Packet,
-  PlayerDeathCause,
+  DamageCause,
   Packets,
   Server,
   ServerEvent,
@@ -143,7 +143,7 @@ console.log('PlayerDied');
 test('carries the cause and the killing mob', () => {
   const [signal] = handleFrame(Packet.PlayerDied, ServerEvent.PlayerDied, PLAYER_DIED_BY_MOB);
 
-  assert.equal(signal.cause, PlayerDeathCause.EntityAttack);
+  assert.equal(signal.cause, DamageCause.EntityAttack);
   assert.equal(signal.killer.type, 32);
   assert.equal(signal.inRaid, false);
   assert.equal(signal.player.name, 'Kai_U');
@@ -153,30 +153,37 @@ test('an environmental death still fills in a killer', () => {
   // Worth pinning: `killer` being present does not mean somebody did the killing.
   const [signal] = handleFrame(Packet.PlayerDied, ServerEvent.PlayerDied, PLAYER_DIED_BY_LAVA);
 
-  assert.equal(signal.cause, PlayerDeathCause.Lava);
+  assert.equal(signal.cause, DamageCause.Lava);
   assert.deepEqual(signal.killer, { color: 0, id: 1, type: 1, variant: -1 });
 });
 
+/**
+ * Every pairing below was produced with `/damage <target> 200 <keyword>` against a live
+ * client and read back off the resulting frame. Pinned here so a future edit to the enum
+ * cannot quietly drift away from the measurement.
+ */
+const MEASURED_CAUSES = {
+  none: -1, override: 0, contact: 1, entity_attack: 2, projectile: 3,
+  fall: 5, fire: 6, fire_tick: 7, lava: 8, drowning: 9,
+  block_explosion: 10, entity_explosion: 11, void: 12, self_destruct: 13, magic: 14,
+  wither: 15, starve: 16, anvil: 17, thorns: 18, falling_block: 19,
+  piston: 20, fly_into_wall: 21, magma: 22, fireworks: 23, lightning: 24,
+  charging: 25, temperature: 26, freezing: 27, stalactite: 28, stalagmite: 29,
+  ram_attack: 30, sonic_boom: 31, campfire: 32,
+};
+
 test('the cause numbers match what /damage produced', () => {
-  // Each pairing below was produced with `/damage <player> 200 <keyword>` against a live
-  // client and read back off the resulting frame. Pinning them here so a future edit to
-  // the enum cannot quietly drift away from the measurement.
-  const measured = {
-    contact: 1, entity_attack: 2, fall: 5, fire: 6, fire_tick: 7, lava: 8,
-    drowning: 9, block_explosion: 10, entity_explosion: 11, void: 12, magic: 14,
-    wither: 15, starve: 16, anvil: 17, thorns: 18, falling_block: 19,
-    fly_into_wall: 21, lightning: 24, freezing: 27,
-  };
   const byNumber = Object.fromEntries(
-    Object.entries(PlayerDeathCause)
+    Object.entries(DamageCause)
       .filter(([key]) => Number.isNaN(Number(key)))
       .map(([key, value]) => [value, key]),
   );
 
-  for (const [keyword, number] of Object.entries(measured)) {
-    assert.ok(byNumber[number], `no PlayerDeathCause member for ${keyword} (${number})`);
+  for (const [keyword, number] of Object.entries(MEASURED_CAUSES)) {
+    assert.ok(byNumber[number] !== undefined, `no DamageCause member for ${keyword} (${number})`);
   }
-  assert.equal(Object.keys(byNumber).length, Object.keys(measured).length);
+  // Nothing unmeasured slipped in.
+  assert.equal(Object.keys(byNumber).length, Object.keys(MEASURED_CAUSES).length);
 });
 
 console.log('MobKilled');
@@ -186,7 +193,25 @@ test('identifies the victim by identifier string', () => {
 
   assert.equal(signal.victim.type, 'minecraft:sheep');
   assert.equal(signal.isMonster, false);
-  assert.equal(signal.killMethodType, 2);
+  assert.equal(signal.killMethodType, DamageCause.EntityAttack);
+});
+
+test('killMethodType shares the numbering of PlayerDied.cause', () => {
+  // Ten keywords were driven through both events and returned the same number on each:
+  // entity_attack 2, projectile 3, contact 1, fire 6, lava 8, block_explosion 10,
+  // entity_explosion 11, magic 14, thorns 18, lightning 24. Hence one enum for both.
+  const crossChecked = {
+    contact: 1, entity_attack: 2, projectile: 3, fire: 6, lava: 8,
+    block_explosion: 10, entity_explosion: 11, magic: 14, thorns: 18, lightning: 24,
+  };
+
+  for (const [keyword, number] of Object.entries(crossChecked)) {
+    assert.equal(MEASURED_CAUSES[keyword], number, `${keyword} disagrees between the two events`);
+    const [signal] = handleFrame(Packet.MobKilled, ServerEvent.MobKilled, {
+      ...MOB_KILLED, killMethodType: number,
+    });
+    assert.equal(signal.killMethodType, number);
+  }
 });
 
 test('regroups the armour slots and drops the empty ones', () => {
