@@ -2,21 +2,12 @@
  * How damage was dealt, as reported by `PlayerDied.cause` and `MobKilled.killMethodType`.
  *
  * @remarks
- * Every member below was measured, not read off a table. Each was produced with
- * `/damage <target> 200 <keyword>` against a live 1.21 client and the resulting number
- * read back off the event, so the names here are the Bedrock keywords that actually
- * produce them.
+ * The member names and values are based on Endstone's `ActorDamageCause` implementation:
+ * https://github.com/EndstoneMC/endstone/blob/56065defb20f0f96303325e3e9108c4e6c104043/src/bedrock/world/actor/actor_damage_cause.h
  *
- * The two events share this numbering. `PlayerDied.cause` and
- * `MobKilled.killMethodType` were driven through the same set of keywords and returned
- * the same numbers for each - `entity_attack` gave 2 on both, `projectile` gave 3 on both,
- * and so on through the ten that were cross-checked.
- *
- * Two keywords Bedrock accepts are missing because they could not be made lethal by
- * command: `suffocation`, which the client refused outright (its response reported
- * `unhurtActors`), and `soot_campfire`, which the parser rejected. The event fields stay
- * plain `number`s for that reason - compare against this enum rather than assuming it
- * covers every value a client can send.
+ * Values from `None` through `Campfire`, except `Suffocation`, were also verified with
+ * `/damage <target> 200 <keyword>` against a live 1.21 client. Ten of those causes were
+ * cross-checked against both events and produced the same numbers.
  */
 export enum DamageCause {
   /** `none` - reported as -1. */
@@ -29,6 +20,8 @@ export enum DamageCause {
   EntityAttack = 2,
   /** `projectile` */
   Projectile = 3,
+  /** Suffocation inside a solid block. */
+  Suffocation = 4,
   /** `fall` */
   Fall = 5,
   /** `fire` - standing in fire. */
@@ -85,4 +78,8 @@ export enum DamageCause {
   SonicBoom = 31,
   /** `campfire` */
   Campfire = 32,
+  /** Soul campfire damage. */
+  SoulCampfire = 33,
+  /** Damage dealt by a mace smash attack. */
+  MaceSmash = 34,
 }

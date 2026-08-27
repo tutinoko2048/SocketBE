@@ -1,4 +1,4 @@
-import { Packet, ServerEvent } from '../enums';
+import { DamageCause, Packet, ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
 import type { World } from '../world';
 import type { Player } from '../entity';
@@ -18,8 +18,8 @@ export class PlayerDiedSignal extends WorldEventSignal {
 
   public static readonly packets: Packet[] = [Packet.PlayerDied];
 
-  /** Compare against {@link DamageCause}, which lists the 33 measured values. */
-  public readonly cause: number;
+  /** How the player died. Compare against {@link DamageCause}. */
+  public readonly cause: DamageCause;
 
   public readonly inRaid: boolean;
 
@@ -31,7 +31,7 @@ export class PlayerDiedSignal extends WorldEventSignal {
 
   public constructor(
     world: World,
-    cause: number,
+    cause: DamageCause,
     inRaid: boolean,
     killer: WorldKiller,
     player: Player,

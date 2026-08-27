@@ -41,7 +41,6 @@ export class MobKilledHandler extends NetworkHandler {
     new MobKilledSignal(
       world,
       victim,
-      toItemStack(weapon),
       {
         head: toItemStack(armorHead),
         torso: toItemStack(armorTorso),
@@ -53,7 +52,8 @@ export class MobKilledHandler extends NetworkHandler {
       killMethodType,
       playerIsHiddenFrom,
       player,
-      rawPlayer
+      rawPlayer,
+      toItemStack(weapon),
     ).emit();
   }
 }

@@ -31,8 +31,7 @@ export class MobKilledPacket extends BasePacket {
    *
    * @remarks
    * The same numbering as `PlayerDied.cause` - see {@link DamageCause}. Ten keywords were
-   * driven through both events and matched on every one. Left as a plain number for the
-   * same reason the other field is.
+   * driven through both events and matched on every one.
    */
   public killMethodType!: number;
 

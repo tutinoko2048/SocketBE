@@ -182,8 +182,12 @@ test('the cause numbers match what /damage produced', () => {
   for (const [keyword, number] of Object.entries(MEASURED_CAUSES)) {
     assert.ok(byNumber[number] !== undefined, `no DamageCause member for ${keyword} (${number})`);
   }
-  // Nothing unmeasured slipped in.
-  assert.equal(Object.keys(byNumber).length, Object.keys(MEASURED_CAUSES).length);
+});
+
+test('includes the remaining causes from Endstone', () => {
+  assert.equal(DamageCause.Suffocation, 4);
+  assert.equal(DamageCause.SoulCampfire, 33);
+  assert.equal(DamageCause.MaceSmash, 34);
 });
 
 console.log('MobKilled');

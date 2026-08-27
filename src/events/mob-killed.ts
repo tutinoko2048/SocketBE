@@ -1,4 +1,4 @@
-import { Packet, ServerEvent } from '../enums';
+import { DamageCause, Packet, ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
 import type { World } from '../world';
 import type { Player } from '../entity';
@@ -42,7 +42,7 @@ export class MobKilledSignal extends WorldEventSignal {
   public readonly isMonster: boolean;
 
   /** Shares the numbering of `PlayerDied.cause`. Compare against {@link DamageCause}. */
-  public readonly killMethodType: number;
+  public readonly killMethodType: DamageCause;
 
   public readonly playerIsHiddenFrom: boolean;
 
@@ -53,13 +53,13 @@ export class MobKilledSignal extends WorldEventSignal {
   public constructor(
     world: World,
     victim: WorldVictim,
-    weapon: ItemStack | undefined,
     armor: MobKilledArmor,
     isMonster: boolean,
-    killMethodType: number,
+    killMethodType: DamageCause,
     playerIsHiddenFrom: boolean,
     player: Player,
     rawPlayer: WorldPlayer,
+    weapon?: ItemStack,
   ) {
     super(world);
 

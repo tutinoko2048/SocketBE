@@ -1,4 +1,4 @@
-import { MessagePurpose, Packet } from '../../enums';
+import { DamageCause, MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
 import type { WorldKiller, WorldPlayer } from '../../types';
@@ -9,9 +9,7 @@ export class PlayerDiedPacket extends BasePacket {
    * What killed the player.
    *
    * @remarks
-   * A plain number rather than an enum: 33 values have been measured, but two Bedrock
-   * keywords could not be made lethal by command. Compare against {@link DamageCause}
-   * instead of switching exhaustively.
+   * Compare against {@link DamageCause}.
    */
   public cause!: number;
 
