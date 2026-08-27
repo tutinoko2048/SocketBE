@@ -1,4 +1,4 @@
-import { Packet, ServerEvent } from '../enums';
+import { ItemUseMethod, Packet, ServerEvent } from '../enums';
 import { WorldEventSignal } from './world-event-signal';
 import type { World } from '../world';
 import type { Player } from '../entity';
@@ -20,8 +20,8 @@ export class ItemUsedSignal extends WorldEventSignal {
 
   public readonly item: WorldItemType;
 
-  /** Compare against {@link ItemUseMethod}, which lists the confirmed values. */
-  public readonly useMethod: number;
+  /** How the item was used. */
+  public readonly useMethod: ItemUseMethod;
 
   public readonly count: number;
 
@@ -32,7 +32,7 @@ export class ItemUsedSignal extends WorldEventSignal {
   public constructor(
     world: World,
     item: WorldItemType,
-    useMethod: number,
+    useMethod: ItemUseMethod,
     count: number,
     player: Player,
     rawPlayer: WorldPlayer,

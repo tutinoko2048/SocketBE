@@ -123,7 +123,7 @@ console.log('summon');
 
 await test('reports the new entity uId', async () => {
   const world = newWorld();
-  const result = await callWorld(world, 'summonEntity', 'chicken');
+  const result = await callWorld(world, 'spawnEntity', 'chicken');
 
   assert.equal(result.uId, '-111669149461');
   assert.equal(result.entityType, 'minecraft:chicken');

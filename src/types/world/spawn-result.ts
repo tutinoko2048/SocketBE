@@ -1,7 +1,7 @@
 import type { Vector3 } from '@minecraft/server';
 
-/** What `summon` reports back. */
-export interface SummonResult {
+/** What {@link World.spawnEntity} reports back. */
+export interface EntitySpawnResult {
   /** Namespaced identifier, e.g. `minecraft:chicken`. */
   entityType: string;
   spawnPos: Vector3;

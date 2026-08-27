@@ -9,7 +9,7 @@ import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type {
   QueryTargetResult,
-  SummonResult,
+  EntitySpawnResult,
   PlayerList,
   PlayerDetail,
   PlayerListDetail,
@@ -444,9 +444,9 @@ export class World {
    * @param entityType Entity identifier, with or without the `minecraft:` namespace.
    * @param location Where to spawn it. Defaults to the local player's position.
    */
-  public async summonEntity(entityType: string, location?: Vector3): Promise<SummonResult> {
+  public async spawnEntity(entityType: string, location?: Vector3): Promise<EntitySpawnResult> {
     const locationArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
-    const res = await this.runCommand<SummonResult>(`summon ${entityType} ${locationArg}`);
+    const res = await this.runCommand<EntitySpawnResult>(`summon ${entityType} ${locationArg}`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
 
     return {

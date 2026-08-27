@@ -22,9 +22,9 @@ export class ItemUsedPacket extends BasePacket {
    * How the item was used.
    *
    * @remarks
-   * A plain number, since only a few values have been confirmed. Compare against
-   * {@link ItemUseMethod} for those. This is a different field from
-   * `ItemInteractedPacket.method`; one action can produce both events.
+   * The raw packet value. {@link ItemUsedSignal.useMethod} exposes it as an
+   * {@link ItemUseMethod}. This is a different field from `ItemInteractedPacket.method`;
+   * one action can produce both events.
    */
   public useMethod!: number;
 
