@@ -367,11 +367,20 @@ export class World {
     return res.data;
   }
 
+  /**
+   * Returns this world's agent, summoning one if it does not have it yet.
+   *
+   * @remarks
+   * This can spawn an entity, so it is not safe to call from a read path. To find out where
+   * an existing agent is without creating one, run `querytarget @e[type=agent]` and read the
+   * `details` field of the response.
+   */
   public async getOrCreateAgent(): Promise<Agent> {
     if (this.agent) return this.agent;
     const res = await this.runCommand('agent create');
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
-    return new Agent(this);
+    this.agent = new Agent(this);
+    return this.agent;
   }
   
   private async updatePlayerList(isFirst = false) {
