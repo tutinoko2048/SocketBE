@@ -4,7 +4,7 @@ import { EntityQueryUtil } from './query';
 import { ScreenDisplay } from './screen-display';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { World } from '../world';
-import type { EntityQueryOptions, GiveItemOptions, PlayerDetail, QueryTargetResult } from '../types';
+import type { EntityQueryOptions, GiveItemOptions, PlayerDetail, PlayerExperience, QueryTargetResult } from '../types';
 
 export class Player {
   public readonly world: World;
@@ -147,15 +147,58 @@ export class Player {
   }
 
   public async getLevel(): Promise<number> {
-    const res = await this.world.runCommand<{ level: number }>(`xp 0 "${this.rawName}"`);
-    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
-
-    return res.level;
+    return (await this.getExperience()).level;
   }
 
-  public async addLevel(level: number): Promise<void> {
-    const res = await this.world.runCommand(`xp ${level}L "${this.rawName}"`);
+  /**
+   * Returns the player's level together with their progress into it.
+   *
+   * @remarks
+   * Reads through `xp 0`, which awards nothing and reports back. That response carries
+   * `amount` alongside `level`, and {@link getLevel} throws the former away - progress
+   * within a level is only available here.
+   */
+  public async getExperience(): Promise<PlayerExperience> {
+    const res = await this.world.runCommand<{ level: number, amount: number }>(`xp 0 "${this.rawName}"`);
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return { level: res.level, amount: res.amount };
+  }
+
+  /**
+   * @returns The level and progress after the change, as the command reports them.
+   */
+  public async addLevel(level: number): Promise<PlayerExperience> {
+    const res = await this.world.runCommand<{ level: number, amount: number }>(`xp ${level}L "${this.rawName}"`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return { level: res.level, amount: res.amount };
+  }
+
+  /**
+   * Counts how many of an item the player is carrying.
+   *
+   * @remarks
+   * There is no dedicated query for this. `clear` with a maximum count of 0 removes
+   * nothing and reports what it would have cleared, which is the closest thing Bedrock
+   * offers. Carrying none of the item is not an error here: the command answers with a
+   * failure status in that case, and this returns 0.
+   *
+   * @param itemId Item identifier, with or without the `minecraft:` namespace.
+   * @param data Data value to match, or -1 for any.
+   */
+  public async getItemCount(itemId: string, data = 0): Promise<number> {
+    const res = await this.world.runCommand<{ playerTest: string[] }>(
+      `clear "${this.rawName}" ${itemId} ${data} 0`
+    );
+    if (res.statusCode < CommandStatusCode.Success) return 0;
+
+    // The count is only ever reported inside a string, as `Name (12)`.
+    const total = (res.playerTest ?? []).reduce((sum, entry) => {
+      const match = /\((\d+)\)\s*$/.exec(entry);
+      return sum + (match ? Number(match[1]) : 0);
+    }, 0);
+    return total;
   }
 
   public async setGameMode(mode?: GameMode): Promise<void> {

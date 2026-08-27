@@ -8,6 +8,8 @@ import { serializeStates } from '../block';
 import type { RawMessage, Vector3 } from '@minecraft/server';
 import type { Server } from '../server';
 import type {
+  QueryTargetResult,
+  SummonResult,
   PlayerList,
   PlayerDetail,
   PlayerListDetail,
@@ -258,15 +260,21 @@ export class World {
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
   }
 
-  public async setBlock(location: Vector3, blockId: string, options?: SetBlockOptions) {
+  /**
+   * @returns Where the block ended up, which is what the command reports back. Useful when
+   * the location was given with relative coordinates and the caller wants the absolute one.
+   */
+  public async setBlock(location: Vector3, blockId: string, options?: SetBlockOptions): Promise<Vector3> {
     const locationArg = `${location.x} ${location.y} ${location.z}`;
     const stateArg = options?.states ? serializeStates(options.states) : '';
 
-    const res = await this.runCommand(
+    const res = await this.runCommand<{ position: Vector3 }>(
       `setblock ${locationArg} ${blockId} ${stateArg} ${options?.mode ?? ''}`,
       { version: MinecraftCommandVersion.LocateStructureOutput }
     );
     if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return res.position;
   }
 
   /**
@@ -365,6 +373,88 @@ export class World {
 
     const res = await this.connection.awaitResponse<DataResponsePacket>(header.requestId);
     return res.data;
+  }
+
+  /**
+   * Queries any entities a selector matches, not just players.
+   *
+   * @remarks
+   * `Player#query` runs the same command against one player name. This takes the selector
+   * straight through, so `@e` returns everything loaded and `@e[type=zombie]` narrows it.
+   *
+   * Be aware of what comes back: `dimension`, `id`, `position`, `uniqueId` and `yRot`, and
+   * nothing else. There is no type and no name, so this can say where things are but not
+   * what they are - filter by the selector if that matters.
+   *
+   * @param selector Target selector. Defaults to every loaded entity.
+   * @returns The matches, or an empty array when the selector matched nothing. A selector
+   * matching nothing is not treated as an error.
+   */
+  public async queryEntities(selector = '@e'): Promise<QueryTargetResult[]> {
+    const res = await this.runCommand<{ details: string }>(`querytarget ${selector}`);
+    if (res.statusCode < CommandStatusCode.Success) return [];
+
+    try {
+      return JSON.parse(res.details) as QueryTargetResult[];
+    } catch {
+      throw new Error(`Could not parse querytarget details: ${res.details}`);
+    }
+  }
+
+  /**
+   * Returns every game rule and its current value.
+   *
+   * @remarks
+   * `gamerule` with no arguments reports the lot in one response - 44 of them on the world
+   * this was measured against - which is cheaper than asking for them one at a time.
+   */
+  public async getGameRules(): Promise<Record<string, string | number | boolean>> {
+    const res = await this.runCommand<{ details: string }>('gamerule');
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return JSON.parse(res.details) as Record<string, string | number | boolean>;
+  }
+
+  /**
+   * Returns one game rule's value.
+   *
+   * @param rule Rule name. Matching is case-insensitive, as the command itself is.
+   */
+  public async getGameRule(rule: string): Promise<string | number | boolean | undefined> {
+    const res = await this.runCommand<{ details: string }>(`gamerule ${rule}`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    const parsed = JSON.parse(res.details) as Record<string, string | number | boolean>;
+    // The response echoes the rule under its canonical casing, not the one that was asked for.
+    const key = Object.keys(parsed).find(k => k.toLowerCase() === rule.toLowerCase());
+    return key === undefined ? undefined : parsed[key];
+  }
+
+  /**
+   * Spawns an entity and reports what was spawned.
+   *
+   * @remarks
+   * The response carries the new entity's `uId`, which is the only way to get hold of one
+   * at the moment of creation - the `EntitySpawned` event that follows gives a type number
+   * and no id at all.
+   *
+   * Note that event only fires for mobs. Summoning an arrow, a snowball, TNT, a boat or a
+   * minecart succeeds and reports `wasSpawned: true` here, but raises nothing.
+   *
+   * @param entityType Entity identifier, with or without the `minecraft:` namespace.
+   * @param location Where to spawn it. Defaults to the local player's position.
+   */
+  public async summonEntity(entityType: string, location?: Vector3): Promise<SummonResult> {
+    const locationArg = location ? `${location.x} ${location.y} ${location.z}` : '~ ~ ~';
+    const res = await this.runCommand<SummonResult>(`summon ${entityType} ${locationArg}`);
+    if (res.statusCode < CommandStatusCode.Success) throw new Error(res.statusMessage);
+
+    return {
+      entityType: res.entityType,
+      spawnPos: res.spawnPos,
+      uId: res.uId,
+      wasSpawned: res.wasSpawned,
+    };
   }
 
   /**
