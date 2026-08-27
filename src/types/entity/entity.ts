@@ -18,6 +18,10 @@ export interface WorldVillager extends WorldEntity {
 
 export interface WorldMob {
   color: number;
+  /**
+   * Numeric actor type. Compare this value against {@link EntityTypeId}; keep it as a
+   * `number` because a server may report a type not yet represented by the enum.
+   */
   type: number;
   variant: number;
 }
@@ -64,5 +68,9 @@ export interface MobQueryResult {
  * with - run `querytarget` afterwards if you need one.
  */
 export interface WorldMobType {
+  /**
+   * Numeric actor type. Compare this value against {@link EntityTypeId}; keep it as a
+   * `number` because a server may report a type not yet represented by the enum.
+   */
   type: number;
 }
