@@ -26,16 +26,16 @@ export class BlockPlacedHandler extends NetworkHandler {
     // unconditionally: reading `rawPlayer.name` threw for every `setblock`, and the
     // network layer caught that and dropped the event without emitting a signal.
     const player = rawPlayer ? world.resolvePlayer(rawPlayer.name) : undefined;
-    const itemStack = new ItemStack(tool);
+    const itemStackBeforePlace = new ItemStack(tool);
 
     new BlockPlacedSignal(
       world,
       block,
-      placedUnderWater,
       placementMethod,
+      placedUnderWater,
       player,
       rawPlayer,
-      itemStack
+      itemStackBeforePlace.isAir ? undefined : itemStackBeforePlace
     ).emit();
   }
 }
