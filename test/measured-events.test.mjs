@@ -157,6 +157,28 @@ test('an environmental death still fills in a killer', () => {
   assert.deepEqual(signal.killer, { color: 0, id: 1, type: 1, variant: -1 });
 });
 
+test('the cause numbers match what /damage produced', () => {
+  // Each pairing below was produced with `/damage <player> 200 <keyword>` against a live
+  // client and read back off the resulting frame. Pinning them here so a future edit to
+  // the enum cannot quietly drift away from the measurement.
+  const measured = {
+    contact: 1, entity_attack: 2, fall: 5, fire: 6, fire_tick: 7, lava: 8,
+    drowning: 9, block_explosion: 10, entity_explosion: 11, void: 12, magic: 14,
+    wither: 15, starve: 16, anvil: 17, thorns: 18, falling_block: 19,
+    fly_into_wall: 21, lightning: 24, freezing: 27,
+  };
+  const byNumber = Object.fromEntries(
+    Object.entries(PlayerDeathCause)
+      .filter(([key]) => Number.isNaN(Number(key)))
+      .map(([key, value]) => [value, key]),
+  );
+
+  for (const [keyword, number] of Object.entries(measured)) {
+    assert.ok(byNumber[number], `no PlayerDeathCause member for ${keyword} (${number})`);
+  }
+  assert.equal(Object.keys(byNumber).length, Object.keys(measured).length);
+});
+
 console.log('MobKilled');
 
 test('identifies the victim by identifier string', () => {

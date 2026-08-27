@@ -9,8 +9,8 @@ export class PlayerDiedPacket extends BasePacket {
    * What killed the player.
    *
    * @remarks
-   * A plain number, since only a few values have been confirmed. Compare against
-   * {@link PlayerDeathCause} for those.
+   * A plain number rather than an enum: 19 values have been measured, but Bedrock has
+   * more. Compare against {@link PlayerDeathCause} instead of switching exhaustively.
    */
   public cause!: number;
 
