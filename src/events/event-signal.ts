@@ -13,7 +13,6 @@ export class EventSignal {
   public readonly server: Server;
   
   public emit(): boolean {
-    // @ts-expect-error - "this" should be correct type
     return this.server.emit(this.identifier, this);
   }
 

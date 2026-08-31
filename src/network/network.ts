@@ -76,7 +76,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   public onListening() {
-    this.server.emit(ServerEvent.Open);
+    new events.ServerOpenSignal(this.server).emit();
   }
 
   public async onConnection(ws: WebSocket) {
@@ -93,29 +93,10 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     }
 
     new events.WorldAddSignal(world).emit();
-    
+
     this.server.worlds.set(connection, world);
 
-    // send all registered events
-    const registeredEvents: Set<Packet | 'all' | 'raw'> = this.getRegisteredEvents();
-
-    for (const registered of this.server.getRegisteredEvents()) {
-      // get subscribed EventSignal class
-      const Signal = Object.values(events).find(Signal => Signal.identifier === registered);
-      if (!Signal) continue;
-      for (const packetId of Signal.packets) {
-        registeredEvents.add(packetId);
-      }
-    }
-
-    for (const registered of registeredEvents) {
-      if (registered === 'all' || registered === 'raw') continue;
-
-      const packet = new EventSubscribePacket();
-      packet.eventName = registered;
-
-      this.send(connection, packet);
-    }
+    this.sendEventSubscriptions(connection);
 
     world.onConnect();
   }
@@ -250,7 +231,7 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     
   public onClose() {
     this.connections.clear();
-    this.server.emit(ServerEvent.Close);
+    new events.ServerCloseSignal(this.server).emit();
   }
 
   public registerHandler(handler: typeof NetworkHandler) {
@@ -264,5 +245,48 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
         break;
       }
     }
+  }
+
+  private getSubscribedPacketIds(): Set<Packet> {
+    const subscribedPacketIds = new Set<Packet>();
+    for (const registered of this.server.getRegisteredEvents()) {
+      for (const packetId of Network.getPacketIdsByEvent(registered)) {
+        subscribedPacketIds.add(packetId);
+      }
+    }
+
+    for (const packetId of this.getRegisteredEvents()) {
+      if (packetId === 'all' || packetId === 'raw') continue;
+      subscribedPacketIds.add(packetId);
+    }
+
+    return subscribedPacketIds;
+  }
+
+  /**
+   * Send EventSubscribePacket for all registered events to a single connection.
+   */
+  public sendEventSubscriptions(connection: Connection) {
+    for (const packetId of this.getSubscribedPacketIds()) {
+      const packet = new EventSubscribePacket();
+      packet.eventName = packetId;
+      this.send(connection, packet);
+    }
+  }
+
+  /**
+   * Send EventSubscribePacket for all registered events to all connected worlds.
+   * Can be used to resubscribe when new events are registered.
+   */
+  public refreshEventSubscriptions() {
+    for (const connection of this.connections) {
+      this.sendEventSubscriptions(connection);
+    }
+  }
+
+  public static getPacketIdsByEvent(event: ServerEvent) {
+    const Signal = Object.values(events).find(Signal => Signal.identifier === event);
+    if (!Signal) throw new Error(`No Event class found for event ${ServerEvent[event]}`);
+    return Signal.packets;
   }
 }
