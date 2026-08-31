@@ -9,11 +9,19 @@ export class BlockPlacedPacket extends BasePacket {
 
   public count!: number;
 
-  public placedUnderWater!: boolean;
-  
+  /** Absent on a command-driven placement, along with {@link player}. */
+  public placedUnderWater?: boolean;
+
   public placementMethod!: number;
 
-  public player!: WorldPlayer;
+  /**
+   * The player who placed the block, or `undefined` when no player was involved.
+   *
+   * @remarks
+   * `setblock` fires this event with only `block`, `count`, `placementMethod` and `tool`.
+   * The field is not `null` in that case, it is missing from the frame entirely.
+   */
+  public player?: WorldPlayer;
 
   public tool!: WorldItemStack;
 

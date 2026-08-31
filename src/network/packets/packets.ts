@@ -25,6 +25,12 @@ import { PlayerTeleportedPacket } from './player-teleported';
 import { PlayerTransformPacket } from './player-transform';
 import { PlayerTravelledPacket } from './player-travelled';
 import { TargetBlockHitPacket } from './target-block-hit';
+import { EndOfDayPacket } from './end-of-day';
+import { ItemUsedPacket } from './item-used';
+import { MobKilledPacket } from './mob-killed';
+import { PlayerDiedPacket } from './player-died';
+import { ItemDroppedPacket } from './item-dropped';
+import { EntitySpawnedPacket } from './entity-spawned';
 
 
 export const Packets = {
@@ -54,4 +60,10 @@ export const Packets = {
   [Packet.PlayerTransform]: PlayerTransformPacket,
   [Packet.PlayerTravelled]: PlayerTravelledPacket,
   [Packet.TargetBlockHit]: TargetBlockHitPacket,
+  [Packet.EndOfDay]: EndOfDayPacket,
+  [Packet.ItemUsed]: ItemUsedPacket,
+  [Packet.MobKilled]: MobKilledPacket,
+  [Packet.PlayerDied]: PlayerDiedPacket,
+  [Packet.ItemDropped]: ItemDroppedPacket,
+  [Packet.EntitySpawned]: EntitySpawnedPacket,
 } satisfies Record<Packet, typeof BasePacket>;

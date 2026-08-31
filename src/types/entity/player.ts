@@ -53,3 +53,9 @@ export interface GiveItemOptions {
   lockMode?: ItemLockMode;
   keepOnDeath?: boolean;
 }
+/** A player's experience, as `xp` reports it. */
+export interface PlayerExperience {
+  level: number;
+  /** Progress into the current level. Dropped by `Player#getLevel`. */
+  amount: number;
+}

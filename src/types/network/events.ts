@@ -26,6 +26,12 @@ import type {
   PlayerTransformPacket,
   PlayerTravelledPacket,
   TargetBlockHitPacket,
+  EndOfDayPacket,
+  ItemUsedPacket,
+  MobKilledPacket,
+  PlayerDiedPacket,
+  ItemDroppedPacket,
+  EntitySpawnedPacket,
 } from '../../network';
 
 export interface NetworkEvents {
@@ -61,4 +67,10 @@ export interface NetworkEvents {
   [Packet.PlayerTransform]: [NetworkEvent<PlayerTransformPacket>];
   [Packet.PlayerTravelled]: [NetworkEvent<PlayerTravelledPacket>];
   [Packet.TargetBlockHit]: [NetworkEvent<TargetBlockHitPacket>];
+  [Packet.EndOfDay]: [NetworkEvent<EndOfDayPacket>];
+  [Packet.ItemUsed]: [NetworkEvent<ItemUsedPacket>];
+  [Packet.MobKilled]: [NetworkEvent<MobKilledPacket>];
+  [Packet.PlayerDied]: [NetworkEvent<PlayerDiedPacket>];
+  [Packet.ItemDropped]: [NetworkEvent<ItemDroppedPacket>];
+  [Packet.EntitySpawned]: [NetworkEvent<EntitySpawnedPacket>];
 }

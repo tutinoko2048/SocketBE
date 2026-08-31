@@ -22,17 +22,20 @@ export class BlockPlacedHandler extends NetworkHandler {
       tool,
     } = packet;
     const block = new BlockType(rawBlock);
-    const player = world.resolvePlayer(rawPlayer.name);
-    const itemStack = new ItemStack(tool);
+    // A command-driven placement carries no player, so this cannot be resolved
+    // unconditionally: reading `rawPlayer.name` threw for every `setblock`, and the
+    // network layer caught that and dropped the event without emitting a signal.
+    const player = rawPlayer ? world.resolvePlayer(rawPlayer.name) : undefined;
+    const itemStackBeforePlace = new ItemStack(tool);
 
     new BlockPlacedSignal(
       world,
       block,
-      placedUnderWater,
       placementMethod,
+      placedUnderWater,
       player,
       rawPlayer,
-      itemStack
+      itemStackBeforePlace.isAir ? undefined : itemStackBeforePlace
     ).emit();
   }
 }
