@@ -1,4 +1,4 @@
-import { DamageCause, MessagePurpose, Packet } from '../../enums';
+import { MessagePurpose, Packet } from '../../enums';
 import { PacketClass } from '../decorator';
 import { BasePacket } from './base';
 import type { WorldKiller, WorldPlayer } from '../../types';
