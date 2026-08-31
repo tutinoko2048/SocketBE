@@ -26,4 +26,10 @@ export enum ServerEvent {
   PlayerTransform,
   PlayerTravelled,
   TargetBlockHit,
+  EndOfDay,
+  ItemUsed,
+  MobKilled,
+  PlayerDied,
+  ItemDropped,
+  EntitySpawned,
 }

@@ -24,6 +24,12 @@ import type {
   PlayerTeleportedSignal,
   PlayerTransformSignal,
   TargetBlockHitSignal,
+  EndOfDaySignal,
+  ItemUsedSignal,
+  MobKilledSignal,
+  PlayerDiedSignal,
+  ItemDroppedSignal,
+  EntitySpawnedSignal,
 } from '../../events';
 
 export interface ServerEvents {
@@ -53,4 +59,10 @@ export interface ServerEvents {
   [ServerEvent.PlayerTransform]: [PlayerTransformSignal];
   [ServerEvent.PlayerTravelled]: [PlayerTravelledSignal];
   [ServerEvent.TargetBlockHit]: [TargetBlockHitSignal];
+  [ServerEvent.EndOfDay]: [EndOfDaySignal];
+  [ServerEvent.ItemUsed]: [ItemUsedSignal];
+  [ServerEvent.MobKilled]: [MobKilledSignal];
+  [ServerEvent.PlayerDied]: [PlayerDiedSignal];
+  [ServerEvent.ItemDropped]: [ItemDroppedSignal];
+  [ServerEvent.EntitySpawned]: [EntitySpawnedSignal];
 }

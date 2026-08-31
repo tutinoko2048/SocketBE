@@ -1,6 +1,6 @@
 // Unit tests for BlockPlaced frames that carry no player.
 //
-// Measured against a live 1.21 client: `setblock` fires BlockPlaced with only
+// Measured against a live client: `setblock` fires BlockPlaced with only
 // `block` / `count` / `placementMethod` / `tool` - no `player`, no `placedUnderWater`.
 // The handler read `packet.player.name` unconditionally, so every command-driven
 // placement threw inside the handler; the network layer caught that and dropped the

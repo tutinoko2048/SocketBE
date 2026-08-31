@@ -17,6 +17,12 @@ import { MobInteractedHandler } from './mob-interacted';
 import { PlayerBouncedHandler } from './player-bounced';
 import { PlayerTeleportedHandler } from './player-teleported';
 import { TargetBlockHitHandler } from './target-block-hit';
+import { EndOfDayHandler } from './end-of-day';
+import { ItemUsedHandler } from './item-used';
+import { MobKilledHandler } from './mob-killed';
+import { PlayerDiedHandler } from './player-died';
+import { ItemDroppedHandler } from './item-dropped';
+import { EntitySpawnedHandler } from './entity-spawned';
 
 export const Handlers = [
   CommandResponseHandler,
@@ -38,4 +44,10 @@ export const Handlers = [
   PlayerTransformHandler,
   PlayerTravelledHandler,
   TargetBlockHitHandler,
+  EndOfDayHandler,
+  ItemUsedHandler,
+  MobKilledHandler,
+  PlayerDiedHandler,
+  ItemDroppedHandler,
+  EntitySpawnedHandler,
 ];
