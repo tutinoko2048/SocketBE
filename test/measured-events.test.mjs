@@ -1,6 +1,6 @@
 // Unit tests for the six events added from live measurement.
 //
-// Every frame below was captured verbatim from a Bedrock 1.21 client
+// Every frame below was captured verbatim from a live client
 // (`header.version` 17104896) over an unencrypted WebSocket connection. None of these
 // names appear in the event-name list kept at the bottom of `src/enums/packet.ts`,
 // so that list is not a description of what a client will actually send.

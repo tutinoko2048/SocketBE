@@ -6,7 +6,7 @@
  * https://github.com/EndstoneMC/endstone/blob/56065defb20f0f96303325e3e9108c4e6c104043/src/bedrock/world/actor/actor_damage_cause.h
  *
  * Values from `None` through `Campfire`, except `Suffocation`, were also verified with
- * `/damage <target> 200 <keyword>` against a live 1.21 client. Ten of those causes were
+ * `/damage <target> 200 <keyword>` against a live client. Ten of those causes were
  * cross-checked against both events and produced the same numbers.
  */
 export enum DamageCause {
