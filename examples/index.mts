@@ -18,6 +18,7 @@ rl.on('line', async line => {
     const world = server.getWorlds()[0];
     try {
       const env = { world, server };
+      /* oxlint-disable-next-line typescript/no-implied-eval */
       const result = await (new Function(...Object.keys(env), `return (${args.join(' ')});`))(...Object.values(env));
       console.log(result);
     } catch (error) {
