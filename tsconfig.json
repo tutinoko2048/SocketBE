@@ -1,5 +1,5 @@
 {
-  "include": ["src", "tsdown.config.mts"],
+  "include": ["src", "vite.config.mts"],
   "compilerOptions": {
     "strict": true,
     "allowJs": true,
