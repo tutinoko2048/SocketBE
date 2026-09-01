@@ -7,10 +7,9 @@
 // The world here is a stub whose runCommand replays those captures, which keeps the
 // parsing under test without needing a client.
 //
-// Run: node test/queries.test.mjs   (after `tsdown`)
 
-import assert from 'node:assert/strict';
-import { Player } from '../dist/index.mjs';
+import { expect, it } from 'vite-plus/test';
+import { Player, World } from '../src/index';
 
 /** Bodies exactly as the client sent them. */
 const RESPONSES = {
@@ -58,7 +57,7 @@ function newWorld() {
       asked.push(commandLine);
       const key = commandLine.replace(/\s+/g, ' ').trim();
       const body = RESPONSES[key];
-      assert.ok(body, `no capture for: ${key}`);
+      expect(body, `no capture for: ${key}`).toBeTruthy();
       return body;
     },
     resolvePlayer: (name) => ({ name }),
@@ -66,68 +65,52 @@ function newWorld() {
   return world;
 }
 
-let passed = 0;
-let failed = 0;
-
-async function test(name, fn) {
-  try {
-    await fn();
-    passed++;
-    console.log(`  ok   ${name}`);
-  } catch (error) {
-    failed++;
-    console.log(`  FAIL ${name}`);
-    console.log(`       ${error.message}`);
-  }
-}
-
-const { World } = await import('../dist/index.mjs');
 /** Borrows World's methods without constructing one, which would need a socket. */
 const callWorld = (world, method, ...args) => World.prototype[method].apply(world, args);
 
 console.log('queryEntities');
 
-await test('takes any selector, not just a player name', async () => {
+it('takes any selector, not just a player name', async () => {
   const world = newWorld();
   const entities = await callWorld(world, 'queryEntities', '@e');
 
-  assert.equal(entities.length, 2);
-  assert.equal(entities[1].uniqueId, '-111669149660');
-  assert.deepEqual(world.asked, ['querytarget @e']);
+  expect(entities).toHaveLength(2);
+  expect(entities[1].uniqueId).toBe('-111669149660');
+  expect(world.asked).toEqual(['querytarget @e']);
 });
 
-await test('a selector matching nothing gives an empty array, not a throw', async () => {
+it('a selector matching nothing gives an empty array, not a throw', async () => {
   // The client reports this as a failure status; an empty result is not an error here.
   const world = newWorld();
-  assert.deepEqual(await callWorld(world, 'queryEntities', '@e[type=zombie]'), []);
+  expect(await callWorld(world, 'queryEntities', '@e[type=zombie]')).toEqual([]);
 });
 
 console.log('game rules');
 
-await test('reads every rule in one command', async () => {
+it('reads every rule in one command', async () => {
   const world = newWorld();
   const rules = await callWorld(world, 'getGameRules');
 
-  assert.equal(rules.keepInventory, false);
-  assert.equal(rules.randomTickSpeed, 1);
-  assert.deepEqual(world.asked, ['gamerule']);
+  expect(rules.keepInventory).toBe(false);
+  expect(rules.randomTickSpeed).toBe(1);
+  expect(world.asked).toEqual(['gamerule']);
 });
 
-await test('matches a rule name case-insensitively', async () => {
+it('matches a rule name case-insensitively', async () => {
   // The response echoes the canonical casing, which is not what callers will type.
   const world = newWorld();
-  assert.equal(await callWorld(world, 'getGameRule', 'showcoordinates'), false);
+  expect(await callWorld(world, 'getGameRule', 'showcoordinates')).toBe(false);
 });
 
 console.log('summon');
 
-await test('reports the new entity uId', async () => {
+it('reports the new entity uId', async () => {
   const world = newWorld();
   const result = await callWorld(world, 'spawnEntity', 'chicken');
 
-  assert.equal(result.uId, '-111669149461');
-  assert.equal(result.entityType, 'minecraft:chicken');
-  assert.equal(result.wasSpawned, true);
+  expect(result.uId).toBe('-111669149461');
+  expect(result.entityType).toBe('minecraft:chicken');
+  expect(result.wasSpawned).toBe(true);
 });
 
 console.log('experience');
@@ -138,40 +121,37 @@ const newPlayer = (world) => Object.assign(Object.create(Player.prototype), {
   name: 'Kai_U',
 });
 
-await test('getExperience keeps the progress that getLevel drops', async () => {
+it('getExperience keeps the progress that getLevel drops', async () => {
   const world = newWorld();
   const xp = await Player.prototype.getExperience.call(newPlayer(world));
 
-  assert.deepEqual(xp, { level: 2, amount: 7 });
+  expect(xp).toEqual({ level: 2, amount: 7 });
 });
 
-await test('getLevel still answers a bare number', async () => {
+it('getLevel still answers a bare number', async () => {
   const world = newWorld();
-  assert.equal(await Player.prototype.getLevel.call(newPlayer(world)), 2);
+  expect(await Player.prototype.getLevel.call(newPlayer(world))).toBe(2);
 });
 
-await test('addLevel reports the level after the change', async () => {
+it('addLevel reports the level after the change', async () => {
   const world = newWorld();
   const xp = await Player.prototype.addLevel.call(newPlayer(world), 3);
 
-  assert.deepEqual(xp, { level: 5, amount: 0 });
+  expect(xp).toEqual({ level: 5, amount: 0 });
 });
 
 console.log('item count');
 
-await test('reads the count out of the string the command returns', async () => {
+it('reads the count out of the string the command returns', async () => {
   // There is no count query; `clear` with a maximum of 0 removes nothing and reports.
   const world = newWorld();
   const count = await Player.prototype.getItemCount.call(newPlayer(world), 'stone');
 
-  assert.equal(count, 64);
-  assert.deepEqual(world.asked, ['clear "Kai_U" stone 0 0']);
+  expect(count).toBe(64);
+  expect(world.asked).toEqual(['clear "Kai_U" stone 0 0']);
 });
 
-await test('carrying none of the item is 0, not an error', async () => {
+it('carrying none of the item is 0, not an error', async () => {
   const world = newWorld();
-  assert.equal(await Player.prototype.getItemCount.call(newPlayer(world), 'diamond'), 0);
+  expect(await Player.prototype.getItemCount.call(newPlayer(world), 'diamond')).toBe(0);
 });
-
-console.log(`\n${passed} passed, ${failed} failed`);
-if (failed > 0) process.exitCode = 1;

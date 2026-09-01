@@ -8,9 +8,8 @@
 // Handlers are not exported, so these go through Server, which registers the real ones
 // and is also where the signal lands.
 //
-// Run: node test/measured-events.test.mjs   (after `tsdown`)
 
-import assert from 'node:assert/strict';
+import { expect, it } from 'vite-plus/test';
 import {
   ItemUseMethod,
   Packet,
@@ -18,7 +17,7 @@ import {
   Packets,
   Server,
   ServerEvent,
-} from '../dist/index.mjs';
+} from '../src/index';
 
 const PLAYER = {
   color: 'ffededed',
@@ -112,7 +111,7 @@ function handleFrame(packetId, serverEvent, body) {
   server.on(serverEvent, (signal) => { signals.push(signal); });
 
   const handler = [...server.network.handlers].find((h) => h.packet === packetId);
-  assert.ok(handler, `no handler registered for ${packetId}`);
+  expect(handler, `no handler registered for ${packetId}`).toBeTruthy();
 
   try {
     handler.handle(Packets[packetId].deserialize(body), connection);
@@ -123,38 +122,23 @@ function handleFrame(packetId, serverEvent, body) {
   return signals;
 }
 
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-  try {
-    fn();
-    passed++;
-    console.log(`  ok   ${name}`);
-  } catch (error) {
-    failed++;
-    console.log(`  FAIL ${name}`);
-    console.log(`       ${error.message}`);
-  }
-}
-
 console.log('PlayerDied');
 
-test('carries the cause and the killing mob', () => {
+it('carries the cause and the killing mob', () => {
   const [signal] = handleFrame(Packet.PlayerDied, ServerEvent.PlayerDied, PLAYER_DIED_BY_MOB);
 
-  assert.equal(signal.cause, DamageCause.EntityAttack);
-  assert.equal(signal.killer.type, 32);
-  assert.equal(signal.inRaid, false);
-  assert.equal(signal.player.name, 'Kai_U');
+  expect(signal.cause).toBe(DamageCause.EntityAttack);
+  expect(signal.killer.type).toBe(32);
+  expect(signal.inRaid).toBe(false);
+  expect(signal.player.name).toBe('Kai_U');
 });
 
-test('an environmental death still fills in a killer', () => {
+it('an environmental death still fills in a killer', () => {
   // Worth pinning: `killer` being present does not mean somebody did the killing.
   const [signal] = handleFrame(Packet.PlayerDied, ServerEvent.PlayerDied, PLAYER_DIED_BY_LAVA);
 
-  assert.equal(signal.cause, DamageCause.Lava);
-  assert.deepEqual(signal.killer, { color: 0, id: 1, type: 1, variant: -1 });
+  expect(signal.cause).toBe(DamageCause.Lava);
+  expect(signal.killer).toEqual({ color: 0, id: 1, type: 1, variant: -1 });
 });
 
 /**
@@ -172,7 +156,7 @@ const MEASURED_CAUSES = {
   ram_attack: 30, sonic_boom: 31, campfire: 32,
 };
 
-test('the cause numbers match what /damage produced', () => {
+it('the cause numbers match what /damage produced', () => {
   const byNumber = Object.fromEntries(
     Object.entries(DamageCause)
       .filter(([key]) => Number.isNaN(Number(key)))
@@ -180,27 +164,27 @@ test('the cause numbers match what /damage produced', () => {
   );
 
   for (const [keyword, number] of Object.entries(MEASURED_CAUSES)) {
-    assert.ok(byNumber[number] !== undefined, `no DamageCause member for ${keyword} (${number})`);
+    expect(byNumber[number], `no DamageCause member for ${keyword} (${number})`).toBeDefined();
   }
 });
 
-test('includes the remaining causes from Endstone', () => {
-  assert.equal(DamageCause.Suffocation, 4);
-  assert.equal(DamageCause.SoulCampfire, 33);
-  assert.equal(DamageCause.MaceSmash, 34);
+it('includes the remaining causes from Endstone', () => {
+  expect(DamageCause.Suffocation).toBe(4);
+  expect(DamageCause.SoulCampfire).toBe(33);
+  expect(DamageCause.MaceSmash).toBe(34);
 });
 
 console.log('MobKilled');
 
-test('identifies the victim by identifier string', () => {
+it('identifies the victim by identifier string', () => {
   const [signal] = handleFrame(Packet.MobKilled, ServerEvent.MobKilled, MOB_KILLED);
 
-  assert.equal(signal.victim.type, 'minecraft:sheep');
-  assert.equal(signal.isMonster, false);
-  assert.equal(signal.killMethodType, DamageCause.EntityAttack);
+  expect(signal.victim.type).toBe('minecraft:sheep');
+  expect(signal.isMonster).toBe(false);
+  expect(signal.killMethodType).toBe(DamageCause.EntityAttack);
 });
 
-test('killMethodType shares the numbering of PlayerDied.cause', () => {
+it('killMethodType shares the numbering of PlayerDied.cause', () => {
   // Ten keywords were driven through both events and returned the same number on each:
   // entity_attack 2, projectile 3, contact 1, fire 6, lava 8, block_explosion 10,
   // entity_explosion 11, magic 14, thorns 18, lightning 24. Hence one enum for both.
@@ -210,24 +194,24 @@ test('killMethodType shares the numbering of PlayerDied.cause', () => {
   };
 
   for (const [keyword, number] of Object.entries(crossChecked)) {
-    assert.equal(MEASURED_CAUSES[keyword], number, `${keyword} disagrees between the two events`);
+    expect(MEASURED_CAUSES[keyword], `${keyword} disagrees between the two events`).toBe(number);
     const [signal] = handleFrame(Packet.MobKilled, ServerEvent.MobKilled, {
       ...MOB_KILLED, killMethodType: number,
     });
-    assert.equal(signal.killMethodType, number);
+    expect(signal.killMethodType).toBe(number);
   }
 });
 
-test('regroups the armour slots and drops the empty ones', () => {
+it('regroups the armour slots and drops the empty ones', () => {
   const [signal] = handleFrame(Packet.MobKilled, ServerEvent.MobKilled, MOB_KILLED);
 
-  assert.deepEqual(signal.armor, {
+  expect(signal.armor).toEqual({
     head: undefined, torso: undefined, legs: undefined, feet: undefined, body: undefined,
   });
-  assert.equal(signal.weapon.typeId, 'minecraft:netherite_sword');
+  expect(signal.weapon.typeId).toBe('minecraft:netherite_sword');
 });
 
-test('surfaces armour that is actually worn', () => {
+it('surfaces armour that is actually worn', () => {
   const helmet = {
     aux: 0, enchantments: [], freeStackSize: 0,
     id: 'iron_helmet', maxStackSize: 1, namespace: 'minecraft', stackSize: 1,
@@ -236,57 +220,54 @@ test('surfaces armour that is actually worn', () => {
     ...MOB_KILLED, armorHead: helmet,
   });
 
-  assert.equal(signal.armor.head.typeId, 'minecraft:iron_helmet');
-  assert.equal(signal.armor.torso, undefined);
+  expect(signal.armor.head.typeId).toBe('minecraft:iron_helmet');
+  expect(signal.armor.torso).toBeUndefined();
 });
 
 console.log('ItemUsed');
 
-test('reports useMethod, which is not ItemInteracted.method', () => {
+it('reports useMethod, which is not ItemInteracted.method', () => {
   const [signal] = handleFrame(Packet.ItemUsed, ServerEvent.ItemUsed, ITEM_USED);
 
-  assert.equal(signal.useMethod, ItemUseMethod.PourBucket);
-  assert.equal(signal.item.id, 'lava_bucket');
-  assert.equal(signal.count, 1);
+  expect(signal.useMethod).toBe(ItemUseMethod.PourBucket);
+  expect(signal.item.id).toBe('lava_bucket');
+  expect(signal.count).toBe(1);
 });
 
 console.log('EndOfDay');
 
-test('arrives with a player rather than for the world', () => {
+it('arrives with a player rather than for the world', () => {
   const [signal] = handleFrame(Packet.EndOfDay, ServerEvent.EndOfDay, END_OF_DAY);
 
-  assert.equal(signal.player.name, 'Kai_U');
-  assert.equal(signal.rawPlayer.position.y, -58.37998962402344);
+  expect(signal.player.name).toBe('Kai_U');
+  expect(signal.rawPlayer.position.y).toBe(-58.37998962402344);
 });
 
 console.log('ItemDropped');
 
-test('carries only the item type, with no stack detail', () => {
+it('carries only the item type, with no stack detail', () => {
   const [signal] = handleFrame(Packet.ItemDropped, ServerEvent.ItemDropped, ITEM_DROPPED);
 
-  assert.equal(signal.item.id, 'rotten_flesh');
-  assert.equal(signal.count, 1);
-  assert.equal(signal.item.enchantments, undefined);
-  assert.equal(signal.player.name, 'Kai_U');
+  expect(signal.item.id).toBe('rotten_flesh');
+  expect(signal.count).toBe(1);
+  expect(signal.item.enchantments).toBeUndefined();
+  expect(signal.player.name).toBe('Kai_U');
 });
 
 console.log('EntitySpawned');
 
-test('says what spawned but not where', () => {
+it('says what spawned but not where', () => {
   const [signal] = handleFrame(Packet.EntitySpawned, ServerEvent.EntitySpawned, ENTITY_SPAWNED);
 
-  assert.equal(signal.mob.type, 10);
-  assert.equal(signal.mob.position, undefined);
-  assert.equal(signal.spawnType, 2);
+  expect(signal.mob.type).toBe(10);
+  expect(signal.mob.position).toBeUndefined();
+  expect(signal.spawnType).toBe(2);
 });
 
-test('a command-driven spawn still attributes a player', () => {
+it('a command-driven spawn still attributes a player', () => {
   // The opposite of BlockPlaced, where a command-driven placement arrives with no player.
   const [signal] = handleFrame(Packet.EntitySpawned, ServerEvent.EntitySpawned, ENTITY_SPAWNED);
 
-  assert.equal(signal.player.name, 'Kai_U');
-  assert.equal(signal.rawPlayer.name, 'Kai_U');
+  expect(signal.player.name).toBe('Kai_U');
+  expect(signal.rawPlayer.name).toBe('Kai_U');
 });
-
-console.log(`\n${passed} passed, ${failed} failed`);
-if (failed > 0) process.exitCode = 1;

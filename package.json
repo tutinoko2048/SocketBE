@@ -15,6 +15,7 @@
   "scripts": {
     "lint": "vp lint",
     "build": "vp pack",
+    "test": "vp test",
     "prepublishOnly": "pnpm run lint && pnpm run build"
   },
   "dependencies": {

@@ -9,10 +9,9 @@
 // Handlers are not exported, so these go through Server, which registers the real ones
 // and is also where the signal lands.
 //
-// Run: node test/block-placed.test.mjs   (after `tsdown`)
 
-import assert from 'node:assert/strict';
-import { BlockPlacedPacket, Packet, Server, ServerEvent } from '../dist/index.mjs';
+import { expect, it } from 'vite-plus/test';
+import { BlockPlacedPacket, Packet, Server, ServerEvent } from '../src/index';
 
 /** Captured from a live client running `setblock 69 100 -11 stone`. */
 const commandFrame = {
@@ -53,7 +52,7 @@ function handleFrame(body) {
   server.on(ServerEvent.BlockPlaced, (signal) => { signals.push(signal); });
 
   const handler = [...server.network.handlers].find((h) => h.packet === Packet.BlockPlaced);
-  assert.ok(handler, 'BlockPlaced handler is not registered');
+  expect(handler, 'BlockPlaced handler is not registered').toBeTruthy();
 
   try {
     handler.handle(BlockPlacedPacket.deserialize(body), connection);
@@ -64,47 +63,32 @@ function handleFrame(body) {
   return signals;
 }
 
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-  try {
-    fn();
-    passed++;
-    console.log(`  ok   ${name}`);
-  } catch (error) {
-    failed++;
-    console.log(`  FAIL ${name}`);
-    console.log(`       ${error.message}`);
-  }
-}
-
 console.log('BlockPlaced');
 
-test('a command-driven frame emits a signal instead of throwing', () => {
+it('a command-driven frame emits a signal instead of throwing', () => {
   const signals = handleFrame(commandFrame);
 
-  assert.equal(signals.length, 1, 'expected exactly one signal');
-  assert.equal(signals[0].placedBlockType.id, 'minecraft:stone');
+  expect(signals).toHaveLength(1);
+  expect(signals[0].placedBlockType.id).toBe('minecraft:stone');
 });
 
-test('a command-driven frame leaves player and rawPlayer undefined', () => {
+it('a command-driven frame leaves player and rawPlayer undefined', () => {
   const [signal] = handleFrame(commandFrame);
 
-  assert.equal(signal.player, undefined);
-  assert.equal(signal.rawPlayer, undefined);
-  assert.equal(signal.placedUnderwater, undefined);
+  expect(signal.player).toBeUndefined();
+  expect(signal.rawPlayer).toBeUndefined();
+  expect(signal.placedUnderwater).toBeUndefined();
 });
 
-test('a player-driven frame still resolves the player', () => {
+it('a player-driven frame still resolves the player', () => {
   const [signal] = handleFrame(playerFrame);
 
-  assert.equal(signal.player.name, 'Kai_U');
-  assert.equal(signal.rawPlayer.name, 'Kai_U');
-  assert.equal(signal.placedUnderwater, false);
+  expect(signal.player.name).toBe('Kai_U');
+  expect(signal.rawPlayer.name).toBe('Kai_U');
+  expect(signal.placedUnderwater).toBe(false);
 });
 
-test('placing air is reported as a placement, not as a break', () => {
+it('placing air is reported as a placement, not as a break', () => {
   // `setblock <pos> air` produces BlockPlaced with id "air" rather than BlockBroken.
   // Callers that read this as "a block now exists here" need to check for it.
   const [signal] = handleFrame({
@@ -112,8 +96,5 @@ test('placing air is reported as a placement, not as a break', () => {
     block: { aux: 0, id: 'air', namespace: 'minecraft' },
   });
 
-  assert.equal(signal.placedBlockType.id, 'minecraft:air');
+  expect(signal.placedBlockType.id).toBe('minecraft:air');
 });
-
-console.log(`\n${passed} passed, ${failed} failed`);
-if (failed > 0) process.exitCode = 1;
