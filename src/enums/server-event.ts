@@ -32,4 +32,5 @@ export enum ServerEvent {
   PlayerDied,
   ItemDropped,
   EntitySpawned,
+  ConnectionOpen,
 }

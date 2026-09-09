@@ -5,27 +5,30 @@ import { CommandStatusCode } from '../enums';
 import { CommandErrorPacket, type EncryptionResponsePacket, type CommandResponsePacket, type DataResponsePacket } from './packets';
 import type { WebSocket } from 'ws';
 import type { Network } from './network';
-import type { PendingResponse } from '../types';
+import type { ConnectionInfo, PendingResponse } from '../types';
 
 
 export class Connection {
   public readonly network: Network;
-  
+
   public readonly ws: WebSocket;
+
+  public readonly info: ConnectionInfo;
 
   public readonly encryption: Encryption = new Encryption();
 
   public readonly identifier: string = randomUUID();
 
   public readonly pendingResponses = new Map<string, PendingResponse>();
-  
+
   public readonly responseTimes: number[] = [];
 
   public readonly establishedAt: number = Date.now();
 
-  constructor(network: Network, ws: WebSocket) {
+  constructor(network: Network, ws: WebSocket, info: ConnectionInfo) {
     this.network = network;
     this.ws = ws;
+    this.info = info;
   }
 
   public get isOpen() {

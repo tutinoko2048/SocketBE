@@ -32,3 +32,4 @@ export * from './world-add';
 export * from './world-event-signal';
 export * from './world-initialize';
 export * from './world-remove';
+export * from './connection-open';

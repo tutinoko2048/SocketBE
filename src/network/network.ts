@@ -10,6 +10,7 @@ import type { WebSocket } from 'ws';
 import type { Server } from '../server';
 import type { IHeader, IPacket, NetworkEvent, NetworkEvents, NetworkSendOptions } from '../types';
 import type { NetworkHandler } from './handler';
+import type { IncomingMessage } from 'http';
 
 
 export class Network extends ExtendedEmitter<NetworkEvents> {
@@ -79,14 +80,24 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
     new events.ServerOpenSignal(this.server).emit();
   }
 
-  public async onConnection(ws: WebSocket) {
-    const connection = new Connection(this, ws);
+  public async onConnection(ws: WebSocket, request: IncomingMessage) {
+    const connection = new Connection(this, ws, {
+      headers: request.headers,
+      url: request.url,
+      remoteAddress: request.socket.remoteAddress,
+    });
     this.connections.add(connection);
 
     ws.on('message', this.onConnectionMessage.bind(this, connection));
     ws.on('close', this.onConnectionClose.bind(this, connection));
 
     const world = new World(this.server, connection);
+
+    if (!new events.ConnectionOpenSignal(connection).emit()) {
+      this.connections.delete(connection);
+      ws.close();
+      return;
+    }
 
     if (!this.server.options.disableEncryption) {
       await world.enableEncryption(this.server.options.encryptionMode);
@@ -221,10 +232,16 @@ export class Network extends ExtendedEmitter<NetworkEvents> {
   }
 
   public onConnectionClose(connection: Connection, code: number) {
-    const world = this.server.worlds.get(connection)!;
+    const world = this.server.worlds.get(connection);
+    this.connections.delete(connection);
+
+    if (!world) {
+      connection.clearPendingResponses();
+      return;
+    }
+
     world.onDisconnect();
     this.server.worlds.delete(connection);
-    this.connections.delete(connection);
 
     new events.WorldRemoveSignal(world, code).emit();
   }

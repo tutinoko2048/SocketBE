@@ -32,6 +32,7 @@ import type {
   PlayerDiedSignal,
   ItemDroppedSignal,
   EntitySpawnedSignal,
+  ConnectionOpenSignal,
 } from '../../events';
 
 export interface ServerEvents {
@@ -67,4 +68,5 @@ export interface ServerEvents {
   [ServerEvent.PlayerDied]: [PlayerDiedSignal];
   [ServerEvent.ItemDropped]: [ItemDroppedSignal];
   [ServerEvent.EntitySpawned]: [EntitySpawnedSignal];
+  [ServerEvent.ConnectionOpen]: [ConnectionOpenSignal];
 }

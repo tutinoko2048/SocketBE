@@ -4,3 +4,9 @@ export interface PendingResponse<RES = any, REJ = any> {
   timeout: NodeJS.Timeout;
   sentAt: number;
 }
+
+export interface ConnectionInfo {
+  headers: Readonly<Record<string, string | string[] | undefined>>;
+  url?: string;
+  remoteAddress?: string;
+}
