@@ -1,4 +1,4 @@
-**English** | [日本語](./README_ja.md)
+**English** | [日本語](./README_ja.md) | [简体中文](./README_zh-CN.md)
 
 # SocketBE
 A powerful websocket library for interacting with the MCBE WebSocket Protocol

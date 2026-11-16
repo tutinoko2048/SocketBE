@@ -1,4 +1,4 @@
-[English](./README.md) | **日本語**
+[English](./README.md) | **日本語** | [简体中文](./README_zh-CN.md)
 
 # SocketBE
 Minecraft統合版のWebSocketプロトコルと通信するためのライブラリです。
